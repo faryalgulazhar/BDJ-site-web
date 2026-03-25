@@ -1,7 +1,12 @@
+"use client";
+
 import AuthCTAButton from "@/components/AuthCTAButton";
 import { GraduationCap, Share2, Eye } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function MembershipPage() {
+  const { t, language } = useLanguage();
+
   return (
     <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20">
       
@@ -12,14 +17,16 @@ export default function MembershipPage() {
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-red-900/5 blur-[150px] rounded-full pointer-events-none"></div>
         
         <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-white uppercase leading-[0.9] z-10 drop-shadow-lg">
-          BECOME A <span className="text-[#ffdbdb] drop-shadow-[0_0_20px_rgba(255,95,95,0.3)]">MEMBER</span>
+          {t.membership.heroTitle}
         </h1>
         <p className="mt-6 text-gray-400 max-w-lg mx-auto text-base md:text-lg leading-relaxed z-10">
-          Join the BDJ Karukera association. Free membership, open to all students and collaborators.
+          {language === "FR"
+            ? "Rejoignez l'association BDJ Karukera. Adhésion gratuite, ouverte à tous les étudiants et collaborateurs."
+            : "Join the BDJ Karukera association. Free membership, open to all students and collaborators."}
         </p>
         <div className="mt-10 z-10">
           <AuthCTAButton 
-            primaryText="JOIN NOW"
+            primaryText={t.membership.joinNow}
             secondaryText="GO TO DASHBOARD"
             className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-4 rounded-full text-[13px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] uppercase"
           />
@@ -30,7 +37,7 @@ export default function MembershipPage() {
       <section className="max-w-7xl mx-auto w-full px-6 py-16 z-10">
         <div className="mb-10">
           <h2 className="text-3xl font-black tracking-tighter text-white uppercase inline-block border-b-2 border-[#FF5F5F]/50 pb-2">
-            WHO CAN JOIN
+            {t.membership.whoCanJoin}
           </h2>
         </div>
 
@@ -42,9 +49,9 @@ export default function MembershipPage() {
               <GraduationCap size={20} className="text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-black tracking-tight text-white uppercase mb-3">STUDENTS</h3>
+              <h3 className="text-lg font-black tracking-tight text-white uppercase mb-3">{t.membership.studentsTitle}</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
-                Access to all gaming sessions, tournaments, and community events on campus.
+                {t.membership.studentsDesc}
               </p>
             </div>
           </div>
@@ -56,9 +63,9 @@ export default function MembershipPage() {
               <Share2 size={20} className="text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-black tracking-tight text-white uppercase mb-3">COLLABORATORS</h3>
+              <h3 className="text-lg font-black tracking-tight text-white uppercase mb-3">{t.membership.collaboratorsTitle}</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
-                Engage with the community, host sessions, and support the association's growth.
+                {t.membership.collaboratorsDesc}
               </p>
             </div>
           </div>
@@ -70,9 +77,9 @@ export default function MembershipPage() {
               <Eye size={20} className="text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-black tracking-tight text-white uppercase mb-3">POTENTIAL MEMBERS</h3>
+              <h3 className="text-lg font-black tracking-tight text-white uppercase mb-3">{t.membership.potentialTitle}</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
-                Curious about the club? Join as a guest to stay updated on our next open events.
+                {t.membership.potentialDesc}
               </p>
             </div>
           </div>
@@ -81,7 +88,7 @@ export default function MembershipPage() {
 
       {/* ── The Rules Section ── */}
       <section className="max-w-5xl mx-auto w-full px-6 py-20 z-10 text-center">
-        <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white uppercase mb-4">THE RULES</h2>
+        <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white uppercase mb-4">{t.membership.theRules}</h2>
         <p className="text-gray-400 text-sm md:text-base mb-12">
           By joining BDJ Karukera, you agree to the following guidelines.
         </p>
@@ -90,12 +97,12 @@ export default function MembershipPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
             
             {[
-              { num: "01", text: "Respect all members and collaborators at all times." },
-              { num: "02", text: "Fair play is mandatory in all game sessions and tournaments." },
-              { num: "03", text: "No harassment, discrimination or offensive language." },
-              { num: "04", text: "Event registrations must be cancelled 24h in advance if unable to attend." },
-              { num: "05", text: "Community posts must remain constructive and relevant." },
-              { num: "06", text: "Board decisions are final and must be respected." },
+              { num: "01", text: t.membership.rule1Desc },
+              { num: "02", text: t.membership.rule2Desc },
+              { num: "03", text: t.membership.rule3Desc },
+              { num: "04", text: t.membership.rule4Desc },
+              { num: "05", text: t.membership.rule5Desc },
+              { num: "06", text: t.membership.rule6Desc },
             ].map((rule) => (
               <div key={rule.num} className="flex gap-4 items-start">
                 <span className="text-[#FF5F5F]/60 font-black text-xl tracking-tighter">{rule.num}</span>
@@ -107,7 +114,7 @@ export default function MembershipPage() {
             <div className="flex gap-4 items-start md:col-span-2">
               <span className="text-[#FF5F5F]/60 font-black text-xl tracking-tighter">07</span>
               <p className="text-sm text-gray-300 font-medium leading-relaxed pt-1">
-                Any violation may result in suspension from the association.
+                {t.membership.rule7Desc}
               </p>
             </div>
 
@@ -123,11 +130,11 @@ export default function MembershipPage() {
           <div className="relative z-10 flex flex-col items-center gap-6">
             <span className="bg-[#ff4040]/10 text-[#FF5F5F] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#ff4040]/20 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF5F5F] animate-pulse"></span>
-              LIVE COMMUNITY
+              {t.membership.liveCommunity}
             </span>
             
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase">
-              READY TO JOIN?
+              {t.membership.readyToJoin}
             </h2>
             
             <p className="text-gray-400 text-sm md:text-base max-w-md mx-auto mb-4">
@@ -135,7 +142,7 @@ export default function MembershipPage() {
             </p>
             
             <AuthCTAButton 
-              primaryText="BECOME A MEMBER"
+              primaryText={t.membership.becomeMemberCTA}
               secondaryText="VIEW YOUR PROFILE"
               className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-5 rounded-full text-[13px] font-black tracking-widest uppercase shadow-[0_0_30px_-5px_#FF5F5F] transition-all duration-300"
             />

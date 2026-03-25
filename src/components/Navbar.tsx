@@ -4,18 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Sun } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
+
+const ADMIN_EMAIL = "admin@bdj-karukera.com";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   const navLinks = [
-    { name: "HOMEPAGE", href: "/" },
-    { name: "GAMES", href: "/games" },
-    { name: "MEMBERSHIP", href: "/membership" },
-    { name: "COMMUNITY", href: "/community" },
+    { name: t.nav.homepage, href: "/" },
+    { name: t.nav.games, href: "/games" },
+    { name: t.nav.membership, href: "/membership" },
+    { name: t.nav.community, href: "/community" },
   ];
 
   return (
@@ -56,14 +61,18 @@ export default function Navbar() {
             <button className="hidden sm:flex text-gray-400 hover:text-white transition-all duration-300">
               <Sun size={18} />
             </button>
-            <span className="hidden sm:block text-[12px] font-bold tracking-widest text-gray-400 hover:text-white cursor-pointer transition-all duration-300">
-              FR/EN
-            </span>
+            <button 
+              onClick={() => setLanguage(language === "EN" ? "FR" : "EN")}
+              className="hidden sm:block text-[12px] font-black tracking-widest text-[#FF5F5F] hover:text-[#ff4040] transition-colors"
+            >
+              {language === "EN" ? "FR" : "EN"}
+            </button>
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="hidden sm:block text-[11px] text-gray-400 font-medium truncate max-w-[120px]">
                   {user.email}
                 </span>
+                {user.email !== ADMIN_EMAIL && <NotificationBell />}
                 <button
                   onClick={() => signOut()}
                   className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-300"
@@ -76,7 +85,7 @@ export default function Navbar() {
                 onClick={() => router.push('/register')}
                 className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F] hover:shadow-[0_0_30px_-3px_#FF5F5F]"
               >
-                JOIN NOW
+                {t.nav.joinNow}
               </button>
             )}
           </div>

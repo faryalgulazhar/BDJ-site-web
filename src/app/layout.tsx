@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import PageTransition from "@/components/PageTransition";
 import CustomCursor from "@/components/CustomCursor";
 import TopLoader from "@/components/TopLoader";
@@ -32,18 +33,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0a0a0a] selection:bg-[#FF5F5F]/30 lg:cursor-none">
-        <AuthProvider>
-          <TopLoader />
-          <CustomCursor />
-          <Navbar />
-          <main className="flex-1 flex flex-col min-h-screen">
-            <PageTransition>
-              {children}
-            </PageTransition>
-          </main>
-          <Footer />
-          <Toaster position="bottom-right" theme="dark" richColors />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <TopLoader />
+            <CustomCursor />
+            <Navbar />
+            <main className="flex-1 flex flex-col min-h-screen">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </main>
+            <Footer />
+            <Toaster position="bottom-right" theme="dark" richColors />
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

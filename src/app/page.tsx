@@ -1,9 +1,22 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal";
 
 export default function Home() {
+  const router = useRouter();
+  const { user, signOut } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#0E0E0E] text-white flex flex-col font-sans selection:bg-red-500/30">
+      {showAuthModal && (
+        <AuthModal onClose={() => setShowAuthModal(false)} redirectTo="/planning" />
+      )}
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-5 w-full max-w-7xl mx-auto border-b border-white/5 md:border-transparent">
         <div className="flex items-center gap-3">
@@ -18,7 +31,7 @@ export default function Home() {
         </div>
 
         <div className="hidden lg:flex items-center gap-10 text-[13px] font-bold tracking-[0.15em] text-gray-400">
-          <Link href="/homepage" className="text-white border-b-2 border-red-500 pb-1">HOMEPAGE</Link>
+          <Link href="/" className="text-white border-b-2 border-red-500 pb-1">HOMEPAGE</Link>
           <Link href="/games" className="hover:text-white transition-colors">GAMES</Link>
           <Link href="/membership" className="hover:text-white transition-colors">MEMBERSHIP</Link>
           <Link href="/community" className="hover:text-white transition-colors">COMMUNITY</Link>
@@ -29,7 +42,12 @@ export default function Home() {
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
           <span className="hidden sm:block hover:text-white cursor-pointer transition-colors pt-0.5">FR/EN</span>
-          <button className="bg-[#ff4040] hover:bg-red-600 text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-wider transition-all">JOIN NOW</button>
+          <button
+            onClick={() => user ? signOut() : setShowAuthModal(true)}
+            className="bg-[#ff4040] hover:bg-red-600 text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-wider transition-all"
+          >
+            {user ? "LOG OUT" : "JOIN NOW"}
+          </button>
         </div>
       </nav>
 
@@ -52,14 +70,17 @@ export default function Home() {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 z-10 w-full sm:w-auto">
-          <Link href="/homepage" className="w-full sm:w-auto">
-             <button className="w-full sm:w-auto bg-[#ff4040] hover:bg-red-600 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all shadow-[0_0_30px_-5px_#ff4040]">
-               JOIN THE CLUB
-             </button>
-          </Link>
-          <button className="w-full sm:w-auto bg-transparent border border-white/10 hover:border-white/30 hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all flex items-center justify-center gap-2">
-            EXPLORE GAMES <span className="text-lg leading-none">&darr;</span>
+          <button 
+            onClick={() => user ? router.push('/planning') : setShowAuthModal(true)}
+            className="w-full sm:w-auto bg-[#ff4040] hover:bg-red-600 active:scale-95 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all shadow-[0_0_30px_-5px_#ff4040] hover:shadow-[0_0_40px_-3px_#ff4040]"
+          >
+            {user ? "GO TO DASHBOARD" : "JOIN THE CLUB"}
           </button>
+          <Link href="/games" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto bg-transparent border border-white/10 hover:border-white/30 hover:bg-white/5 active:scale-95 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all flex items-center justify-center gap-2">
+              EXPLORE GAMES <span className="text-lg leading-none">&darr;</span>
+            </button>
+          </Link>
         </div>
       </section>
 
@@ -136,8 +157,11 @@ export default function Home() {
           <p className="text-gray-400 max-w-md mx-auto mb-10 text-sm md:text-base leading-relaxed">
             Join 25+ students already dominating the campus scene. Membership is free.
           </p>
-          <button className="bg-[#ff4040] hover:bg-red-600 text-white px-10 py-5 rounded-full font-bold text-sm tracking-widest transition-all shadow-[0_4px_20px_-5px_#ff4040]">
-            BECOME A MEMBER
+          <button 
+            onClick={() => user ? router.push('/planning') : setShowAuthModal(true)}
+            className="bg-[#ff4040] hover:bg-red-600 active:scale-95 text-white px-10 py-5 rounded-full font-bold text-sm tracking-widest transition-all shadow-[0_4px_20px_-5px_#ff4040] hover:shadow-[0_8px_30px_-5px_#ff4040]"
+          >
+            {user ? "VIEW YOUR PERKS" : "BECOME A MEMBER"}
           </button>
         </div>
       </section>

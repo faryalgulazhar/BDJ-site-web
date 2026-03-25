@@ -1,0 +1,17 @@
+
+> bdj-karukera@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.1.77:3002
+✓ Ready in 204ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3001
+- PID:          13140
+- Dir:          /Users/faryal/bdj-karukera
+- Log:          .next/dev/logs/next-development.log
+
+Run kill 13140 to stop it.
+[?25h

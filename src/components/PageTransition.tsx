@@ -7,20 +7,18 @@ export default function PageTransition({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
-    <LayoutGroup>
-      <AnimatePresence mode="popLayout" initial={false}>
+    <div className="grid flex-1 overflow-hidden">
+      <AnimatePresence initial={false}>
         <motion.div
           key={pathname}
-          layout
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="flex-1 flex flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.4, ease: "easeInOut" } }}
+          exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeInOut" } }}
+          className="col-start-1 row-start-1 flex flex-col min-h-screen"
         >
           {children}
         </motion.div>
       </AnimatePresence>
-    </LayoutGroup>
+    </div>
   );
 }

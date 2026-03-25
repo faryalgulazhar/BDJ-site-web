@@ -12,7 +12,7 @@ export default function Footer() {
           <Link href="#" className="hover:text-gray-300 transition-all duration-300">PRIVACY POLICY</Link>
           <Link href="#" className="hover:text-gray-300 transition-all duration-300">TERMS OF SERVICE</Link>
           <Link href="#" className="hover:text-gray-300 transition-all duration-300">LEGAL MENTIONS</Link>
-          <Link href="#" className="hover:text-gray-300 transition-all duration-300">CONTACT US</Link>
+          <a href="https://www.instagram.com/bdj_psb" target="_blank" rel="noopener noreferrer" className="hover:text-[#FF5F5F] transition-all duration-300">CONTACT US</a>
         </div>
         
         <div className="whitespace-nowrap opacity-60">

@@ -1,5 +1,14 @@
 import Link from "next/link";
-import RegisterForm from "@/components/RegisterForm";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+const RegisterForm = dynamic(() => import("@/components/RegisterForm"), {
+  loading: () => (
+    <div className="flex justify-center py-10">
+      <Loader2 className="animate-spin text-[#FF5F5F]" size={24} />
+    </div>
+  ),
+});
 
 export default function RegisterPage() {
   return (

@@ -9,7 +9,7 @@ export default function Home() {
       <section className="flex-1 flex flex-col items-center justify-center pt-24 pb-32 text-center px-4 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-500/5 blur-[120px] rounded-full pointer-events-none"></div>
         
-        <p className="text-[#c79a63] text-xs font-bold tracking-[0.2em] uppercase mb-8 z-10">STUDENT ASSOCIATION - SINCE 2023</p>
+        <p className="text-[#c79a63] text-xs font-bold tracking-[0.2em] uppercase mb-8 z-10">STUDENT ASSOCIATION - SINCE 2025</p>
         
         <h1 className="text-7xl md:text-[8rem] font-black leading-[0.85] tracking-tighter z-10">
           PLAY<br/>

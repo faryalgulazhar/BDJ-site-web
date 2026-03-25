@@ -2,18 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import AuthModal from "@/components/AuthModal";
-import { AnimatePresence } from "framer-motion";
-import { Moon } from "lucide-react";
+import { Sun } from "lucide-react";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, signOut } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const navLinks = [
     { name: "HOMEPAGE", href: "/" },
@@ -24,12 +20,6 @@ export default function Navbar() {
 
   return (
     <>
-      <AnimatePresence>
-        {showAuthModal && (
-          <AuthModal onClose={() => setShowAuthModal(false)} redirectTo="/planning" />
-        )}
-      </AnimatePresence>
-
       <nav className="sticky top-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
           <Link href="/" className="flex items-center gap-3">
@@ -64,7 +54,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-4">
             <button className="hidden sm:flex text-gray-400 hover:text-white transition-all duration-300">
-              <Moon size={18} />
+              <Sun size={18} />
             </button>
             <span className="hidden sm:block text-[12px] font-bold tracking-widest text-gray-400 hover:text-white cursor-pointer transition-all duration-300">
               FR/EN

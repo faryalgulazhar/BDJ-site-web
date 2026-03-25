@@ -1,5 +1,14 @@
 import Link from "next/link";
-import LoginForm from "@/components/LoginForm";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+const LoginForm = dynamic(() => import("@/components/LoginForm"), {
+  loading: () => (
+    <div className="flex justify-center py-10">
+      <Loader2 className="animate-spin text-[#FF5F5F]" size={24} />
+    </div>
+  ),
+});
 
 export default function LoginPage() {
   return (

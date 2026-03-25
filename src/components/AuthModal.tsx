@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
 import {
@@ -11,7 +11,8 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import { X, Mail, Lock, Loader2, LogIn } from "lucide-react";
+import { X, Mail, Lock, User, Loader2, LogIn } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Friendly error messages ──────────────────────────────────────────────────
 const friendlyError = (code: string): string => {
@@ -56,11 +57,24 @@ export default function AuthModal({
 }: AuthModalProps) {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(defaultSignUp);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const gamerTagRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Redirect to registration if sign up is selected
+  useEffect(() => {
+    if (isSignUp) {
+      // Small delay to coordinate with exit animation or just feel less abrupt
+      const timer = setTimeout(() => {
+        router.push("/register");
+        onClose();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isSignUp, router, onClose]);
 
   const handleSuccess = () => {
     onSuccess?.();
@@ -73,6 +87,11 @@ export default function AuthModal({
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    const email = emailRef.current?.value || "";
+    const password = passwordRef.current?.value || "";
+    const gamerTag = gamerTagRef.current?.value || "";
+
     try {
       if (isSignUp) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -84,7 +103,7 @@ export default function AuthModal({
           uid: user.uid,
           createdAt: serverTimestamp(),
           role: "member",
-          gamerTag: email.split("@")[0], // Default gamer tag from email
+          gamerTag: gamerTag || email.split("@")[0],
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -136,8 +155,15 @@ export default function AuthModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-      <div className="relative w-full max-w-md bg-[#0f172a] border border-[#FF5F5F]/25 rounded-3xl p-10 shadow-[0_0_80px_-20px_#FF5F5F33]">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="relative w-full max-w-md bg-[#0f172a] border border-[#FF5F5F]/25 rounded-3xl p-10 shadow-[0_0_80px_-20px_#FF5F5F33]"
+      >
         {/* Close */}
+
         <button
           onClick={onClose}
           className="absolute right-5 top-5 text-white/30 hover:text-white transition-colors"
@@ -160,15 +186,29 @@ export default function AuthModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Gamer Tag (Only for Sign Up) */}
+          {isSignUp && (
+            <div className="relative">
+              <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Gamer Tag"
+                required={isSignUp}
+                ref={gamerTagRef}
+                className="w-full bg-white/5 border border-white/10 focus:border-[#FF5F5F]/60 outline-none text-white placeholder-gray-600 rounded-xl pl-11 pr-4 py-3.5 text-sm transition-colors"
+              />
+            </div>
+          )}
+
           {/* Email */}
+
           <div className="relative">
             <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
             <input
               type="email"
               placeholder="Email address"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              ref={emailRef}
               className="w-full bg-white/5 border border-white/10 focus:border-[#FF5F5F]/60 outline-none text-white placeholder-gray-600 rounded-xl pl-11 pr-4 py-3.5 text-sm transition-colors"
             />
           </div>
@@ -181,8 +221,7 @@ export default function AuthModal({
               placeholder={isSignUp ? "Password (min. 6 characters)" : "Password"}
               required
               minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              ref={passwordRef}
               className="w-full bg-white/5 border border-white/10 focus:border-[#FF5F5F]/60 outline-none text-white placeholder-gray-600 rounded-xl pl-11 pr-4 py-3.5 text-sm transition-colors"
             />
           </div>
@@ -249,7 +288,7 @@ export default function AuthModal({
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -2,18 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import AuthModal from "@/components/AuthModal";
 import {
   Plus,
   Users,
   Calendar,
   Clock,
   Lock,
-  Moon,
   CheckCircle,
   Loader2,
 } from "lucide-react";
@@ -174,7 +172,7 @@ function SessionCard({ session, isLoading, isLoggedIn, onRegister }: CardProps) 
       <button
         disabled={isFull || isRegistered}
         onClick={() => onRegister(session.id)}
-        className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-200 flex items-center justify-center gap-2 ${
+        className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
           isFull
             ? "bg-white/5 text-white/20 cursor-not-allowed"
             : isRegistered
@@ -209,13 +207,11 @@ function SessionCard({ session, isLoading, isLoggedIn, onRegister }: CardProps) 
 // ─────────────────────────────────────────────
 export default function GamesPage() {
   const router = useRouter();
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user } = useAuth();
 
   const [sessions, setSessions] = useState<GameSession[]>(initialSessions);
   const [activeTab, setActiveTab] = useState<Tab>("ALL");
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [pendingId, setPendingId] = useState<number | null>(null);
 
   const isLoggedIn = !!user;
 
@@ -227,10 +223,9 @@ export default function GamesPage() {
   // Register handler
   const handleRegister = useCallback(
     (id: number) => {
-      // Not logged in → show auth modal
+      // Not logged in → redirect to register
       if (!isLoggedIn) {
-        setPendingId(id);
-        setShowAuthModal(true);
+        router.push('/register');
         return;
       }
 
@@ -258,97 +253,16 @@ export default function GamesPage() {
         });
       }, 500);
     },
-    [isLoggedIn, sessions]
+    [isLoggedIn, sessions, router]
   );
 
-  // After successful auth, auto-register pending session
-  const handleAuthSuccess = useCallback(() => {
-    if (pendingId !== null) {
-      const id = pendingId;
-      setPendingId(null);
-      setTimeout(() => handleRegister(id), 150);
-    }
-  }, [pendingId, handleRegister]);
-
-  // Sign out
-  const handleSignOut = async () => {
-    await signOut();
-    toast("Signed out.");
-  };
-
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans">
-      {/* ── Auth Modal ── */}
-      {showAuthModal && (
-        <AuthModal
-          onClose={() => { setShowAuthModal(false); setPendingId(null); }}
-          onSuccess={handleAuthSuccess}
-          redirectTo="/planning"
-        />
-      )}
-
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-white/5">
-        <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Bureau des Jeux" width={40} height={40} className="object-contain" />
-            <span className="text-[#FF5F5F] font-black tracking-tighter text-base uppercase hidden sm:block">
-              BDJ KARUKERA
-            </span>
-          </Link>
-
-          <div className="hidden lg:flex items-center gap-8 text-[12px] font-bold tracking-[0.15em] text-gray-400">
-            <Link href="/" className="hover:text-white transition-colors">HOMEPAGE</Link>
-            <Link href="/games" className="text-white relative pb-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#FF5F5F] after:rounded-full">
-              GAMES
-            </Link>
-            <Link href="/membership" className="hover:text-white transition-colors">MEMBERSHIP</Link>
-            <Link href="/community" className="hover:text-white transition-colors">COMMUNITY</Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="hidden sm:flex text-gray-400 hover:text-white transition-colors">
-              <Moon size={18} />
-            </button>
-            <span className="hidden sm:block text-[12px] font-bold tracking-widest text-gray-400 hover:text-white cursor-pointer transition-colors">
-              FR/EN
-            </span>
-            {authLoading ? (
-              <div className="w-24 h-9 bg-white/5 rounded-full animate-pulse" />
-            ) : isLoggedIn ? (
-              <div className="flex items-center gap-3">
-                <span className="hidden sm:block text-[11px] text-gray-400 font-medium truncate max-w-[120px]">{user?.email}</span>
-                <button
-                  onClick={handleSignOut}
-                  className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest transition-all"
-                >
-                  LOG OUT
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest transition-all shadow-[0_0_20px_-5px_#FF5F5F]"
-              >
-                JOIN NOW
-              </button>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Login status banner ── */}
-      {isLoggedIn && (
-        <div className="bg-green-500/10 border-b border-green-500/20 text-green-400 text-[11px] font-bold tracking-widest text-center py-2.5 px-4">
-          ✓ LOGGED IN AS {user?.email?.toUpperCase()} — You can register for sessions
-        </div>
-      )}
-
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20">
       {/* ── Hero ── */}
       <section className="max-w-7xl mx-auto w-full px-6 pt-16 pb-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
           <div>
-            <h1 className="text-7xl md:text-8xl font-black tracking-tighter text-white leading-none">GAMES</h1>
+            <h1 className="text-7xl md:text-8xl font-black tracking-tighter text-white leading-none uppercase">GAMES</h1>
             <p className="mt-4 text-gray-400 max-w-md text-sm md:text-base leading-relaxed">
               Browse upcoming sessions and tournaments.<br />
               Register to secure your spot in our kinetic arena.
@@ -356,7 +270,7 @@ export default function GamesPage() {
           </div>
           <button
             onClick={() => router.push("/sessions/new")}
-            className="flex items-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] whitespace-nowrap self-start sm:self-auto"
+            className="flex items-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] whitespace-nowrap self-start sm:self-auto uppercase"
           >
             <Plus size={16} strokeWidth={3} />
             CREATE SESSION
@@ -371,7 +285,7 @@ export default function GamesPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 ${
                 activeTab === tab
                   ? "bg-[#FF5F5F] text-white shadow-[0_0_20px_-5px_#FF5F5F]"
                   : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
@@ -384,9 +298,9 @@ export default function GamesPage() {
       </section>
 
       {/* ── Cards Grid ── */}
-      <section className="max-w-7xl mx-auto w-full px-6 pb-16">
+      <section className="max-w-7xl mx-auto w-full px-6">
         {filteredSessions.length === 0 ? (
-          <div className="text-center py-24 text-gray-600 font-bold tracking-widest text-sm">
+          <div className="text-center py-24 text-gray-600 font-bold tracking-widest text-sm uppercase">
             NO SESSIONS FOUND FOR THIS CATEGORY
           </div>
         ) : (
@@ -406,7 +320,7 @@ export default function GamesPage() {
 
       {/* ── Locked CTA (hidden when logged in) ── */}
       {!isLoggedIn && (
-        <section className="max-w-7xl mx-auto w-full px-6 pb-20">
+        <section className="max-w-7xl mx-auto w-full px-6 mt-20">
           <div className="relative rounded-3xl border border-[#FF5F5F]/20 bg-gradient-to-b from-[#1a0a0a] to-[#0f0808] p-16 md:p-24 text-center overflow-hidden shadow-[inset_0_0_80px_-20px_#FF5F5F22]">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#FF5F5F]/10 blur-[100px] rounded-full pointer-events-none" />
             <div className="relative flex flex-col items-center gap-6">
@@ -417,39 +331,26 @@ export default function GamesPage() {
                 UNLOCK THE ARENA
               </h2>
               <p className="text-gray-400 max-w-sm text-sm md:text-base leading-relaxed">
-                To register for sessions and track your tournament progress, you must be part of the collective.
+                To register for sessions/track progress, you must be part of the collective.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
                 <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all shadow-[0_0_25px_-5px_#FF5F5F]"
+                  onClick={() => router.push("/register")}
+                  className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_25px_-5px_#FF5F5F]"
                 >
-                  LOGIN TO REGISTER
+                  SIGN UP TO REGISTER
                 </button>
                 <button
-                  onClick={() => router.push("/guest-view")}
-                  className="bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/70 hover:text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all"
+                  onClick={() => router.push("/register")}
+                  className="bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/70 hover:text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300"
                 >
-                  EXPLORE AS GUEST
+                  LOGIN TO ACCOUNT
                 </button>
               </div>
             </div>
           </div>
         </section>
       )}
-
-      {/* ── Footer ── */}
-      <footer className="mt-auto border-t border-white/5 bg-[#080808] py-8">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] font-bold tracking-[0.15em] text-gray-600">
-          <span className="text-[#FF5F5F] font-black tracking-tighter text-sm uppercase">BDJ Karukera</span>
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
-            <Link href="#" className="hover:text-gray-300 transition-colors">PRIVACY POLICY</Link>
-            <Link href="#" className="hover:text-gray-300 transition-colors">TERMS OF SERVICE</Link>
-            <Link href="#" className="hover:text-gray-300 transition-colors">LEGAL MENTIONS</Link>
-          </div>
-          <span className="whitespace-nowrap">@2025 BDJ KARUKERA. ALL RIGHTS RESERVED.</span>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,56 +1,10 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import AuthModal from "@/components/AuthModal";
+import AuthCTAButton from "@/components/AuthCTAButton";
 
 export default function Home() {
-  const router = useRouter();
-  const { user, signOut } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
   return (
-    <div className="min-h-screen bg-[#0E0E0E] text-white flex flex-col font-sans selection:bg-red-500/30">
-      {showAuthModal && (
-        <AuthModal onClose={() => setShowAuthModal(false)} redirectTo="/planning" />
-      )}
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 py-5 w-full max-w-7xl mx-auto border-b border-white/5 md:border-transparent">
-        <div className="flex items-center gap-3">
-          <Image 
-            src="/logo.png" 
-            alt="Bureau des Jeux Logo"
-            width={48} 
-            height={48} 
-            className="object-contain"
-          />
-          <span className="text-red-500 font-black tracking-tighter text-lg uppercase hidden sm:block">BDJ KARUKERA</span>
-        </div>
-
-        <div className="hidden lg:flex items-center gap-10 text-[13px] font-bold tracking-[0.15em] text-gray-400">
-          <Link href="/" className="text-white border-b-2 border-red-500 pb-1">HOMEPAGE</Link>
-          <Link href="/games" className="hover:text-white transition-colors">GAMES</Link>
-          <Link href="/membership" className="hover:text-white transition-colors">MEMBERSHIP</Link>
-          <Link href="/community" className="hover:text-white transition-colors">COMMUNITY</Link>
-        </div>
-
-        <div className="flex items-center gap-6 text-[13px] font-bold tracking-[0.1em] text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden sm:block hover:text-white transition-colors cursor-pointer">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-          </svg>
-          <span className="hidden sm:block hover:text-white cursor-pointer transition-colors pt-0.5">FR/EN</span>
-          <button
-            onClick={() => user ? signOut() : setShowAuthModal(true)}
-            className="bg-[#ff4040] hover:bg-red-600 text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-wider transition-all"
-          >
-            {user ? "LOG OUT" : "JOIN NOW"}
-          </button>
-        </div>
-      </nav>
-
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-red-500/30">
       {/* Hero Section */}
       <section className="flex-1 flex flex-col items-center justify-center pt-24 pb-32 text-center px-4 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-500/5 blur-[120px] rounded-full pointer-events-none"></div>
@@ -70,14 +24,13 @@ export default function Home() {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 z-10 w-full sm:w-auto">
-          <button 
-            onClick={() => user ? router.push('/planning') : setShowAuthModal(true)}
-            className="w-full sm:w-auto bg-[#ff4040] hover:bg-red-600 active:scale-95 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all shadow-[0_0_30px_-5px_#ff4040] hover:shadow-[0_0_40px_-3px_#ff4040]"
-          >
-            {user ? "GO TO DASHBOARD" : "JOIN THE CLUB"}
-          </button>
+          <AuthCTAButton 
+            primaryText="JOIN THE CLUB"
+            secondaryText="GO TO DASHBOARD"
+            className="w-full sm:w-auto bg-[#ff4040] hover:bg-red-600 active:scale-95 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#ff4040] hover:shadow-[0_0_40px_-3px_#ff4040]"
+          />
           <Link href="/games" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto bg-transparent border border-white/10 hover:border-white/30 hover:bg-white/5 active:scale-95 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all flex items-center justify-center gap-2">
+            <button className="w-full sm:w-auto bg-transparent border border-white/10 hover:border-white/30 hover:bg-white/5 active:scale-95 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest transition-all duration-300 flex items-center justify-center gap-2">
               EXPLORE GAMES <span className="text-lg leading-none">&darr;</span>
             </button>
           </Link>
@@ -104,8 +57,11 @@ export default function Home() {
           <div className="flex-1 flex flex-col gap-6">
             {/* Big Competitive Leagues */}
             <div className="relative h-[300px] md:h-[450px] rounded-[2rem] overflow-hidden group border border-white/5">
-              <img 
+              <Image 
                 src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop" 
+                width={800}
+                height={600}
+                priority
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
                 alt="Esports Room" 
               />
@@ -157,32 +113,14 @@ export default function Home() {
           <p className="text-gray-400 max-w-md mx-auto mb-10 text-sm md:text-base leading-relaxed">
             Join 25+ students already dominating the campus scene. Membership is free.
           </p>
-          <button 
-            onClick={() => user ? router.push('/planning') : setShowAuthModal(true)}
-            className="bg-[#ff4040] hover:bg-red-600 active:scale-95 text-white px-10 py-5 rounded-full font-bold text-sm tracking-widest transition-all shadow-[0_4px_20px_-5px_#ff4040] hover:shadow-[0_8px_30px_-5px_#ff4040]"
-          >
-            {user ? "VIEW YOUR PERKS" : "BECOME A MEMBER"}
-          </button>
+          <AuthCTAButton 
+            primaryText="BECOME A MEMBER"
+            secondaryText="VIEW YOUR PERKS"
+            className="bg-[#ff4040] hover:bg-red-600 active:scale-95 text-white px-10 py-5 rounded-full font-bold text-sm tracking-widest transition-all duration-300 shadow-[0_4px_20px_-5px_#ff4040] hover:shadow-[0_8px_30px_-5px_#ff4040]"
+          />
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-white/5 bg-[#0a0a0a] py-10 mt-auto relative z-10">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-[11px] text-gray-600 font-bold tracking-[0.15em] gap-6">
-          <div className="flex items-center gap-2">
-             <span className="text-[#ff4040] font-black tracking-tighter uppercase whitespace-nowrap text-sm">BDJ KARUKERA</span>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-             <Link href="#" className="hover:text-gray-300 transition-colors">PRIVACY POLICY</Link>
-             <Link href="#" className="hover:text-gray-300 transition-colors">TERMS OF SERVICE</Link>
-             <Link href="#" className="hover:text-gray-300 transition-colors">CONTACT US</Link>
-             <Link href="#" className="hover:text-gray-300 transition-colors">SUPPORT</Link>
-          </div>
-          <div className="whitespace-nowrap">
-             &copy; 2025 BDJ KARUKERA. ALL RIGHTS RESERVED.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

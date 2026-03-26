@@ -20,6 +20,7 @@ import {
   getDocs,
   query,
   orderBy,
+  where,
   serverTimestamp,
   deleteDoc,
   doc,
@@ -129,6 +130,7 @@ export default function AdminOpsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [memberMessages, setMemberMessages] = useState<any[]>([]);
   const [adminTasks, setAdminTasks] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Messaging state
   const [isMessageOpen, setIsMessageOpen] = useState(false);
@@ -161,6 +163,12 @@ export default function AdminOpsPage() {
 
       const taskSnap = await getDocs(query(collection(db, "admin_tasks"), orderBy("createdAt", "desc")));
       setAdminTasks(taskSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+
+      // Fetch Notifications/Unregisters
+      const notifSnap = await getDocs(query(collection(db, "notifications"), where("toUid", "==", "admin")));
+      const notifDocs = notifSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      notifDocs.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      setNotifications(notifDocs);
     } catch (e) { console.error(e); }
     setIsLoading(false);
   };
@@ -247,6 +255,16 @@ export default function AdminOpsPage() {
       toast.success("Message deleted");
     } catch (e) {
       toast.error("Failed to delete message");
+    }
+  };
+
+  const handleDeleteNotification = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "notifications", id));
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      toast.success("Alert dismissed");
+    } catch (e) {
+      toast.error("Failed to dismiss alert");
     }
   };
 
@@ -404,41 +422,84 @@ export default function AdminOpsPage() {
             </div>
           </div>
 
-          {/* Column 2: Member Messages */}
-          <div className="flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-[#FF5F5F] rounded-full" />
-                <h2 className="text-xl font-black text-white uppercase tracking-tighter">Member Replies</h2>
-                <span className="bg-[#FF5F5F]/10 text-[#FF5F5F] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#FF5F5F]/20">{memberMessages.length}</span>
+          {/* Column 2: Member Messages & System Alerts */}
+          <div className="flex flex-col gap-12">
+            
+            {/* Member Replies */}
+            <div className="flex flex-col gap-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-[#FF5F5F] rounded-full" />
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">Member Replies</h2>
+                  <span className="bg-[#FF5F5F]/10 text-[#FF5F5F] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#FF5F5F]/20">{memberMessages.length}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {memberMessages.length === 0 ? (
+                  <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No messages from members</div>
+                ) : (
+                  memberMessages.map((m) => (
+                    <div key={m.id} className="group p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#FF5F5F]/30 transition-all relative">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-[#FF5F5F] font-black uppercase tracking-widest">{m.fromEmail?.split('@')[0]}</span>
+                          <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">RE: {m.originalSession}</span>
+                        </div>
+                        <button onClick={() => handleDeleteMessage(m.id)} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 transition-all p-1">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <p className="text-gray-300 text-xs leading-relaxed italic">"{m.content}"</p>
+                      <div className="mt-3 flex justify-end">
+                         <span className="text-[8px] text-gray-700 font-black uppercase">
+                           {m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                         </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-              {memberMessages.length === 0 ? (
-                <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No messages from members</div>
-              ) : (
-                memberMessages.map((m) => (
-                  <div key={m.id} className="group p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#FF5F5F]/30 transition-all relative">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-[#FF5F5F] font-black uppercase tracking-widest">{m.fromEmail?.split('@')[0]}</span>
-                        <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">RE: {m.originalSession}</span>
+            {/* Unregistration Alerts */}
+            <div className="flex flex-col gap-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-teal-500 rounded-full" />
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">System Alerts</h2>
+                  <span className="bg-teal-500/10 text-teal-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-teal-500/20">{notifications.length}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {notifications.length === 0 ? (
+                  <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No recent alerts</div>
+                ) : (
+                  notifications.map((n) => (
+                    <div key={n.id} className="group p-5 rounded-2xl bg-teal-500/5 border border-teal-500/10 hover:border-teal-500/30 transition-all relative">
+                      <div className="flex items-center justify-between mb-3 border-b border-teal-500/10 pb-3">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-teal-400 font-black uppercase tracking-widest">EVENT UNREGISTER</span>
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">{n.sessionTitle}</span>
+                        </div>
+                        <button onClick={() => handleDeleteNotification(n.id)} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-teal-400 transition-all p-1">
+                          <Trash2 size={14} />
+                        </button>
                       </div>
-                      <button onClick={() => handleDeleteMessage(m.id)} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 transition-all p-1">
-                        <Trash2 size={14} />
-                      </button>
+                      <p className="text-white text-xs leading-relaxed font-mono bg-black/30 p-3 rounded-xl border border-white/5">{n.message}</p>
+                      <div className="mt-3 flex justify-between items-center">
+                         <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">UID: {(n.fromUid || 'Unknown').substring(0, 8)}...</span>
+                         <span className="text-[8px] text-teal-500/50 font-black uppercase">
+                           {n.createdAt?.seconds ? new Date(n.createdAt.seconds * 1000).toLocaleTimeString([], { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                         </span>
+                      </div>
                     </div>
-                    <p className="text-gray-300 text-xs leading-relaxed italic">"{m.content}"</p>
-                    <div className="mt-3 flex justify-end">
-                       <span className="text-[8px] text-gray-700 font-black uppercase">
-                         {m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
-                       </span>
-                    </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
+            
           </div>
 
           {/* Column 3: Admin Tasks Section */}

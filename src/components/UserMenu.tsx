@@ -22,6 +22,7 @@ import {
   writeBatch, 
   doc,
   addDoc,
+  getDocs,
   serverTimestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -31,6 +32,8 @@ export default function UserMenu() {
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [gamerTag, setGamerTag] = useState<string | null>(null);
+  const isAdmin = user?.email === "admin@bdj-karukera.com";
   
   // Notification States (Integrated from NotificationBell)
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -42,9 +45,22 @@ export default function UserMenu() {
 
   useEffect(() => {
     if (!user) return;
+    if (isAdmin) { setGamerTag("ADMIN"); return; }
+    (async () => {
+      try {
+        const snap = await getDocs(query(collection(db, "users"), where("__name__", "==", user.uid)));
+        const tag = snap.docs[0]?.data()?.gamerTag;
+        setGamerTag(tag || user.displayName || user.email?.split('@')[0].toUpperCase() || "PLAYER");
+      } catch { setGamerTag(user.email?.split('@')[0].toUpperCase() || "PLAYER"); }
+    })();
+  }, [user, isAdmin]);
+
+  useEffect(() => {
+    if (!user) return;
+    const targets = isAdmin ? [user.uid, "admin"] : [user.uid];
     const q = query(
       collection(db, "notifications"),
-      where("toUid", "==", user.uid)
+      where("toUid", "in", targets)
     );
     const unsub = onSnapshot(q, (snap) => {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -52,7 +68,7 @@ export default function UserMenu() {
       setNotifications(docs);
     });
     return () => unsub();
-  }, [user]);
+  }, [user, isAdmin]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -73,6 +89,15 @@ export default function UserMenu() {
     const batch = writeBatch(db);
     unread.forEach((n) => batch.update(doc(db, "notifications", n.id), { read: true }));
     await batch.commit();
+  };
+
+  const clearAllNotifications = async () => {
+    if (!notifications.length) return;
+    const batch = writeBatch(db);
+    notifications.forEach((n) => batch.delete(doc(db, "notifications", n.id)));
+    await batch.commit();
+    setNotifications([]);
+    toast.success("Notifications cleared.");
   };
 
   const handleSendReply = async (e: React.FormEvent) => {
@@ -112,8 +137,10 @@ export default function UserMenu() {
           <User size={16} className="text-[#FF5F5F]" />
         </div>
         <div className="flex flex-col items-start hidden sm:flex">
-          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Profile</span>
-          <span className="text-[11px] text-white font-black truncate max-w-[100px] uppercase tracking-tighter">{user.email?.split('@')[0]}</span>
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{isAdmin ? "Admin" : "Profile"}</span>
+          <span className={`text-[11px] font-black truncate max-w-[100px] uppercase tracking-tighter ${isAdmin ? "text-[#FF5F5F]" : "text-white"}`}>
+            {gamerTag ?? user.email?.split('@')[0].toUpperCase()}
+          </span>
         </div>
         <ChevronDown size={14} className={`text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         {unreadCount > 0 && (
@@ -129,8 +156,11 @@ export default function UserMenu() {
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF5F5F]/50 to-transparent" />
           
           <div className="p-4 border-b border-white/5 bg-white/[0.02]">
-            <p className="text-[9px] text-gray-500 font-black tracking-widest uppercase mb-1">Authenticated Account</p>
-            <p className="text-xs text-white font-bold truncate">{user.email}</p>
+            <p className="text-[9px] text-gray-500 font-black tracking-widest uppercase mb-1">{isAdmin ? "Administrator" : "Authenticated Account"}</p>
+            <p className="text-xs font-bold truncate">
+              <span className={isAdmin ? "text-[#FF5F5F]" : "text-white"}>{gamerTag ?? user.email?.split('@')[0].toUpperCase()}</span>
+            </p>
+            <p className="text-[9px] text-gray-600 truncate mt-0.5">{user.email}</p>
           </div>
 
           <div className="p-2">
@@ -168,8 +198,8 @@ export default function UserMenu() {
                       </div>
                     ))}
                     {notifications.length > 0 && (
-                      <button onClick={markAllRead} className="text-[9px] text-gray-500 hover:text-white font-black uppercase tracking-widest p-2 text-center flex items-center justify-center gap-2">
-                        <CheckCheck size={12} /> Clear all alerts
+                      <button onClick={clearAllNotifications} className="text-[9px] text-gray-500 hover:text-red-400 font-black uppercase tracking-widest p-2 text-center flex items-center justify-center gap-2">
+                        <CheckCheck size={12} /> Clear all
                       </button>
                     )}
                   </div>

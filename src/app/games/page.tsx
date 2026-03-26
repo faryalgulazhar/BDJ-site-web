@@ -515,6 +515,15 @@ export default function GamesPage() {
         createdAt: serverTimestamp(),
       });
 
+      // 4. Send confirmation to the user's own notification bell
+      await addDoc(collection(db, "notifications"), {
+        toUid: user.uid,
+        sessionTitle: session.title,
+        message: `You have been unregistered from "${session.title}". Your reason has been logged.`,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+
       await reloadSessions();
       setIsUnregisterOpen(false);
       setUnregisterId(null);

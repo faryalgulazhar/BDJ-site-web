@@ -34,12 +34,12 @@ export default function TopLoader() {
   return (
     <style jsx global>{`
       #nprogress .bar {
-        background: #FF5F5F !important;
+        background: var(--primary) !important;
         height: 3px !important;
-        box-shadow: 0 0 10px #FF5F5F, 0 0 5px #FF5F5F !important;
+        box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important;
       }
       #nprogress .peg {
-        box-shadow: 0 0 10px #FF5F5F, 0 0 5px #FF5F5F !important;
+        box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important;
       }
     `}</style>
   );

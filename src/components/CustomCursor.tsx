@@ -51,7 +51,7 @@ export default function CustomCursor() {
     <>
       {/* The Glow Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-[#FF5F5F]/40 pointer-events-none z-[1000] mix-blend-screen"
+        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-primary/40 pointer-events-none z-[1000] mix-blend-screen"
         style={{
           translateX: cursorXSpring,
           translateY: cursorYSpring,
@@ -65,7 +65,7 @@ export default function CustomCursor() {
       
       {/* The Inner Dot */}
       <motion.div
-        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#FF5F5F] rounded-full pointer-events-none z-[1001] shadow-[0_0_10px_#FF5F5F]"
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-primary rounded-full pointer-events-none z-[1001] shadow-[var(--shadow-primary)]"
         style={{
           x: cursorX,
           y: cursorY,

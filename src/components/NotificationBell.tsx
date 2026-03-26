@@ -122,7 +122,7 @@ export default function NotificationBell() {
       >
         <Bell size={16} className="text-white/70" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] flex items-center justify-center rounded-full bg-[#FF5F5F] text-white text-[9px] font-black px-1 shadow-[0_0_10px_-2px_#FF5F5F]">
+          <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] flex items-center justify-center rounded-full bg-primary text-white text-[9px] font-black px-1 shadow-[var(--shadow-primary)]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -153,7 +153,7 @@ export default function NotificationBell() {
                   <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-amber-400/80 font-black uppercase tracking-widest truncate">{n.sessionTitle}</span>
-                      {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5F5F] shrink-0" />}
+                      {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
                     </div>
                     <p className="text-[12px] text-gray-300 leading-relaxed">{n.message}</p>
                     <div className="flex items-center justify-between mt-1">
@@ -164,7 +164,7 @@ export default function NotificationBell() {
                           setReplyTo(n);
                           setIsReplyOpen(true);
                         }}
-                        className="text-[10px] text-[#FF5F5F] font-black uppercase tracking-widest hover:underline"
+                        className="text-[10px] text-primary font-black uppercase tracking-widest hover:underline"
                       >
                         Reply
                       </button>
@@ -200,11 +200,11 @@ export default function NotificationBell() {
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Type your reply here..."
-                className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all resize-none"
+                className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all resize-none"
               />
               <button 
                 disabled={isSending}
-                className="bg-[#FF5F5F] hover:bg-[#ff4040] disabled:opacity-50 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
               >
                 {isSending ? <Loader2 size={14} className="animate-spin" /> : <MessageSquare size={14} />}
                 {isSending ? "SENDING..." : "SEND REPLY"}

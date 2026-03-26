@@ -8,7 +8,7 @@ export default function MembershipPage() {
   const { t, language } = useLanguage();
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20">
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20">
       
       {/* ── Hero Section ── */}
       <section className="relative w-full flex flex-col items-center justify-center pt-32 pb-24 text-center px-6 overflow-hidden">
@@ -28,7 +28,7 @@ export default function MembershipPage() {
           <AuthCTAButton 
             primaryText={t.membership.joinNow}
             secondaryText="GO TO DASHBOARD"
-            className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-4 rounded-full text-[13px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] uppercase"
+            className="bg-primary hover:bg-primary/80 text-white px-10 py-4 rounded-full text-[13px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] uppercase"
           />
         </div>
       </section>
@@ -36,14 +36,14 @@ export default function MembershipPage() {
       {/* ── Who Can Join Section ── */}
       <section className="max-w-7xl mx-auto w-full px-6 py-16 z-10">
         <div className="mb-10">
-          <h2 className="text-3xl font-black tracking-tighter text-white uppercase inline-block border-b-2 border-[#FF5F5F]/50 pb-2">
+          <h2 className="text-3xl font-black tracking-tighter text-white uppercase inline-block border-b-2 border-primary/50 pb-2">
             {t.membership.whoCanJoin}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1 */}
-          <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-[#FF5F5F]/30 transition-colors">
+          <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
             <GraduationCap size={120} className="absolute -right-6 -top-6 text-white/[0.02] group-hover:text-white/[0.05] transition-colors" strokeWidth={1} />
             <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex flex-col items-center justify-center mb-2">
               <GraduationCap size={20} className="text-white" />
@@ -57,7 +57,7 @@ export default function MembershipPage() {
           </div>
 
           {/* Card 2 */}
-          <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-[#FF5F5F]/30 transition-colors">
+          <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
             <Share2 size={120} className="absolute -right-6 -top-6 text-white/[0.02] group-hover:text-white/[0.05] transition-colors" strokeWidth={1} />
             <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex flex-col items-center justify-center mb-2">
               <Share2 size={20} className="text-white" />
@@ -71,7 +71,7 @@ export default function MembershipPage() {
           </div>
 
           {/* Card 3 */}
-          <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-[#FF5F5F]/30 transition-colors">
+          <div className="bg-[#141414] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
             <Eye size={120} className="absolute -right-6 -top-6 text-white/[0.02] group-hover:text-white/[0.05] transition-colors" strokeWidth={1} />
             <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex flex-col items-center justify-center mb-2">
               <Eye size={20} className="text-white" />
@@ -105,14 +105,14 @@ export default function MembershipPage() {
               { num: "06", text: t.membership.rule6Desc },
             ].map((rule) => (
               <div key={rule.num} className="flex gap-4 items-start">
-                <span className="text-[#FF5F5F]/60 font-black text-xl tracking-tighter">{rule.num}</span>
+                <span className="text-primary/60 font-black text-xl tracking-tighter">{rule.num}</span>
                 <p className="text-sm text-gray-300 font-medium leading-relaxed pt-1">{rule.text}</p>
               </div>
             ))}
             
             {/* Rule 07 spans full width loosely based on screenshot, or just fits naturally */}
             <div className="flex gap-4 items-start md:col-span-2">
-              <span className="text-[#FF5F5F]/60 font-black text-xl tracking-tighter">07</span>
+              <span className="text-primary/60 font-black text-xl tracking-tighter">07</span>
               <p className="text-sm text-gray-300 font-medium leading-relaxed pt-1">
                 {t.membership.rule7Desc}
               </p>
@@ -124,12 +124,12 @@ export default function MembershipPage() {
 
       {/* ── Bottom CTA ── */}
       <section className="max-w-5xl mx-auto w-full px-6 pb-20 z-10 mt-10">
-        <div className="bg-gradient-to-b from-[#1a1212] to-[#140e0e] border border-[#FF5F5F]/10 rounded-[3rem] p-16 md:p-24 text-center shadow-[0_0_50px_-20px_#ff404022] relative overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#FF5F5F]/5 blur-[100px] pointer-events-none"></div>
+        <div className="bg-gradient-to-b from-[#1a1212] to-[#140e0e] border border-primary/10 rounded-[3rem] p-16 md:p-24 text-center shadow-[var(--shadow-primary)] relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] pointer-events-none"></div>
           
           <div className="relative z-10 flex flex-col items-center gap-6">
-            <span className="bg-[#ff4040]/10 text-[#FF5F5F] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#ff4040]/20 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5F5F] animate-pulse"></span>
+            <span className="bg-[var(--primary)]/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[var(--primary)]/20 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
               {t.membership.liveCommunity}
             </span>
             
@@ -144,7 +144,7 @@ export default function MembershipPage() {
           <AuthCTAButton 
             primaryText={t.membership.becomeMemberCTA}
             secondaryText="VIEW YOUR PROFILE"
-            className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-5 rounded-full text-[13px] font-black tracking-widest uppercase shadow-[0_0_30px_-5px_#FF5F5F] transition-all duration-300"
+            className="bg-primary hover:bg-primary/80 text-white px-10 py-5 rounded-full text-[13px] font-black tracking-widest uppercase shadow-[var(--shadow-primary)] transition-all duration-500"
           />
           </div>
         </div>

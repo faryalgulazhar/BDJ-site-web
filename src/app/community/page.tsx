@@ -10,6 +10,7 @@ import { db, storage } from "@/lib/firebase";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -87,6 +88,7 @@ export default function CommunityPage() {
   const { user } = useAuth();
   const router = useRouter();
   const { t, language } = useLanguage();
+  const { isIceTheme } = useTheme();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -352,7 +354,7 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20 relative">
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20 relative">
 
       {/* ── Modal overlay ── */}
       {isModalOpen && (
@@ -376,7 +378,7 @@ export default function CommunityPage() {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder={t.community.postTitlePlaceholder}
-                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-colors"
+                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -386,13 +388,13 @@ export default function CommunityPage() {
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
                   placeholder={t.community.contentPlaceholder}
-                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-colors resize-none"
+                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none"
                 />
               </div>
               <button
                 disabled={isSubmitting}
                 type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]"
+                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]"
               >
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : t.community.publishPost}
               </button>
@@ -404,7 +406,7 @@ export default function CommunityPage() {
       {/* ── Admin Edit Board Modal ── */}
       {isEditBoardModalOpen && isAdmin && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-lg p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div className="bg-[var(--background)] border border-[var(--border)] rounded-3xl w-full max-w-lg p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar transition-colors duration-500">
             <button
               onClick={() => { setIsEditBoardModalOpen(false); setBoardForm({}); setSelectedFile(null); }}
               className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
@@ -418,16 +420,16 @@ export default function CommunityPage() {
             <form onSubmit={handleAdminBoardSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.name}</label>
-                <input required type="text" value={boardForm.name || ""} onChange={(e) => setBoardForm({ ...boardForm, name: e.target.value.toUpperCase() })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                <input required type="text" value={boardForm.name || ""} onChange={(e) => setBoardForm({ ...boardForm, name: e.target.value.toUpperCase() })}                 className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors duration-500" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.role}</label>
-                <input required type="text" value={boardForm.role || ""} onChange={(e) => setBoardForm({ ...boardForm, role: e.target.value.toUpperCase() })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                <input required type="text" value={boardForm.role || ""} onChange={(e) => setBoardForm({ ...boardForm, role: e.target.value.toUpperCase() })}                 className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors duration-500" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.imageUrl}</label>
                 <div className="flex gap-2">
-                  <input placeholder="https://..." type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({ ...boardForm, img: e.target.value })} className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                  <input placeholder="https://..." type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({ ...boardForm, img: e.target.value })} className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50" />
                   <label className="flex-shrink-0 cursor-pointer flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all">
                     <Upload size={16} />
                     {selectedFile ? selectedFile.name.substring(0, 10) + "..." : "UPLOAD"}
@@ -437,17 +439,17 @@ export default function CommunityPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.descEn}</label>
-                <textarea required rows={3} value={boardForm.descEn || ""} onChange={(e) => setBoardForm({ ...boardForm, descEn: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
+                <textarea required rows={3} value={boardForm.descEn || ""} onChange={(e) => setBoardForm({ ...boardForm, descEn: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 resize-none" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.descFr}</label>
-                <textarea required rows={3} value={boardForm.descFr || ""} onChange={(e) => setBoardForm({ ...boardForm, descFr: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
+                <textarea required rows={3} value={boardForm.descFr || ""} onChange={(e) => setBoardForm({ ...boardForm, descFr: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 resize-none" />
               </div>
               <div className="flex gap-4 mt-4 w-full">
                 <button 
                   disabled={isSubmitting || isSuccess}
                   type="submit" 
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300 ${isSuccess ? "bg-green-500 text-white" : "bg-[#FF5F5F] hover:bg-[#ff4040] text-white"}`}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${isSuccess ? "bg-green-500 text-white" : "bg-primary hover:bg-primary/80 text-white"}`}
                 >
                   {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : isSuccess ? "SAVED ✔" : t.community.saveChanges}
                 </button>
@@ -479,12 +481,12 @@ export default function CommunityPage() {
             <div className="mt-10 border-t border-white/5 pt-6 flex flex-col gap-3">
               <h3 className="text-[10px] text-gray-400 font-bold tracking-widest uppercase mb-2">{t.community.existingMembers}</h3>
               {boardMembers.map(m => (
-                <div key={m.id} className="flex items-center justify-between bg-[#1a1a1a] p-3 rounded-xl border border-white/5">
+                <div key={m.id} className="flex items-center justify-between bg-[var(--card-bg)] p-3 rounded-xl border border-[var(--border)] transition-colors duration-500">
                   <div className="flex items-center gap-3">
                     <Image src={m.img} alt={m.name} width={30} height={30} className="rounded-full w-8 h-8 object-cover" />
                     <div className="flex flex-col">
                       <span className="text-xs font-bold text-white tracking-widest">{m.name}</span>
-                      <span className="text-[9px] text-[#FF5F5F] tracking-widest">{m.role}</span>
+                      <span className="text-[9px] text-primary tracking-widest">{m.role}</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -500,7 +502,7 @@ export default function CommunityPage() {
 
       {selectedBoardMember && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-[3rem] w-full max-w-lg p-10 relative shadow-[0_0_50px_-15px_rgba(255,95,95,0.15)] flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[3rem] w-full max-w-lg p-10 relative shadow-[0_0_50px_-15px_var(--shadow-primary)] flex flex-col items-center text-center animate-in zoom-in-95 duration-500 transition-colors">
             <button
               onClick={() => { setSelectedBoardMember(null); }}
               className="absolute top-8 right-8 text-gray-400 hover:text-white transition-colors"
@@ -508,14 +510,14 @@ export default function CommunityPage() {
               <X size={24} />
             </button>
 
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#FF5F5F]/50 mb-6 shadow-[0_0_30px_-5px_#FF5F5F]">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/50 mb-6 shadow-[0_0_30px_-5px_var(--shadow-primary)] transition-all duration-500">
               <Image src={selectedBoardMember.img} alt={selectedBoardMember.name} width={96} height={96} className="w-full h-full object-cover" />
             </div>
 
-            <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-1">{selectedBoardMember.name}</h2>
-            <p className="text-xs font-black text-[#FF5F5F] tracking-[0.2em] uppercase mb-8">{selectedBoardMember.role}</p>
+            <h2 className="text-3xl font-black text-primary uppercase tracking-tighter mb-1 transition-colors duration-500">{selectedBoardMember.name}</h2>
+            <p className="text-xs font-black text-primary tracking-[0.2em] uppercase mb-8 transition-colors duration-500">{selectedBoardMember.role}</p>
 
-            <p className="text-sm text-gray-300 leading-relaxed max-w-sm">
+            <p className="text-sm text-gray-300 leading-relaxed max-w-sm transition-colors duration-500">
               {language === "EN" ? selectedBoardMember.descEn : selectedBoardMember.descFr}
             </p>
           </div>
@@ -526,7 +528,7 @@ export default function CommunityPage() {
       <section className="max-w-7xl mx-auto w-full px-6 pt-32 pb-12">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
-            <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-[#ffdbdb] leading-none uppercase drop-shadow-[0_0_15px_rgba(255,95,95,0.2)]">
+            <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-white leading-none uppercase drop-shadow-[0_0_15px_var(--shadow-primary)] transition-all duration-500">
               {t.community.heroTitle}
             </h1>
             <p className="mt-6 text-gray-400 max-w-lg text-sm md:text-base leading-relaxed">
@@ -535,7 +537,7 @@ export default function CommunityPage() {
           </div>
           <button
             onClick={handleOpenModal}
-            className="flex items-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] whitespace-nowrap uppercase self-start"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[0_0_30px_-5px_var(--shadow-primary)] hover:shadow-[0_0_40px_-3px_var(--shadow-primary)] whitespace-nowrap uppercase self-start"
           >
             <Plus size={16} strokeWidth={3} />
             {t.community.newPost}
@@ -546,11 +548,11 @@ export default function CommunityPage() {
       {/* ── The Board ── */}
       <section className="max-w-7xl mx-auto w-full px-6 pb-16">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase">{t.community.theBoard}</h2>
+          <h2 className="text-white text-xl font-black tracking-tighter uppercase transition-colors duration-500">{t.community.theBoard}</h2>
           {isAdmin && (
             <button
               onClick={() => { setBoardForm({}); setIsEditBoardModalOpen(true); }}
-              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-[9px] font-black tracking-widest uppercase transition-colors"
+              className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-4 py-2 rounded-full text-[9px] font-black tracking-widest uppercase transition-all duration-500"
             >
               {t.community.manageBoard}
             </button>
@@ -558,13 +560,13 @@ export default function CommunityPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {boardMembers.map(member => (
-            <button key={member.id} onClick={() => setSelectedBoardMember(member)} className="bg-[#161616] border border-white/5 rounded-3xl p-6 flex flex-col items-start gap-4 hover:bg-[#1a1a1a] hover:border-[#FF5F5F]/30 transition-all text-left w-full group">
-              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#FF5F5F] transition-colors">
+            <button key={member.id} onClick={() => setSelectedBoardMember(member)} className="bg-[var(--card-bg)] border border-[var(--border)] rounded-3xl p-6 flex flex-col items-start gap-4 hover:border-primary/80 transition-all duration-500 text-left w-full group shadow-[var(--shadow-primary)]">
+              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-colors duration-500">
                 <Image src={member.img} alt={member.name} width={56} height={56} className="w-full h-full object-cover" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-white tracking-wide">{member.name}</h3>
-                <p className="text-[10px] font-bold text-[#c79a63] uppercase tracking-widest">{member.role}</p>
+                <h3 className="text-sm font-black text-white tracking-wide transition-colors duration-500">{member.name}</h3>
+                <p className="text-[10px] font-bold text-primary uppercase tracking-widest transition-colors duration-500">{member.role}</p>
               </div>
             </button>
           ))}
@@ -577,27 +579,27 @@ export default function CommunityPage() {
 
           {/* Left Column: Latest from the community */}
           <div className="flex-[2] flex flex-col gap-6">
-            <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase mb-2">{t.community.latestPosts}</h2>
+            <h2 className="text-white text-xl font-black tracking-tighter uppercase mb-2 transition-colors duration-500">{t.community.latestPosts}</h2>
 
             {isLoading ? (
               <div className="py-20 flex justify-center items-center">
-                <Loader2 size={32} className="text-[#FF5F5F] animate-spin" />
+                <Loader2 size={32} className="text-primary animate-spin" />
               </div>
             ) : posts.length === 0 ? (
-              <div className="bg-[#161616] border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
+              <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-[2rem] p-12 text-center flex flex-col items-center gap-4 transition-all duration-500">
                 <h3 className="text-xl font-black text-white tracking-tight uppercase mb-2">{t.community.noPosts}</h3>
                 <p className="text-sm text-gray-400">{t.community.beTheFirst}</p>
                 <button
                   onClick={handleOpenModal}
-                  className="mt-4 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300"
+                  className="mt-4 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500"
                 >
                   {t.community.startConversation}
                 </button>
               </div>
             ) : (
               posts.map(post => (
-                <div key={post.id} className="bg-[#161616] border border-white/5 rounded-[2rem] p-8 flex flex-col gap-6 relative group hover:border-white/10 transition-colors">
-                  <div className="absolute top-8 right-8 bg-[#FF5F5F]/10 text-[#FF5F5F] border border-[#FF5F5F]/20 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                <div key={post.id} className="bg-[var(--card-bg)] border border-[var(--border)] rounded-[2rem] p-8 flex flex-col gap-6 relative group hover:border-primary/50 transition-all duration-500">
+                  <div className="absolute top-8 right-8 bg-primary/10 text-primary border border-primary/20 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
                     {t.community.publishedBadge}
                   </div>
 
@@ -619,7 +621,7 @@ export default function CommunityPage() {
                   <div className="flex items-center gap-6 mt-2 pt-6 border-t border-white/5">
                     <button
                       onClick={() => handleToggleLike(post)}
-                      className={`flex items-center gap-2 transition-colors ${post.likedBy?.includes(user?.uid || "") ? "text-[#FF5F5F]" : "text-gray-500 hover:text-[#FF5F5F]"}`}
+                      className={`flex items-center gap-2 transition-colors ${post.likedBy?.includes(user?.uid || "") ? "text-primary" : "text-gray-500 hover:text-primary"}`}
                     >
                       <ThumbsUp size={14} className={post.likedBy?.includes(user?.uid || "") ? "fill-current" : ""} />
                       <span className="text-xs font-bold">{post.likedBy?.length || 0}</span>
@@ -644,7 +646,7 @@ export default function CommunityPage() {
 
                   {/* Comments Section */}
                   {activeCommentPostId === post.id && (
-                    <div className="mt-4 flex flex-col gap-4 pt-4 border-t border-white/5 animate-in fade-in duration-300">
+                    <div className="mt-4 flex flex-col gap-4 pt-4 border-t border-white/5 animate-in fade-in duration-500">
 
                       {/* Comments List */}
                       <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -652,7 +654,7 @@ export default function CommunityPage() {
                           <p className="text-xs text-gray-500 italic">{t.community.noCommentsYet}</p>
                         ) : (
                           post.commentsList.map(comment => (
-                            <div key={comment.id} className="flex gap-3 bg-[#0a0a0a] p-3 rounded-2xl border border-white/5">
+                            <div key={comment.id} className="flex gap-3 bg-[var(--background)] p-3 rounded-2xl border border-[var(--border)] transition-colors duration-500">
                               <Image src={comment.authorImg} alt={comment.authorName} width={24} height={24} className="w-6 h-6 rounded-full object-cover" />
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-black text-white">{comment.authorName}</span>
@@ -672,7 +674,7 @@ export default function CommunityPage() {
                             onChange={(e) => setCommentText(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleAddComment(post.id)}
                             placeholder={t.community.writeComment}
-                            className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#FF5F5F]/50 transition-colors"
+                            className="flex-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-primary/50 transition-colors duration-500"
                           />
                           <button
                             disabled={isCommenting || !commentText.trim()}
@@ -692,7 +694,7 @@ export default function CommunityPage() {
             )}
 
             {/* Bottom Auth CTA */}
-            <div className="mt-4 bg-gradient-to-b from-[#1c1212] to-[#161111] border border-white/5 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-4 py-16">
+            <div className="mt-4 bg-[var(--glow-bg)] border border-[var(--border)] shadow-[inset_0_0_50px_var(--shadow-primary)] transition-all duration-500 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-4 py-16">
               <h2 className="text-2xl font-black text-white tracking-tighter uppercase">
                 {user ? t.community.readyToPost : t.community.wantToJoin}
               </h2>
@@ -705,13 +707,13 @@ export default function CommunityPage() {
               {user ? (
                 <button
                   onClick={handleOpenModal}
-                  className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]"
+                  className="bg-primary hover:bg-primary/80 text-white px-8 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]"
                 >
                   {t.community.createNewPost}
                 </button>
               ) : (
                 <Link href="/login">
-                  <button className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]">
+                  <button className="bg-primary hover:bg-primary/80 text-white px-8 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]">
                     {t.community.loginToPost}
                   </button>
                 </Link>
@@ -721,14 +723,14 @@ export default function CommunityPage() {
 
           {/* Right Column: Our Members */}
           <div className="flex-1 flex flex-col gap-6">
-            <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase mb-2">{t.community.ourMembers}</h2>
+            <h2 className="text-white transition-colors duration-500 text-xl font-black tracking-tighter uppercase mb-2">{t.community.ourMembers}</h2>
 
             <div className="grid grid-cols-2 gap-4">
               {allMembers.slice(0, 6).map(member => (
-                <div key={member.id} className="bg-[#161616] border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-[#1a1a1a] transition-colors">
+                <div key={member.id} className="bg-[var(--card-bg)] border border-[var(--border)] rounded-3xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-primary/5 transition-all duration-500">
                   <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
                     <Image 
-                      src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=1a1a1a&color=FF5F5F`} 
+                              src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=${isIceTheme ? '101625' : '1a1a1a'}&color=${isIceTheme ? '3FCEEE' : 'FF5F5F'}`} 
                       alt={member.gamerTag || "Member"} 
                       width={48} 
                       height={48} 
@@ -745,7 +747,7 @@ export default function CommunityPage() {
 
             <button 
               onClick={() => setIsAllMembersOpen(true)}
-              className="w-full mt-2 bg-transparent border border-white/5 hover:border-white/20 hover:bg-white/5 text-gray-400 hover:text-white px-6 py-4 rounded-3xl text-[10px] font-black tracking-widest uppercase transition-all duration-300"
+              className="w-full mt-2 bg-transparent border border-white/5 hover:border-white/20 hover:bg-white/5 text-gray-400 hover:text-white px-6 py-4 rounded-3xl text-[10px] font-black tracking-widest uppercase transition-all duration-500"
             >
               {t.community.viewAllMembers}
             </button>
@@ -757,13 +759,13 @@ export default function CommunityPage() {
       {/* View All Members Modal */}
       {isAllMembersOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="bg-[#0f0f0f] border border-white/10 rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col relative shadow-2xl">
+          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col relative shadow-2xl transition-colors duration-500">
             {/* Header */}
             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-[#FF5F5F]/15 border border-[#FF5F5F]/30 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
                   <div className="rotate-45">
-                    <Plus size={24} className="text-[#FF5F5F]" />
+                    <Plus size={24} className="text-primary" />
                   </div>
                 </div>
                 <div>
@@ -784,23 +786,23 @@ export default function CommunityPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {allMembers.length === 0 ? (
                   <div className="col-span-full py-20 text-center">
-                    <Loader2 size={32} className="text-[#FF5F5F] animate-spin mx-auto mb-4" />
+                    <Loader2 size={32} className="text-primary animate-spin mx-auto mb-4" />
                     <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Loading members list...</p>
                   </div>
                 ) : (
                   allMembers.map((member) => (
-                    <div key={member.id} className="group p-5 rounded-3xl bg-white/5 border border-white/5 hover:border-[#FF5F5F]/30 transition-all flex flex-col items-center gap-4 text-center">
+                    <div key={member.id} className="group p-5 rounded-3xl bg-[var(--card-bg)] border border-[var(--border)] hover:border-primary/30 transition-all duration-500 flex flex-col items-center gap-4 text-center">
                       <div className="relative">
-                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#FF5F5F]/50 transition-colors">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors">
                           <Image 
-                            src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=1a1a1a&color=FF5F5F`} 
+                                    src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=${isIceTheme ? '101625' : '1a1a1a'}&color=${isIceTheme ? '3FCEEE' : 'FF5F5F'}`} 
                             alt={member.gamerTag || "Member"} 
                             width={64} 
                             height={64} 
                             className="w-full h-full object-cover" 
                           />
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-[#0f0f0f] rounded-full"></div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-[var(--background)] rounded-full"></div>
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-black text-white uppercase tracking-tight">{member.gamerTag || member.email?.split('@')[0]}</span>
@@ -816,7 +818,7 @@ export default function CommunityPage() {
             <div className="p-6 border-t border-white/5 bg-white/[0.01] flex justify-center">
               <button 
                 onClick={() => setIsAllMembersOpen(false)}
-                className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]"
+                className="bg-primary hover:bg-primary/80 text-white px-10 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]"
               >
                 Close Members List
               </button>

@@ -1,19 +1,52 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="red"] {
   --background: #0a0a0a;
-  --foreground: #ededed;
+  --navbar-bg: rgba(0, 0, 0, 0.9);
+  --navbar-link: #9ca3af;
+  --primary: #FF5F5F;
+  --coral: #FF5F5F;
+  --card-bg: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.05);
+  --shadow-primary: 0 0 30px -5px rgba(255, 95, 95, 0.3);
+  --glow-bg: rgba(255, 95, 95, 0.05);
+}
+
+[data-theme="blue"] {
+  --background: #0A0E1A;
+  --navbar-bg: rgba(10, 14, 26, 0.9);
+  --navbar-link: #ffffff;
+  --primary: #3FCEEE;
+  --coral: #FF5F5F;
+  --card-bg: #101625;
+  --border: rgba(255, 255, 255, 0.05);
+  --shadow-primary: 0 0 15px rgba(63, 206, 238, 0.3);
+  --glow-bg: rgba(63, 206, 238, 0.15);
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-foreground: #ffffff; /* General text is mostly white in both */
+  --color-primary: var(--primary);
+  --color-coral: var(--coral);
+  --color-card: var(--card-bg);
+  --color-navbar-bg: var(--navbar-bg);
+  --color-navbar-link: var(--navbar-link);
+  --color-glow-bg: var(--glow-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  --shadow-primary: var(--shadow-primary);
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: #ffffff;
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+* {
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }

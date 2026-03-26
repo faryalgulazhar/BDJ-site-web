@@ -97,7 +97,7 @@ export default function LoginForm() {
             placeholder="Email address"
             required
             ref={emailRef}
-            className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-300"
+            className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-500"
           />
         </div>
 
@@ -109,7 +109,7 @@ export default function LoginForm() {
             required
             minLength={6}
             ref={passwordRef}
-            className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-300"
+            className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-500"
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#ff4040] hover:bg-red-600 active:scale-[0.98] text-white py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 shadow-lg mt-4 flex items-center justify-center gap-2"
+          className="w-full bg-[var(--primary)] hover:bg-red-600 active:scale-[0.98] text-white py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-500 shadow-lg mt-4 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : "SIGN IN"}
         </button>
@@ -138,7 +138,7 @@ export default function LoginForm() {
 
       <button
         onClick={handleGoogle}
-        className="w-full bg-transparent border border-white/10 hover:border-white/20 hover:bg-white/5 py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-3 text-gray-300 hover:text-white"
+        className="w-full bg-transparent border border-white/10 hover:border-white/20 hover:bg-white/5 py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-500 flex items-center justify-center gap-3 text-gray-300 hover:text-white"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

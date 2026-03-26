@@ -143,22 +143,22 @@ export default function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full transition-all group"
       >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF5F5F]/20 to-amber-500/20 flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform overflow-hidden">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--primary)]/20 to-amber-500/20 flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform overflow-hidden">
           {photoURL ? (
             <Image src={photoURL} alt="User" width={32} height={32} className="w-full h-full object-cover" />
           ) : (
-            <User size={16} className="text-[#FF5F5F]" />
+            <User size={16} className="text-primary" />
           )}
         </div>
         <div className="flex flex-col items-start hidden sm:flex">
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{isAdmin ? "Admin" : "Profile"}</span>
-          <span className={`text-[11px] font-black truncate max-w-[100px] uppercase tracking-tighter ${isAdmin ? "text-[#FF5F5F]" : "text-white"}`}>
+          <span className={`text-[11px] font-black truncate max-w-[100px] uppercase tracking-tighter ${isAdmin ? "text-primary" : "text-white"}`}>
             {gamerTag ?? user.email?.split('@')[0].toUpperCase()}
           </span>
         </div>
-        <ChevronDown size={14} className={`text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={14} className={`text-gray-500 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#FF5F5F] flex items-center justify-center text-[8px] font-black text-white shadow-[0_0_10px_-2px_#FF5F5F]">
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center text-[8px] font-black text-white shadow-[var(--shadow-primary)]">
             {unreadCount}
           </span>
         )}
@@ -167,14 +167,14 @@ export default function UserMenu() {
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute right-0 top-[calc(100%+12px)] w-72 bg-[#0d0d0d] border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF5F5F]/50 to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[var(--primary)]/50 to-transparent" />
           
           <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
               {photoURL ? (
                 <Image src={photoURL} alt="User" width={40} height={40} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[#FF5F5F]/50">
+                <div className="w-full h-full flex items-center justify-center text-primary/50">
                   <User size={20} />
                 </div>
               )}
@@ -182,7 +182,7 @@ export default function UserMenu() {
             <div className="overflow-hidden">
               <p className="text-[9px] text-gray-500 font-black tracking-widest uppercase mb-0.5">{isAdmin ? "Administrator" : "Authenticated Account"}</p>
               <p className="text-xs font-bold truncate">
-                <span className={isAdmin ? "text-[#FF5F5F]" : "text-white"}>{gamerTag ?? user.email?.split('@')[0].toUpperCase()}</span>
+                <span className={isAdmin ? "text-primary" : "text-white"}>{gamerTag ?? user.email?.split('@')[0].toUpperCase()}</span>
               </p>
               <p className="text-[9px] text-gray-600 truncate mt-0.5">{user.email}</p>
             </div>
@@ -198,7 +198,7 @@ export default function UserMenu() {
                 <Bell size={16} />
                 <span className="text-[11px] font-black uppercase tracking-widest">Notifications</span>
               </div>
-              {unreadCount > 0 && <span className="bg-[#FF5F5F] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
+              {unreadCount > 0 && <span className="bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
             </button>
 
             {showNotifs && (
@@ -210,13 +210,13 @@ export default function UserMenu() {
                     {notifications.map(n => (
                       <div key={n.id} className="p-3 rounded-xl bg-white/5 border border-white/5 text-[11px] relative group">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[9px] text-[#FF5F5F] font-black uppercase tracking-widest">{n.sessionTitle}</span>
-                          {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5F5F]" />}
+                          <span className="text-[9px] text-primary font-black uppercase tracking-widest">{n.sessionTitle}</span>
+                          {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                         </div>
                         <p className="text-gray-300 leading-relaxed mb-2">{n.message}</p>
                         <button 
                           onClick={() => { setReplyTo(n); setIsReplyOpen(true); }}
-                          className="text-[9px] text-white/50 hover:text-[#FF5F5F] font-black uppercase tracking-widest flex items-center gap-1 transition-colors"
+                          className="text-[9px] text-white/50 hover:text-primary font-black uppercase tracking-widest flex items-center gap-1 transition-colors"
                         >
                           <MessageSquare size={10} /> Reply to admin
                         </button>
@@ -260,7 +260,7 @@ export default function UserMenu() {
           <div className="bg-[#141414] border border-white/10 w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
             <button onClick={() => setIsReplyOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
             <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-1">REPLY TO ADMIN</h3>
-            <p className="text-[#FF5F5F] text-[10px] font-black uppercase tracking-widest mb-6">RE: {replyTo.sessionTitle}</p>
+            <p className="text-primary text-[10px] font-black uppercase tracking-widest mb-6">RE: {replyTo.sessionTitle}</p>
             
             <form onSubmit={handleSendReply} className="flex flex-col gap-5">
               <textarea 
@@ -269,11 +269,11 @@ export default function UserMenu() {
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Type your message here..."
-                className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all resize-none shadow-inner"
+                className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-white text-sm focus:outline-none focus:border-primary/50 transition-all resize-none shadow-inner"
               />
               <button 
                 disabled={isSending}
-                className="bg-[#FF5F5F] hover:bg-[#ff4040] disabled:opacity-50 text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_-5px_#FF5F5F]"
+                className="bg-primary hover:bg-primary/80 disabled:opacity-50 text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[var(--shadow-primary)]"
               >
                 {isSending ? <Loader2 size={16} className="animate-spin" /> : <MessageSquare size={16} />}
                 {isSending ? "SENDING..." : "SEND REPLY"}

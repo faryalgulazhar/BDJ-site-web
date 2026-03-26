@@ -60,7 +60,7 @@ interface Session {
 }
 
 const categoryColors: Record<GameCategory, string> = {
-  "VIDEO GAME": "bg-[#FF5F5F]/20 text-[#FF5F5F] border border-[#FF5F5F]/40",
+  "VIDEO GAME": "bg-primary/20 text-primary border border-primary/40",
   "BOARD GAME": "bg-amber-500/20 text-amber-400 border border-amber-500/40",
   TOURNAMENT: "bg-violet-500/20 text-violet-400 border border-violet-500/40",
 };
@@ -77,7 +77,7 @@ function PendingCard({ session, onApprove, onReject, onMessage }: {
   onMessage: (session: Session) => void;
 }) {
   return (
-    <div className="bg-[#0f172a] border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-3 shadow-[0_0_20px_-10px_#f59e0b]">
+    <div className="bg-[var(--card-bg)] border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-3 shadow-[0_0_20px_-10px_#f59e0b] transition-colors duration-500">
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className={`text-[10px] font-black tracking-widest px-3 py-1 rounded-full uppercase ${categoryColors[session.category]} mb-3 inline-block`}>
@@ -85,7 +85,7 @@ function PendingCard({ session, onApprove, onReject, onMessage }: {
           </span>
           <h4 className="text-base font-black text-white tracking-tight">{session.title}</h4>
           <p className="text-[11px] text-gray-500 mt-1">{session.date} · {session.time}</p>
-          <p className="text-[11px] text-[#FF5F5F]/70 font-black uppercase tracking-widest mt-0.5">{session.location}</p>
+          <p className="text-[11px] text-primary/70 font-black uppercase tracking-widest mt-0.5">{session.location}</p>
           <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-widest">{session.totalSpots} spots</p>
           {session.suggestedByEmail && (
             <p className="text-[10px] text-amber-500/70 mt-1 uppercase tracking-widest">by {session.suggestedByEmail}</p>
@@ -300,7 +300,7 @@ export default function AdminOpsPage() {
   if (isLoading) {
     return (
       <div className="flex-1 flex justify-center items-center pb-20 mt-32 min-h-screen">
-        <Loader2 size={32} className="text-[#FF5F5F] animate-spin" />
+        <Loader2 size={32} className="text-primary animate-spin" />
       </div>
     );
   }
@@ -308,16 +308,16 @@ export default function AdminOpsPage() {
   if (!isAdmin) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 min-h-[80vh]">
-        <div className="relative rounded-3xl border border-[#FF5F5F]/20 bg-gradient-to-b from-[#1a0a0a] to-[#0f0808] p-16 md:p-24 text-center overflow-hidden shadow-[inset_0_0_80px_-20px_#FF5F5F22] max-w-2xl w-full">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#FF5F5F]/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="relative rounded-3xl border border-primary/20 bg-[var(--card-bg)] p-16 md:p-24 text-center overflow-hidden shadow-[inset_0_0_80px_-20px_var(--shadow-primary)] max-w-2xl w-full transition-all duration-500">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-primary/10 blur-[100px] rounded-full pointer-events-none transition-colors duration-500" />
           <div className="relative flex flex-col items-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-[#FF5F5F]/15 border border-[#FF5F5F]/30 flex items-center justify-center">
-              <Lock size={28} className="text-[#FF5F5F]" />
+            <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center transition-colors duration-500">
+              <Lock size={28} className="text-primary transition-colors duration-500" />
             </div>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white uppercase">UNAUTHORIZED</h2>
             <p className="text-gray-400 max-w-sm text-sm md:text-base leading-relaxed">You need administrator privileges to view this area.</p>
             <button onClick={() => router.push("/")}
-              className="mt-4 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_25px_-5px_#FF5F5F]">
+              className="mt-4 bg-primary hover:opacity-90 text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[0_0_25px_-5px_var(--shadow-primary)]">
               BACK TO HOME
             </button>
           </div>
@@ -329,12 +329,12 @@ export default function AdminOpsPage() {
   const pendingSessions = sessions.filter(s => s.approval === "pending");
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20">
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20">
       
       {/* ── Admin: Message Compose Modal ── */}
       {isMessageOpen && messageTarget && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-[2.5rem] w-full max-w-md p-10 relative shadow-2xl">
+          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[2.5rem] w-full max-w-md p-10 relative shadow-2xl transition-colors duration-500">
             <button onClick={() => setIsMessageOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
             <div className="flex items-center gap-3 mb-2">
               <div className="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center">
@@ -358,11 +358,11 @@ export default function AdminOpsPage() {
                   value={messageText}
                   onChange={e => setMessageText(e.target.value)}
                   placeholder="E.g. Great suggestion! Your session has been approved and will appear on the games page."
-                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed"
+                  className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed"
                 />
               </div>
               <button disabled={isSendingMsg} type="submit"
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300">
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
                 {isSendingMsg ? <Loader2 size={16} className="animate-spin" /> : <><MessageSquare size={14} /> SEND MESSAGE</>}
               </button>
             </form>
@@ -379,8 +379,8 @@ export default function AdminOpsPage() {
           </div>
           
           {/* Live Synchronized Clock */}
-          <div className="bg-black/40 border border-[#FF5F5F]/20 px-8 py-4 rounded-3xl flex flex-col items-center justify-center min-w-[240px] shadow-[inset_0_0_20px_rgba(255,95,95,0.05)]">
-             <div className="flex items-center gap-3 text-[#FF5F5F] mb-1">
+          <div className="bg-[var(--card-bg)] border border-primary/20 px-8 py-4 rounded-3xl flex flex-col items-center justify-center min-w-[240px] shadow-[inset_0_0_20px_var(--shadow-primary)] transition-all duration-500">
+             <div className="flex items-center gap-3 text-primary mb-1 transition-colors duration-500">
                <Clock size={16} className="animate-pulse" />
                <span className="text-[10px] font-black tracking-[0.3em] uppercase">System Sync</span>
              </div>
@@ -407,7 +407,7 @@ export default function AdminOpsPage() {
 
             <div className="flex flex-col gap-4">
               {pendingSessions.length === 0 ? (
-                <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No pending suggestions</div>
+                <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px] transition-colors duration-500">No pending suggestions</div>
               ) : (
                 pendingSessions.map(s => (
                   <PendingCard 
@@ -429,21 +429,21 @@ export default function AdminOpsPage() {
             <div className="flex flex-col gap-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-[#FF5F5F] rounded-full" />
+                  <div className="w-1.5 h-6 bg-primary rounded-full transition-colors duration-500" />
                   <h2 className="text-xl font-black text-white uppercase tracking-tighter">Member Replies</h2>
-                  <span className="bg-[#FF5F5F]/10 text-[#FF5F5F] text-[10px] font-black px-2 py-0.5 rounded-full border border-[#FF5F5F]/20">{memberMessages.length}</span>
+                  <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full border border-primary/20 transition-colors duration-500">{memberMessages.length}</span>
                 </div>
               </div>
 
               <div className="flex flex-col gap-4">
                 {memberMessages.length === 0 ? (
-                  <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No messages from members</div>
+                  <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px] transition-colors duration-500">No messages from members</div>
                 ) : (
                   memberMessages.map((m) => (
-                    <div key={m.id} className="group p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#FF5F5F]/30 transition-all relative">
+                    <div key={m.id} className="group p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] hover:border-primary/50 transition-all duration-500 relative">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex flex-col">
-                          <span className="text-[10px] text-[#FF5F5F] font-black uppercase tracking-widest">{m.fromEmail?.split('@')[0]}</span>
+                          <span className="text-[10px] text-primary font-black uppercase tracking-widest transition-colors duration-500">{m.fromEmail?.split('@')[0]}</span>
                           <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">RE: {m.originalSession}</span>
                         </div>
                         <button onClick={() => handleDeleteMessage(m.id)} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 transition-all p-1">
@@ -474,7 +474,7 @@ export default function AdminOpsPage() {
 
               <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {notifications.length === 0 ? (
-                  <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No recent alerts</div>
+                  <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px] transition-colors duration-500">No recent alerts</div>
                 ) : (
                   notifications.map((n) => (
                     <div key={n.id} className="group p-5 rounded-2xl bg-teal-500/5 border border-teal-500/10 hover:border-teal-500/30 transition-all relative">
@@ -520,7 +520,7 @@ export default function AdminOpsPage() {
                 value={newTaskContent}
                 onChange={e => setNewTaskContent(e.target.value)}
                 placeholder="What needs to be done?..."
-                className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all shadow-inner"
+                className="flex-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all shadow-inner"
               />
               <button 
                 disabled={isAddingTask}
@@ -534,7 +534,7 @@ export default function AdminOpsPage() {
             {/* Tasks List */}
             <div className="flex flex-col gap-3">
               {adminTasks.length === 0 ? (
-                <div className="bg-[#1a1a1a]/50 border border-white/5 rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No tasks assigned</div>
+                <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px] transition-colors duration-500">No tasks assigned</div>
               ) : (
                 adminTasks.map((task) => (
                   <div 

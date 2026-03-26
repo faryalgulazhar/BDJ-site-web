@@ -168,7 +168,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#121212] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#FF5F5F]" size={32} />
+        <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
   }
@@ -199,13 +199,13 @@ export default function SettingsPage() {
           {/* Main Settings */}
           <div className="md:col-span-2 flex flex-col gap-6">
             <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
-               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF5F5F]/30 to-transparent" />
+               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--primary)]/30 to-transparent" />
                
                <form onSubmit={handleSave} className="flex flex-col gap-8">
                   {/* Photo Upload Section */}
                   <div className="flex flex-col items-center gap-4 py-4 border-b border-white/5 mb-2">
                     <div className="relative group">
-                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#FF5F5F]/50 transition-colors bg-black/40">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors bg-black/40">
                         {previewUrl || userData?.photoURL ? (
                           <Image 
                             src={previewUrl || userData.photoURL} 
@@ -220,7 +220,7 @@ export default function SettingsPage() {
                           </div>
                         )}
                       </div>
-                      <label className="absolute bottom-0 right-0 w-8 h-8 bg-[#FF5F5F] hover:bg-[#ff4040] rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-colors border-2 border-[#1a1a1a]">
+                      <label className="absolute bottom-0 right-0 w-8 h-8 bg-primary hover:bg-primary/80 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-colors border-2 border-[#1a1a1a]">
                         <Upload size={14} className="text-white" />
                         <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                       </label>
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                         value={gamerTag}
                         onChange={(e) => setGamerTag(e.target.value)}
                         placeholder="Choose your handle..."
-                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none focus:border-[#FF5F5F]/50 transition-all text-sm"
+                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none focus:border-primary/50 transition-all text-sm"
                       />
                     </div>
                     <p className="text-[10px] text-gray-600 px-1 mt-1 uppercase tracking-tight">Characters: {gamerTag.length} / 20</p>
@@ -257,7 +257,7 @@ export default function SettingsPage() {
 
                  <button 
                   disabled={saving || (gamerTag === userData?.gamerTag && !selectedFile)}
-                  className="bg-[#FF5F5F] hover:bg-[#ff4040] disabled:opacity-50 disabled:hover:bg-[#FF5F5F] text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_-5px_#FF5F5F]"
+                  className="bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:hover:bg-primary text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[var(--shadow-primary)]"
                  >
                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                    {saving ? "SAVING..." : "UPDATE PROFILE"}
@@ -279,7 +279,7 @@ export default function SettingsPage() {
           {/* Stats/Status */}
           <div className="flex flex-col gap-6">
             <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-3xl p-6 flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-[#FF5F5F]/10 border border-[#FF5F5F]/20 flex items-center justify-center text-[#FF5F5F]">
+                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                   <History size={24} />
                 </div>
                 <div>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
                   <div 
-                    className="h-full bg-[#FF5F5F] transition-all duration-1000" 
+                    className="h-full bg-primary transition-all duration-1000" 
                     style={{ width: `${((3 - recentChanges.length) / 3) * 100}%` }}
                   />
                 </div>

@@ -78,7 +78,7 @@ const categoryToTab: Record<GameCategory, Tab> = {
 };
 
 const categoryColors: Record<GameCategory, string> = {
-  "VIDEO GAME": "bg-[#FF5F5F]/20 text-[#FF5F5F] border border-[#FF5F5F]/40",
+  "VIDEO GAME": "bg-primary/20 text-primary border border-primary/40",
   "BOARD GAME": "bg-amber-500/20 text-amber-400 border border-amber-500/40",
   TOURNAMENT: "bg-violet-500/20 text-violet-400 border border-violet-500/40",
 };
@@ -107,7 +107,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         value={form.title} 
         onChange={e => setForm({ ...form, title: e.target.value })}
         placeholder="E.g. TEKKEN 8 TOURNAMENT" 
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all shadow-inner" 
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
       />
     </div>
     <div className="flex flex-col gap-1.5">
@@ -116,7 +116,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         required 
         value={form.category} 
         onChange={e => setForm({ ...form, category: e.target.value as GameCategory })}
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all appearance-none cursor-pointer"
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
       >
         <option value="VIDEO GAME">VIDEO GAME</option>
         <option value="BOARD GAME">BOARD GAME</option>
@@ -131,7 +131,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         value={form.location} 
         onChange={e => setForm({ ...form, location: e.target.value })}
         placeholder="E.g. ROOM 101" 
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all shadow-inner" 
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
       />
     </div>
     <div className="grid grid-cols-2 gap-4">
@@ -143,7 +143,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
           value={form.date} 
           onChange={e => setForm({ ...form, date: e.target.value })}
           placeholder="MAY 14, 2025" 
-          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all shadow-inner" 
+          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -154,7 +154,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
           value={form.time} 
           onChange={e => setForm({ ...form, time: e.target.value })}
           placeholder="19:00 - 22:00" 
-          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all shadow-inner" 
+          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
         />
       </div>
     </div>
@@ -166,7 +166,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         min={1} 
         value={form.totalSpots} 
         onChange={e => setForm({ ...form, totalSpots: e.target.value })}
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all shadow-inner font-bold" 
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner font-bold" 
       />
     </div>
   </>
@@ -197,12 +197,12 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
 
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border p-6 gap-5 transition-all duration-300 ${
+      className={`relative flex flex-col rounded-2xl border p-6 gap-5 transition-all duration-500 ${
         isFull
           ? "bg-[#0f172a]/50 border-white/5 opacity-60"
           : isRegistered
           ? "bg-[#0f172a] border-green-500/30 shadow-[0_0_30px_-10px_#22c55e]"
-          : "bg-[#0f172a] border-white/10 hover:border-[#FF5F5F]/40 hover:shadow-[0_0_30px_-10px_#FF5F5F]"
+          : "bg-[#0f172a] border-white/10 hover:border-primary/40 hover:shadow-[var(--shadow-primary)]"
       }`}
     >
       {/* Admin controls dropdown */}
@@ -276,7 +276,7 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
         <div className="flex flex-col gap-1 text-white/50 text-[13px]">
           <span className="flex items-center gap-2"><Calendar size={13} />{session.date}</span>
           <span className="flex items-center gap-2"><Clock size={13} />{session.time}</span>
-          <span className="flex items-center gap-2 font-black text-[#FF5F5F]/70 uppercase tracking-tighter text-[11px]"><Plus size={12} className="rotate-45" /> {session.location}</span>
+          <span className="flex items-center gap-2 font-black text-primary/70 uppercase tracking-tighter text-[11px]"><Plus size={12} className="rotate-45" /> {session.location}</span>
         </div>
         {session.suggestedByEmail && (
           <span className="text-[9px] text-gray-600 uppercase tracking-widest">suggested by {session.suggestedByEmail}</span>
@@ -289,10 +289,10 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
           <button
             disabled={isFull}
             onClick={() => onRegister(session.id)}
-            className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
+            className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 ${
               isFull
                 ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
-                : "bg-[#FF5F5F] hover:bg-[#ff4040] text-white shadow-[0_0_20px_-5px_#FF5F5F] hover:shadow-[0_0_30px_-3px_#FF5F5F]"
+                : "bg-primary hover:bg-primary/80 text-white shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)]"
             }`}
           >
             {isLoadingId === session.id ? (
@@ -306,7 +306,7 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
         ) : (
           <button
             onClick={() => onUnregister(session.id)}
-            className="w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-300 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-red-500/20 text-green-400 hover:text-red-400 border border-green-500/30 hover:border-red-500/30 group"
+            className="w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-red-500/20 text-green-400 hover:text-red-400 border border-green-500/30 hover:border-red-500/30 group"
           >
             {isLoadingId === session.id ? (
               <Loader2 size={14} className="animate-spin" />
@@ -691,7 +691,7 @@ export default function GamesPage() {
 
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20">
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20">
 
       {/* ── Suggest Session Modal (members) ── */}
       {isSuggestOpen && (
@@ -704,10 +704,10 @@ export default function GamesPage() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Why this session? (optional)</label>
                 <textarea rows={3} value={suggestForm.reason} onChange={e => setSuggestForm({ ...suggestForm, reason: e.target.value })}
-                  placeholder="Tell the admin why this session would be great..." className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-colors resize-none" />
+                  placeholder="Tell the admin why this session would be great..." className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none" />
               </div>
               <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300">
+                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "SUBMIT SUGGESTION"}
               </button>
             </form>
@@ -724,7 +724,7 @@ export default function GamesPage() {
             <form onSubmit={handleAdminCreate} className="flex flex-col gap-4">
               <SessionFormFields form={adminForm} setForm={setAdminForm} />
               <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300">
+                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "CREATE SESSION"}
               </button>
             </form>
@@ -741,7 +741,7 @@ export default function GamesPage() {
             <form onSubmit={handleAdminEdit} className="flex flex-col gap-4">
               <SessionFormFields form={adminForm} setForm={setAdminForm} />
               <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300">
+                className="mt-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "SAVE CHANGES"}
               </button>
             </form>
@@ -763,7 +763,7 @@ export default function GamesPage() {
             {isAdmin && (
               <button
                 onClick={() => { setAdminForm({ ...EMPTY_FORM }); setIsCreateOpen(true); }}
-                className="flex items-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] whitespace-nowrap uppercase"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase"
               >
                 <Plus size={16} strokeWidth={3} />
                 CREATE SESSION
@@ -772,7 +772,7 @@ export default function GamesPage() {
             {isLoggedIn && !isAdmin && (
               <button
                 onClick={() => setIsSuggestOpen(true)}
-                className="flex items-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] whitespace-nowrap uppercase"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase"
               >
                 <Plus size={16} strokeWidth={3} />
                 {t.games.proposeEvent}
@@ -788,9 +788,9 @@ export default function GamesPage() {
         <div className="flex flex-wrap gap-2">
           {tabs.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 ${
+              className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
                 activeTab === tab
-                  ? "bg-[#FF5F5F] text-white shadow-[0_0_20px_-5px_#FF5F5F]"
+                  ? "bg-primary text-white shadow-[var(--shadow-primary)]"
                   : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
               }`}
             >
@@ -803,7 +803,7 @@ export default function GamesPage() {
       {/* ── Cards Grid ── */}
       <section className="max-w-7xl mx-auto w-full px-6">
         {isLoading ? (
-          <div className="flex justify-center py-24"><Loader2 size={32} className="text-[#FF5F5F] animate-spin" /></div>
+          <div className="flex justify-center py-24"><Loader2 size={32} className="text-primary animate-spin" /></div>
         ) : filteredSessions.length === 0 ? (
           <div className="text-center py-24 text-gray-600 font-bold tracking-widest text-sm uppercase">
             {t.games.noGamesMatch}
@@ -832,21 +832,21 @@ export default function GamesPage() {
       {/* ── Locked CTA (hidden when logged in) ── */}
       {!isLoggedIn && (
         <section className="max-w-7xl mx-auto w-full px-6 mt-20">
-          <div className="relative rounded-3xl border border-[#FF5F5F]/20 bg-gradient-to-b from-[#1a0a0a] to-[#0f0808] p-16 md:p-24 text-center overflow-hidden shadow-[inset_0_0_80px_-20px_#FF5F5F22]">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#FF5F5F]/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="relative rounded-3xl border border-primary/20 bg-gradient-to-b from-[#1a0a0a] to-[#0f0808] p-16 md:p-24 text-center overflow-hidden shadow-[var(--shadow-primary)]">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
             <div className="relative flex flex-col items-center gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-[#FF5F5F]/15 border border-[#FF5F5F]/30 flex items-center justify-center">
-                <Lock size={28} className="text-[#FF5F5F]" />
+              <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                <Lock size={28} className="text-primary" />
               </div>
               <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white uppercase">{t.games.loginRequired}</h2>
               <p className="text-gray-400 max-w-sm text-sm md:text-base leading-relaxed">{t.games.loginRequiredDesc}</p>
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
                 <button onClick={() => router.push("/register")}
-                  className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_25px_-5px_#FF5F5F]">
+                  className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]">
                   {t.auth.registerHere}
                 </button>
                 <button onClick={() => router.push("/register")}
-                  className="bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/70 hover:text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300">
+                  className="bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/70 hover:text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500">
                   {t.auth.loginHere}
                 </button>
               </div>

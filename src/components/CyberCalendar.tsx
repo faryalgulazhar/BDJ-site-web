@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
+import { collection, onSnapshot, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 type EventType = "tournament" | "videogame" | "tabletop";
@@ -56,12 +57,23 @@ function getFirstDayOfWeek(year: number, month: number) {
 
 export default function CyberCalendar() {
   const { isIceTheme } = useTheme();
+  const { user } = useAuth();
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [selected, setSelected] = useState<CalEvent | null>(null);
   const [events, setEvents] = useState<CalEvent[]>([]);
+  const [userRegistrations, setUserRegistrations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const q = query(collection(db, "registrations"), where("userId", "==", user.uid));
+    const unsub = onSnapshot(q, (snap) => {
+      setUserRegistrations(snap.docs.map(d => d.data().sessionId));
+    });
+    return () => unsub();
+  }, [user]);
 
   // Parse custom date string: "MAY 14, 2025" or similar
   const parseSessionDate = (dateStr: string): { day: number, month: number, year: number } | null => {
@@ -238,11 +250,18 @@ export default function CyberCalendar() {
       {/* ── Event Detail Tooltip ── */}
       {selected && (
         <div
-          className={`mt-1 px-4 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center gap-3 ${EVENT_STYLES[selected.type].pill} transition-all duration-300`}
+          className={`mt-1 px-4 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center justify-between gap-3 ${EVENT_STYLES[selected.type].pill} transition-all duration-300 cursor-pointer hover:opacity-80`}
           onClick={() => setSelected(null)}
         >
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${EVENT_STYLES[selected.type].dot}`} />
-          {selected.label}
+          <div className="flex items-center gap-3 truncate">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${EVENT_STYLES[selected.type].dot}`} />
+            <span className="truncate">{selected.label}</span>
+          </div>
+          {userRegistrations.includes(selected.id) && (
+            <span className="flex-shrink-0 bg-black/40 text-green-400 border border-green-500/30 px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest uppercase shadow-[0_0_15px_-5px_#22c55e]">
+              REGISTERED
+            </span>
+          )}
         </div>
       )}
     </div>

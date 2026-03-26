@@ -22,10 +22,10 @@ export default function Navbar() {
 
   const navLinks = [
     { name: t.nav.homepage, href: "/" },
-    ...(user ? [{ name: "DASHBOARD", href: "/dashboard" }] : []),
-    { name: t.nav.games, href: "/games" },
     { name: t.nav.membership, href: "/membership" },
+    { name: t.nav.games, href: "/games" },
     { name: t.nav.community, href: "/community" },
+    ...(user ? [{ name: "DASHBOARD", href: "/dashboard" }] : []),
     ...(isAdmin ? [{ name: "OPERATIONS", href: "/operations" }] : [])
   ];
 

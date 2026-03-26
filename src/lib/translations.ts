@@ -170,6 +170,30 @@ export const translations = {
       createAccount: "CREATE ACCOUNT",
       hasAccount: "ALREADY HAVE AN ACCOUNT?",
       loginHere: "LOGIN HERE",
+    },
+    // Dashboard Page
+    dashboard: {
+      yourSpace: "YOUR SPACE",
+      title: "DASHBOARD",
+      welcomeBack: "Welcome back,",
+      hub: ". Here's your hub.",
+      leaderboard: "Leaderboard",
+      activityPoints: "Activity Points",
+      leaderboardDesc: "Tracking global member scores across",
+      leaderboardDescSuffix: "sessions.",
+      pointsDesc: "Every event registration grants",
+      topScore: "TOP SCORE",
+      currentScore: "CURRENT SCORE",
+      achievements: "Achievements",
+      achievementsDesc: "Tournament results and badges.",
+      comingSoon: "Coming soon",
+      // Modal
+      leaderboardTitle: "LEADERBOARD",
+      leaderboardSub: "Global Community Rankings",
+      yourEvents: "YOUR EVENTS",
+      activityLog: "Activity points log",
+      noMembers: "No members have registered for events yet.",
+      noEvents: "You haven't registered for any events yet.",
     }
   },
   FR: {
@@ -340,6 +364,30 @@ export const translations = {
       createAccount: "CRÉER UN COMPTE",
       hasAccount: "VOUS AVEZ DÉJÀ UN COMPTE ?",
       loginHere: "SE CONNECTER ICI",
+    },
+    // Dashboard Page
+    dashboard: {
+      yourSpace: "VOTRE ESPACE",
+      title: "TABLEAU DE BORD",
+      welcomeBack: "Bon retour,",
+      hub: ". Voici votre espace.",
+      leaderboard: "Classement",
+      activityPoints: "Points d'Activité",
+      leaderboardDesc: "Suivi des scores mondiaux des membres sur",
+      leaderboardDescSuffix: "sessions.",
+      pointsDesc: "Chaque inscription à un événement rapporte",
+      topScore: "MEILLEUR SCORE",
+      currentScore: "SCORE ACTUEL",
+      achievements: "Succès",
+      achievementsDesc: "Résultats de tournois et badges.",
+      comingSoon: "Bientôt disponible",
+      // Modal
+      leaderboardTitle: "CLASSEMENT",
+      leaderboardSub: "Classements Communautaires Mondiaux",
+      yourEvents: "VOS ÉVÉNEMENTS",
+      activityLog: "Journal de points d'activité",
+      noMembers: "Aucun membre ne s'est encore inscrit à des événements.",
+      noEvents: "Vous n'êtes inscrit à aucun événement pour le moment.",
     }
   }
 };

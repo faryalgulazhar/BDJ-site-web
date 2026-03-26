@@ -90,7 +90,7 @@ export default function Home() {
                   <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
                 </svg>
                 <h4 className="text-sm font-black text-white tracking-widest uppercase mb-3">{t.home.memberPerks}</h4>
-                <p className="text-gray-500 text-sm leading-relaxed">Access to PlayStations, Nintendo Switches, or Karoke when you contact the association.</p>
+                <p className="text-gray-500 text-sm leading-relaxed">Access to PlayStations, Nintendo Switches, or Karaoke when you contact the association.</p>
               </div>
             </div>
           </div>

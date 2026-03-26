@@ -54,14 +54,7 @@ const DEFAULT_BOARD = [
   { name: "LÉA G.", role: "TREASURER", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop", descEn: "Léa handles our sponsorships and treasury. Thanks to her financial strategy, we have been able to secure top-tier gaming equipment and prize pools for our members.", descFr: "Léa gère nos parrainages et notre trésorerie. Grâce à sa stratégie financière, nous avons pu sécuriser des équipements de jeu de haut niveau et des cagnottes pour nos membres." },
 ];
 
-const regularMembers = [
-  { id: 1, name: "CHLOE T.", role: "COLLABORATOR", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" },
-  { id: 2, name: "MARCUS J.", role: "MEMBER", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" },
-  { id: 3, name: "ELENA S.", role: "COLLABORATOR", img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=200&auto=format&fit=crop" },
-  { id: 4, name: "JULIANNE R.", role: "MEMBER", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop" },
-  { id: 5, name: "SOFIA L.", role: "MEMBER", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=200&auto=format&fit=crop" },
-  { id: 6, name: "VICTOR M.", role: "MEMBER", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop" },
-];
+// Removed hardcoded regularMembers after switching to real user data from Firestore.
 
 type Post = {
   id: string;
@@ -116,6 +109,10 @@ export default function CommunityPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // All Members
+  const [allMembers, setAllMembers] = useState<any[]>([]);
+  const [isAllMembersOpen, setIsAllMembersOpen] = useState(false);
+
   const isAdmin = user?.email === "admin@bdj-karukera.com";
 
   // Fetch Firestore Data
@@ -130,7 +127,6 @@ export default function CommunityPage() {
       // Fetch Board
       const boardSnapshot = await getDocs(collection(db, "boardMembers"));
       if (boardSnapshot.empty) {
-        // Seed database if empty
         for (const defaultMember of DEFAULT_BOARD) {
           await addDoc(collection(db, "boardMembers"), defaultMember);
         }
@@ -139,6 +135,10 @@ export default function CommunityPage() {
       } else {
         setBoardMembers(boardSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BoardMember[]);
       }
+
+      // Fetch All Users
+      const usersSnap = await getDocs(collection(db, "users"));
+      setAllMembers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -724,26 +724,106 @@ export default function CommunityPage() {
             <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase mb-2">{t.community.ourMembers}</h2>
 
             <div className="grid grid-cols-2 gap-4">
-              {regularMembers.map(member => (
+              {allMembers.slice(0, 6).map(member => (
                 <div key={member.id} className="bg-[#161616] border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-[#1a1a1a] transition-colors">
                   <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
-                    <Image src={member.img} alt={member.name} width={48} height={48} className="w-full h-full object-cover" />
+                    <Image 
+                      src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=1a1a1a&color=FF5F5F`} 
+                      alt={member.gamerTag || "Member"} 
+                      width={48} 
+                      height={48} 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-black text-white uppercase">{member.name}</span>
-                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.role}</span>
+                    <span className="text-xs font-black text-white uppercase truncate max-w-[100px]">{member.gamerTag || member.email?.split('@')[0]}</span>
+                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email?.includes('admin') ? 'ADMIN' : 'MEMBER'}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <button className="w-full mt-2 bg-transparent border border-white/5 hover:border-white/20 hover:bg-white/5 text-gray-400 hover:text-white px-6 py-4 rounded-3xl text-[10px] font-black tracking-widest uppercase transition-all duration-300">
+            <button 
+              onClick={() => setIsAllMembersOpen(true)}
+              className="w-full mt-2 bg-transparent border border-white/5 hover:border-white/20 hover:bg-white/5 text-gray-400 hover:text-white px-6 py-4 rounded-3xl text-[10px] font-black tracking-widest uppercase transition-all duration-300"
+            >
               {t.community.viewAllMembers}
             </button>
           </div>
 
         </div>
       </section>
+
+      {/* View All Members Modal */}
+      {isAllMembersOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="bg-[#0f0f0f] border border-white/10 rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col relative shadow-2xl">
+            {/* Header */}
+            <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-2xl bg-[#FF5F5F]/15 border border-[#FF5F5F]/30 flex items-center justify-center">
+                  <div className="rotate-45">
+                    <Plus size={24} className="text-[#FF5F5F]" />
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Association Members</h2>
+                  <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{allMembers.length} Active Participants</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsAllMembersOpen(false)} 
+                className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Members Grid */}
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {allMembers.length === 0 ? (
+                  <div className="col-span-full py-20 text-center">
+                    <Loader2 size={32} className="text-[#FF5F5F] animate-spin mx-auto mb-4" />
+                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Loading members list...</p>
+                  </div>
+                ) : (
+                  allMembers.map((member) => (
+                    <div key={member.id} className="group p-5 rounded-3xl bg-white/5 border border-white/5 hover:border-[#FF5F5F]/30 transition-all flex flex-col items-center gap-4 text-center">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#FF5F5F]/50 transition-colors">
+                          <Image 
+                            src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=1a1a1a&color=FF5F5F`} 
+                            alt={member.gamerTag || "Member"} 
+                            width={64} 
+                            height={64} 
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-[#0f0f0f] rounded-full"></div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-black text-white uppercase tracking-tight">{member.gamerTag || member.email?.split('@')[0]}</span>
+                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email?.includes('admin') ? 'ADMIN' : 'STUDENT MEMBER'}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-white/5 bg-white/[0.01] flex justify-center">
+              <button 
+                onClick={() => setIsAllMembersOpen(false)}
+                className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]"
+              >
+                Close Members List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

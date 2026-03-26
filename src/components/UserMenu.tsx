@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { 
@@ -33,6 +34,7 @@ export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [gamerTag, setGamerTag] = useState<string | null>(null);
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
   const isAdmin = user?.email === "admin@bdj-karukera.com";
   
   // Notification States (Integrated from NotificationBell)
@@ -45,13 +47,21 @@ export default function UserMenu() {
 
   useEffect(() => {
     if (!user) return;
-    if (isAdmin) { setGamerTag("ADMIN"); return; }
     (async () => {
       try {
         const snap = await getDocs(query(collection(db, "users"), where("__name__", "==", user.uid)));
-        const tag = snap.docs[0]?.data()?.gamerTag;
-        setGamerTag(tag || user.displayName || user.email?.split('@')[0].toUpperCase() || "PLAYER");
-      } catch { setGamerTag(user.email?.split('@')[0].toUpperCase() || "PLAYER"); }
+        const data = snap.docs[0]?.data();
+        
+        if (isAdmin) {
+          setGamerTag("ADMIN");
+        } else {
+          setGamerTag(data?.gamerTag || user.displayName || user.email?.split('@')[0].toUpperCase() || "PLAYER");
+        }
+        
+        setPhotoURL(data?.photoURL || user.photoURL || null);
+      } catch { 
+        setGamerTag(isAdmin ? "ADMIN" : (user.email?.split('@')[0].toUpperCase() || "PLAYER")); 
+      }
     })();
   }, [user, isAdmin]);
 
@@ -133,8 +143,12 @@ export default function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full transition-all group"
       >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF5F5F]/20 to-amber-500/20 flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform">
-          <User size={16} className="text-[#FF5F5F]" />
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF5F5F]/20 to-amber-500/20 flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform overflow-hidden">
+          {photoURL ? (
+            <Image src={photoURL} alt="User" width={32} height={32} className="w-full h-full object-cover" />
+          ) : (
+            <User size={16} className="text-[#FF5F5F]" />
+          )}
         </div>
         <div className="flex flex-col items-start hidden sm:flex">
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{isAdmin ? "Admin" : "Profile"}</span>
@@ -155,12 +169,23 @@ export default function UserMenu() {
         <div className="absolute right-0 top-[calc(100%+12px)] w-72 bg-[#0d0d0d] border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF5F5F]/50 to-transparent" />
           
-          <div className="p-4 border-b border-white/5 bg-white/[0.02]">
-            <p className="text-[9px] text-gray-500 font-black tracking-widest uppercase mb-1">{isAdmin ? "Administrator" : "Authenticated Account"}</p>
-            <p className="text-xs font-bold truncate">
-              <span className={isAdmin ? "text-[#FF5F5F]" : "text-white"}>{gamerTag ?? user.email?.split('@')[0].toUpperCase()}</span>
-            </p>
-            <p className="text-[9px] text-gray-600 truncate mt-0.5">{user.email}</p>
+          <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
+              {photoURL ? (
+                <Image src={photoURL} alt="User" width={40} height={40} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[#FF5F5F]/50">
+                  <User size={20} />
+                </div>
+              )}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-[9px] text-gray-500 font-black tracking-widest uppercase mb-0.5">{isAdmin ? "Administrator" : "Authenticated Account"}</p>
+              <p className="text-xs font-bold truncate">
+                <span className={isAdmin ? "text-[#FF5F5F]" : "text-white"}>{gamerTag ?? user.email?.split('@')[0].toUpperCase()}</span>
+              </p>
+              <p className="text-[9px] text-gray-600 truncate mt-0.5">{user.email}</p>
+            </div>
           </div>
 
           <div className="p-2">

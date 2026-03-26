@@ -11,8 +11,11 @@ import {
   Save, 
   Loader2, 
   History,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  X
 } from "lucide-react";
+import Image from "next/image";
 import { 
   doc, 
   getDoc, 
@@ -21,6 +24,40 @@ import {
   Timestamp 
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+
+const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL(file.type || "image/jpeg", 0.7)); 
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -31,6 +68,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -55,44 +94,75 @@ export default function SettingsPage() {
 
     fetchProfile();
   }, [user, router]);
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !userData) return;
-    if (gamerTag === userData.gamerTag) return;
-
-    // Check month limits
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const recentChanges = (userData.usernameChanges || []).filter((change: any) => {
-      const changeDate = change.date.toDate ? change.date.toDate() : new Date(change.date);
-      return changeDate > thirtyDaysAgo;
-    });
-
-    if (recentChanges.length >= 3) {
-      toast.error("Limit reached", {
-        description: "You can only change your username 3 times every 30 days."
-      });
-      return;
-    }
 
     setSaving(true);
     try {
-      await updateDoc(doc(db, "users", user.uid), {
-        gamerTag: gamerTag.trim(),
-        usernameChanges: arrayUnion({
-          old: userData.gamerTag,
-          new: gamerTag.trim(),
-          date: Timestamp.now()
-        })
-      });
-      setUserData({ ...userData, gamerTag: gamerTag.trim() });
+      let finalPhotoUrl = userData.photoURL || "";
+      const updateData: any = {};
+
+      // 1. Handle Photo Upload
+      if (selectedFile) {
+        finalPhotoUrl = await resizeImage(selectedFile, 300, 300);
+        updateData.photoURL = finalPhotoUrl;
+      }
+
+      // 2. Handle Gamer Tag Change
+      if (gamerTag.trim() !== userData.gamerTag) {
+        // Check month limits
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const recentChanges = (userData.usernameChanges || []).filter((change: any) => {
+          const changeDate = change.date.toDate ? change.date.toDate() : new Date(change.date);
+          return changeDate > thirtyDaysAgo;
+        });
+
+        if (recentChanges.length >= 3) {
+          toast.error("Limit reached", {
+            description: "Username change blocked, but photo updates will still save."
+          });
+        } else {
+          updateData.gamerTag = gamerTag.trim();
+          updateData.usernameChanges = arrayUnion({
+            old: userData.gamerTag,
+            new: gamerTag.trim(),
+            date: Timestamp.now()
+          });
+        }
+      }
+
+      // 3. Finalize Update
+      if (Object.keys(updateData).length === 0) {
+        setSaving(false);
+        return;
+      }
+
+      await updateDoc(doc(db, "users", user.uid), updateData);
+      setUserData({ ...userData, ...updateData });
+      setSelectedFile(null);
+      setPreviewUrl(null);
       toast.success("Profile updated!");
     } catch (e) {
       console.error(e);
       toast.error("Failed to update profile.");
     }
     setSaving(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("File too large", { description: "Maximum size is 2MB" });
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    }
   };
 
   if (loading) {
@@ -132,7 +202,45 @@ export default function SettingsPage() {
                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF5F5F]/30 to-transparent" />
                
                <form onSubmit={handleSave} className="flex flex-col gap-8">
-                 <div className="flex flex-col gap-2">
+                  {/* Photo Upload Section */}
+                  <div className="flex flex-col items-center gap-4 py-4 border-b border-white/5 mb-2">
+                    <div className="relative group">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#FF5F5F]/50 transition-colors bg-black/40">
+                        {previewUrl || userData?.photoURL ? (
+                          <Image 
+                            src={previewUrl || userData.photoURL} 
+                            alt="Profile" 
+                            width={96} 
+                            height={96} 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-700">
+                            <User size={40} />
+                          </div>
+                        )}
+                      </div>
+                      <label className="absolute bottom-0 right-0 w-8 h-8 bg-[#FF5F5F] hover:bg-[#ff4040] rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-colors border-2 border-[#1a1a1a]">
+                        <Upload size={14} className="text-white" />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                      </label>
+                      {selectedFile && (
+                        <button 
+                          type="button"
+                          onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                          className="absolute -top-1 -right-1 w-6 h-6 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white transition-all backdrop-blur-sm"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Profile Picture</p>
+                      <p className="text-[9px] text-gray-600 uppercase tracking-tighter mt-1">Recommended: 300x300 JPG/PNG</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
                     <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest px-1">Gamer Tag</label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
@@ -148,7 +256,7 @@ export default function SettingsPage() {
                  </div>
 
                  <button 
-                  disabled={saving || gamerTag === userData?.gamerTag}
+                  disabled={saving || (gamerTag === userData?.gamerTag && !selectedFile)}
                   className="bg-[#FF5F5F] hover:bg-[#ff4040] disabled:opacity-50 disabled:hover:bg-[#FF5F5F] text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_-5px_#FF5F5F]"
                  >
                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}

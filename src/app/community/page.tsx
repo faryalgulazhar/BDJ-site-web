@@ -6,11 +6,45 @@ import { Plus, ThumbsUp, MessageCircle, X, Loader2, Trash2, Upload } from "lucid
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+
+const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL(file.type || "image/jpeg", 0.7)); 
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 // Default Mock Data for Seeding
 const DEFAULT_BOARD = [
@@ -79,7 +113,8 @@ export default function CommunityPage() {
   const [selectedBoardMember, setSelectedBoardMember] = useState<BoardMember | null>(null);
   const [isEditBoardModalOpen, setIsEditBoardModalOpen] = useState(false);
   const [boardForm, setBoardForm] = useState<Partial<BoardMember>>({});
-  const [isUploadingImg, setIsUploadingImg] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const isAdmin = user?.email === "admin@bdj-karukera.com";
 
@@ -248,19 +283,32 @@ export default function CommunityPage() {
     e.preventDefault();
     if (!isAdmin) return;
     setIsSubmitting(true);
+    setIsSuccess(false);
     try {
-      if (boardForm.id) {
-        // Update existing member
-        await updateDoc(doc(db, "boardMembers", boardForm.id), { ...boardForm });
-        toast.success("Board member updated.");
-      } else {
-        // Add new member
-        await addDoc(collection(db, "boardMembers"), { ...boardForm });
-        toast.success("Board member added.");
+      let finalImgUrl = boardForm.img || "";
+
+      if (selectedFile) {
+        finalImgUrl = await resizeImage(selectedFile, 300, 300);
       }
-      setBoardForm({});
-      setIsEditBoardModalOpen(false);
-      fetchAllData();
+
+      const payload = { ...boardForm, img: finalImgUrl };
+
+      if (boardForm.id) {
+        await updateDoc(doc(db, "boardMembers", boardForm.id), payload);
+        setBoardMembers(prev => prev.map(m => m.id === boardForm.id ? { ...m, ...payload } as BoardMember : m));
+      } else {
+        const docRef = await addDoc(collection(db, "boardMembers"), payload);
+        setBoardMembers(prev => [...prev, { id: docRef.id, ...payload } as BoardMember]);
+      }
+
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        setBoardForm({});
+        setSelectedFile(null);
+        setIsEditBoardModalOpen(false);
+      }, 1500);
+
     } catch (error) {
       toast.error("Action failed.");
       console.error(error);
@@ -269,7 +317,7 @@ export default function CommunityPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -278,25 +326,7 @@ export default function CommunityPage() {
       return;
     }
 
-    setIsUploadingImg(true);
-    const fileRef = ref(storage, `board_profiles/${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(fileRef, file);
-
-    uploadTask.on(
-      "state_changed",
-      null,
-      (error) => {
-        toast.error("Image upload failed.");
-        setIsUploadingImg(false);
-        console.error(error);
-      },
-      async () => {
-        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-        setBoardForm(prev => ({ ...prev, img: downloadUrl }));
-        setIsUploadingImg(false);
-        toast.success("Image uploaded!");
-      }
-    );
+    setSelectedFile(file);
   };
 
   const handleAdminDeleteBoardMember = async (id: string | undefined) => {
@@ -376,7 +406,7 @@ export default function CommunityPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-lg p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button
-              onClick={() => setIsEditBoardModalOpen(false)}
+              onClick={() => { setIsEditBoardModalOpen(false); setBoardForm({}); setSelectedFile(null); }}
               className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
             >
               <X size={24} />
@@ -399,8 +429,8 @@ export default function CommunityPage() {
                 <div className="flex gap-2">
                   <input placeholder="https://..." type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({ ...boardForm, img: e.target.value })} className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
                   <label className="flex-shrink-0 cursor-pointer flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all">
-                    {isUploadingImg ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                    {isUploadingImg ? "UPLOADING..." : "UPLOAD"}
+                    <Upload size={16} />
+                    {selectedFile ? selectedFile.name.substring(0, 10) + "..." : "UPLOAD"}
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   </label>
                 </div>
@@ -413,9 +443,37 @@ export default function CommunityPage() {
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.descFr}</label>
                 <textarea required rows={3} value={boardForm.descFr || ""} onChange={(e) => setBoardForm({ ...boardForm, descFr: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
               </div>
-              <button type="submit" className="mt-4 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300">
-                {t.community.saveChanges}
-              </button>
+              <div className="flex gap-4 mt-4 w-full">
+                <button 
+                  disabled={isSubmitting || isSuccess}
+                  type="submit" 
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300 ${isSuccess ? "bg-green-500 text-white" : "bg-[#FF5F5F] hover:bg-[#ff4040] text-white"}`}
+                >
+                  {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : isSuccess ? "SAVED ✔" : t.community.saveChanges}
+                </button>
+                {boardForm.id && (
+                  <button 
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                        handleAdminDeleteBoardMember(boardForm.id);
+                        setIsEditBoardModalOpen(false);
+                        setBoardForm({});
+                    }} 
+                    className="bg-white/5 hover:bg-red-500/20 text-red-500 px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all"
+                  >
+                    DELETE
+                  </button>
+                )}
+                <button 
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => { setBoardForm({}); setSelectedFile(null); setIsEditBoardModalOpen(false); }} 
+                  className="bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all"
+                >
+                  CANCEL
+                </button>
+              </div>
             </form>
 
             <div className="mt-10 border-t border-white/5 pt-6 flex flex-col gap-3">

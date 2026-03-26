@@ -12,13 +12,23 @@ interface AuthCTAButtonProps {
 export default function AuthCTAButton({ primaryText, secondaryText, className }: AuthCTAButtonProps) {
   const router = useRouter();
   const { user } = useAuth();
+  
+  const isAdmin = user?.email === "admin@bdj-karukera.com";
+
+  const handleClick = () => {
+    if (!user) router.push('/register');
+    else if (isAdmin) router.push('/operations');
+    else router.push('/planning');
+  };
+
+  const displayText = !user ? primaryText : isAdmin ? "GO TO OPERATIONS" : secondaryText;
 
   return (
     <button 
-      onClick={() => user ? router.push('/planning') : router.push('/register')}
+      onClick={handleClick}
       className={className}
     >
-      {user ? secondaryText : primaryText}
+      {displayText}
     </button>
   );
 }

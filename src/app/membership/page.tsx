@@ -110,14 +110,6 @@ export default function MembershipPage() {
               </div>
             ))}
             
-            {/* Rule 07 spans full width loosely based on screenshot, or just fits naturally */}
-            <div className="flex gap-4 items-start md:col-span-2">
-              <span className="text-primary/60 font-black text-xl tracking-tighter">07</span>
-              <p className="text-sm text-gray-300 font-medium leading-relaxed pt-1">
-                {t.membership.rule7Desc}
-              </p>
-            </div>
-
           </div>
         </div>
       </section>

@@ -97,7 +97,7 @@ export default function LoginForm() {
             placeholder="Email address"
             required
             ref={emailRef}
-            className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-500"
+            className="w-full bg-white/5 border border-white/10 focus:border-primary/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-500"
           />
         </div>
 
@@ -109,7 +109,7 @@ export default function LoginForm() {
             required
             minLength={6}
             ref={passwordRef}
-            className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-500"
+            className="w-full bg-white/5 border border-white/10 focus:border-primary/50 outline-none rounded-xl pl-12 pr-4 py-4 text-sm transition-all duration-500"
           />
         </div>
 

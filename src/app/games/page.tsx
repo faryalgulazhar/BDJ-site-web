@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Plus,
   Users,
@@ -19,6 +20,7 @@ import {
   Pencil,
   AlertCircle,
   MoreVertical,
+  Check,
 } from "lucide-react";
 import {
   collection,
@@ -35,13 +37,14 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { MessageSquare } from "lucide-react";
-import { 
-  deleteSessionAction, 
-  approveSessionAction, 
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import {
+  deleteSessionAction,
+  approveSessionAction,
   updateSessionAction,
   createTaskAction,
   deleteTaskAction,
-  toggleTaskAction 
+  toggleTaskAction
 } from "./actions";
 
 // ─────────────────────────────────────────────
@@ -101,20 +104,20 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
   <>
     <div className="flex flex-col gap-1.5">
       <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Session Title</label>
-      <input 
-        required 
-        type="text" 
-        value={form.title} 
+      <input
+        required
+        type="text"
+        value={form.title}
         onChange={e => setForm({ ...form, title: e.target.value })}
-        placeholder="E.g. TEKKEN 8 TOURNAMENT" 
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
+        placeholder="E.g. TEKKEN 8 TOURNAMENT"
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
       />
     </div>
     <div className="flex flex-col gap-1.5">
       <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Category</label>
-      <select 
-        required 
-        value={form.category} 
+      <select
+        required
+        value={form.category}
         onChange={e => setForm({ ...form, category: e.target.value as GameCategory })}
         className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
       >
@@ -125,48 +128,48 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
     </div>
     <div className="flex flex-col gap-1.5">
       <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Location / Game Room</label>
-      <input 
-        required 
-        type="text" 
-        value={form.location} 
+      <input
+        required
+        type="text"
+        value={form.location}
         onChange={e => setForm({ ...form, location: e.target.value })}
-        placeholder="E.g. ROOM 101" 
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
+        placeholder="E.g. ROOM 101"
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
       />
     </div>
     <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Date</label>
-        <input 
-          required 
-          type="text" 
-          value={form.date} 
+        <input
+          required
+          type="text"
+          value={form.date}
           onChange={e => setForm({ ...form, date: e.target.value })}
-          placeholder="MAY 14, 2025" 
-          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
+          placeholder="MAY 14, 2025"
+          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
         />
       </div>
       <div className="flex flex-col gap-1.5">
         <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Time</label>
-        <input 
-          required 
-          type="text" 
-          value={form.time} 
+        <input
+          required
+          type="text"
+          value={form.time}
           onChange={e => setForm({ ...form, time: e.target.value })}
-          placeholder="19:00 - 22:00" 
-          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner" 
+          placeholder="19:00 - 22:00"
+          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
         />
       </div>
     </div>
     <div className="flex flex-col gap-1.5">
       <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Available Spots</label>
-      <input 
-        required 
-        type="number" 
-        min={1} 
-        value={form.totalSpots} 
+      <input
+        required
+        type="number"
+        min={1}
+        value={form.totalSpots}
         onChange={e => setForm({ ...form, totalSpots: e.target.value })}
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner font-bold" 
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner font-bold"
       />
     </div>
   </>
@@ -183,17 +186,29 @@ interface CardProps {
   isRegistered: boolean;
   onRegister: (id: string) => void;
   onUnregister: (id: string) => void;
+  onApprove: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (session: Session) => void;
   onViewAttendees: (session: Session) => void;
 }
 
-function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, onRegister, onUnregister, onDelete, onEdit, onViewAttendees }: CardProps) {
+function SessionCard({ 
+  session, 
+  isLoadingId, 
+  isLoggedIn, 
+  isAdmin, 
+  isRegistered, 
+  onRegister, 
+  onUnregister, 
+  onApprove,
+  onDelete, 
+  onEdit, 
+  onViewAttendees 
+}: CardProps) {
   const { t } = useLanguage();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const spotsLeft = session.totalSpots - session.currentRegistrations;
   const isFull = session.status === "full" || spotsLeft <= 0;
-  // const isRegistered = session.status === "registered"; // Removing local status check
 
   return (
     <div
@@ -205,20 +220,26 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
           : "bg-[#0f172a] border-white/10 hover:border-primary/40 hover:shadow-[var(--shadow-primary)]"
       }`}
     >
+      {session.approval === "pending" && (
+        <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-md uppercase border border-amber-500/20 w-fit">
+          PENDING
+        </span>
+      )}
+
       {/* Admin controls dropdown */}
       {isAdmin && (
         <div className="absolute top-4 right-4 z-20">
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(!isDropdownOpen); }}
             className="p-2 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white transition-all backdrop-blur-md border border-white/10"
           >
             <MoreVertical size={14} />
           </button>
-          
+
           {isDropdownOpen && (
             <>
-              <div 
-                className="fixed inset-0 z-30" 
+              <div
+                className="fixed inset-0 z-30"
                 onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }}
               />
               <div className="absolute top-full right-0 mt-2 flex flex-col gap-1 bg-[#0f172a]/95 border border-white/10 rounded-xl p-2 shadow-2xl backdrop-blur-3xl min-w-[140px] origin-top-right animate-in fade-in zoom-in-95 duration-200 z-40">
@@ -287,16 +308,22 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
       <div className="flex flex-col gap-2">
         {!isRegistered ? (
           <button
-            disabled={isFull}
-            onClick={() => onRegister(session.id)}
+            disabled={isFull && session.approval !== "pending"}
+            onClick={() => session.approval === "pending" ? onApprove(session.id) : onRegister(session.id)}
             className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 ${
-              isFull
+              session.approval === "pending"
+                ? "bg-green-500 hover:bg-green-600 text-white shadow-[0_0_30px_-10px_#22c55e]"
+                : isFull
                 ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
                 : "bg-primary hover:bg-primary/80 text-white shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)]"
             }`}
           >
             {isLoadingId === session.id ? (
               <Loader2 size={14} className="animate-spin" />
+            ) : session.approval === "pending" ? (
+              <>
+                <Check size={14} strokeWidth={3} /> APPROVE
+              </>
             ) : isFull ? (
               t.games.tournamentFull
             ) : (
@@ -306,7 +333,7 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
         ) : (
           <button
             onClick={() => onUnregister(session.id)}
-            className="w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-red-500/20 text-green-400 hover:text-red-400 border border-green-500/30 hover:border-red-500/30 group"
+            className="w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-[#0f172a] border border-green-500/30 text-green-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 group"
           >
             {isLoadingId === session.id ? (
               <Loader2 size={14} className="animate-spin" />
@@ -315,16 +342,16 @@ function SessionCard({ session, isLoadingId, isLoggedIn, isAdmin, isRegistered, 
                 <CheckCircle size={14} className="group-hover:hidden" />
                 <span className="group-hover:hidden">{t.games.registeredBadge}</span>
                 <X size={14} className="hidden group-hover:block" />
-                <span className="hidden group-hover:block">UNREGISTER</span>
+                <span className="hidden group-hover:block uppercase">Unregister</span>
               </>
             )}
           </button>
         )}
-      </div>
 
-      {!isLoggedIn && !isFull && !isRegistered && (
-        <p className="text-center text-[10px] text-white/20 -mt-2 font-medium">{t.games.loginRequiredDesc}</p>
-      )}
+        {!isLoggedIn && !isFull && !isRegistered && (
+          <p className="text-center text-[10px] text-white/20 -mt-2 font-medium">{t.games.loginRequiredDesc}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -339,6 +366,7 @@ export default function GamesPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { isIceTheme } = useTheme();
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const isLoggedIn = !!user;
@@ -352,6 +380,8 @@ export default function GamesPage() {
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -418,6 +448,18 @@ export default function GamesPage() {
 
 
   // ── Register ──
+  const handleApprove = async (id: string) => {
+    setLoadingId(id);
+    try {
+      await updateDoc(doc(db, "sessions", id), { approval: "approved" });
+      await reloadSessions();
+      toast.success("Session approved!");
+    } catch {
+      toast.error("Failed to approve session.");
+    }
+    setLoadingId(null);
+  };
+
   const handleRegister = async (id: string) => {
     if (!isLoggedIn) { router.push("/register"); return; }
     const session = sessions.find(s => s.id === id);
@@ -575,8 +617,20 @@ export default function GamesPage() {
     toast.success("Session suggested! Waiting for admin approval.");
 
     try {
-      await addDoc(collection(db, "sessions"), {
+      const docRef = await addDoc(collection(db, "sessions"), {
         ...newSessionData,
+        createdAt: serverTimestamp(),
+      });
+      // Notify admin of new suggestion
+      await addDoc(collection(db, "notifications"), {
+        toUid: "admin",
+        type: "new_suggestion",
+        title: newSessionData.title,
+        sessionId: docRef.id,
+        fromUid: user.uid,
+        fromEmail: user.email,
+        message: `📋 New session suggestion: "${newSessionData.title}" by ${user.email}`,
+        read: false,
         createdAt: serverTimestamp(),
       });
       await reloadSessions();
@@ -616,8 +670,15 @@ export default function GamesPage() {
 
 
   // ── Admin: reject/delete ──
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this session permanently?")) return;
+  const handleDelete = (id: string) => {
+    setDeleteTargetId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
+    setIsDeleteModalOpen(false);
     
     // Optimistic UI
     const restoredSessions = [...sessions];
@@ -625,12 +686,13 @@ export default function GamesPage() {
     toast.success("Session removed.");
 
     try {
-      const result = await deleteSessionAction(id);
-      if (!result.success) throw new Error(result.error);
+      await deleteDoc(doc(db, "sessions", id));
+      await reloadSessions();
     } catch (e) { 
       toast.error("Failed to delete session.");
       setSessions(restoredSessions);
     }
+    setDeleteTargetId(null);
   };
 
   // ── Admin: edit session ──
@@ -670,8 +732,10 @@ export default function GamesPage() {
     toast.success("Session updated.");
 
     try {
-      const result = await updateSessionAction(editingSession.id, updatedData);
-      if (!result.success) throw new Error(result.error);
+      await updateDoc(doc(db, "sessions", editingSession.id), {
+        ...updatedData,
+        updatedAt: serverTimestamp(),
+      });
       setEditingSession(null);
       await reloadSessions();
     } catch (e) {
@@ -682,9 +746,9 @@ export default function GamesPage() {
   };
 
   // ── Derived data ──
-  const approvedSessions = sessions.filter(s => s.approval === "approved");
+  const visibleSessions = sessions.filter(s => s.approval === "approved");
 
-  const filteredSessions = approvedSessions.filter(s =>
+  const filteredSessions = visibleSessions.filter(s =>
     activeTab === "ALL" ? true : categoryToTab[s.category] === activeTab
   );
 
@@ -820,6 +884,7 @@ export default function GamesPage() {
                 isRegistered={userRegistrations.includes(s.id)}
                 onRegister={handleRegister}
                 onUnregister={handleUnregister}
+                onApprove={handleApprove}
                 onDelete={handleDelete}
                 onEdit={handleOpenEdit}
                 onViewAttendees={handleViewAttendees}
@@ -912,7 +977,7 @@ export default function GamesPage() {
                    value={unregisterReason}
                    onChange={(e) => setUnregisterReason(e.target.value)}
                    placeholder="Why are you unregistering? (e.g., Schedule conflict)"
-                   className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all resize-none shadow-inner font-medium"
+                   className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white text-sm focus:outline-none focus:border-primary/50 transition-all resize-none shadow-inner font-medium"
                  />
                  
                  <div className="flex flex-col gap-3">
@@ -936,6 +1001,14 @@ export default function GamesPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="ERASE SESSION?"
+        description="This action is irreversible. The session data will be permanently purged from the mainframe."
+      />
     </div>
   );
 }

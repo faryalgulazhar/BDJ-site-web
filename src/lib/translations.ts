@@ -33,7 +33,7 @@ export const translations = {
       communityMixers: "COMMUNITY MIXERS",
       memberPerks: "MEMBER PERKS",
       readyToLevelUp: "READY TO LEVEL UP?",
-      readyDesc: "Join DBJ Karukera today and be part of the most active gaming association on campus. Access exclusive tournaments, connect with other players, and make your mark.",
+      readyDesc: "Join BDJ Karukera today and be part of the most active gaming association on campus. Access exclusive tournaments, connect with other players, and make your mark.",
       becomeMember: "BECOME A MEMBER"
     },
     // Games Page
@@ -59,7 +59,7 @@ export const translations = {
       hostDesc: "Got a game you love? Members can propose and organize official association tournaments with our full support.",
       proposeEvent: "SUGGEST A SESSION",
       loginRequired: "LOGIN REQUIRED",
-      loginRequiredDesc: "You must be logged in to register for official DBJ Karukera tournaments.",
+      loginRequiredDesc: "You must be logged in to register for official BDJ Karukera tournaments.",
       loginToRegister: "LOGIN TO REGISTER",
       tournamentRegistration: "TOURNAMENT REGISTRATION",
       playerTag: "Player Tag",
@@ -145,9 +145,7 @@ export const translations = {
       rule6Sub: "SPACE",
       rule6Title: "CLEAN UP",
       rule6Desc: "Leave the gaming rooms exactly as you found them.",
-      rule7Sub: "FEES",
-      rule7Title: "DUES",
-      rule7Desc: "Annual membership fees must be paid within 30 days of registration.",
+
       readyToJoin: "READY TO JOIN?",
       liveCommunity: "LIVE COMMUNITY",
       becomeMemberCTA: "BECOME A MEMBER"
@@ -155,7 +153,7 @@ export const translations = {
     // Auth Pages
     auth: {
       loginTitle: "LOGIN",
-      loginSub: "Access your DBJ Karukera account.",
+      loginSub: "Access your BDJ Karukera account.",
       email: "EMAIL ADDRESS",
       emailPlaceholder: "you@student.edu",
       password: "PASSWORD",
@@ -166,7 +164,7 @@ export const translations = {
       noAccount: "DON'T HAVE AN ACCOUNT?",
       registerHere: "REGISTER HERE",
       registerTitle: "REGISTER",
-      registerSub: "Join DBJ Karukera today.",
+      registerSub: "Join BDJ Karukera today.",
       gamerTag: "GAMER TAG",
       gamerTagPlaceholder: "Faker#1234",
       createAccount: "CREATE ACCOUNT",
@@ -206,7 +204,7 @@ export const translations = {
       communityMixers: "RENCONTRES COMMUNAUTAIRES",
       memberPerks: "AVANTAGES MEMBRES",
       readyToLevelUp: "PRÊT À PASSER AU NIVEAU SUPÉRIEUR ?",
-      readyDesc: "Rejoignez DBJ Karukera aujourd'hui et faites partie de l'association de jeu la plus active du campus. Accédez à des tournois exclusifs, connectez-vous avec d'autres joueurs et laissez votre marque.",
+      readyDesc: "Rejoignez BDJ Karukera aujourd'hui et faites partie de l'association de jeu la plus active du campus. Accédez à des tournois exclusifs, connectez-vous avec d'autres joueurs et laissez votre marque.",
       becomeMember: "DEVENIR MEMBRE"
     },
     // Games Page
@@ -232,7 +230,7 @@ export const translations = {
       hostDesc: "Vous avez un jeu que vous aimez ? Les membres peuvent proposer et organiser des tournois officiels de l'association avec notre soutien total.",
       proposeEvent: "SUGGÉRER UNE SESSION",
       loginRequired: "CONNEXION REQUISE",
-      loginRequiredDesc: "Vous devez être connecté pour vous inscrire aux tournois officiels DBJ Karukera.",
+      loginRequiredDesc: "Vous devez être connecté pour vous inscrire aux tournois officiels BDJ Karukera.",
       loginToRegister: "SE CONNECTER POUR S'INSCRIRE",
       tournamentRegistration: "INSCRIPTION AU TOURNOI",
       playerTag: "Tag du joueur",
@@ -318,9 +316,6 @@ export const translations = {
       rule6Sub: "ESPACE",
       rule6Title: "NETTOYER",
       rule6Desc: "Laissez les salles de jeu exactement comme vous les avez trouvées.",
-      rule7Sub: "FRAIS",
-      rule7Title: "COTISATIONS",
-      rule7Desc: "Les frais d'adhésion annuels doivent être payés dans les 30 jours suivant l'inscription.",
       readyToJoin: "PRÊT À REJOINDRE ?",
       liveCommunity: "COMMUNAUTÉ ACTIVE",
       becomeMemberCTA: "DEVENIR MEMBRE"
@@ -328,7 +323,7 @@ export const translations = {
     // Auth Pages
     auth: {
       loginTitle: "CONNEXION",
-      loginSub: "Accédez à votre compte DBJ Karukera.",
+      loginSub: "Accédez à votre compte BDJ Karukera.",
       email: "ADRESSE E-MAIL",
       emailPlaceholder: "vous@etudiant.edu",
       password: "MOT DE PASSE",
@@ -339,7 +334,7 @@ export const translations = {
       noAccount: "VOUS N'AVEZ PAS DE COMPTE ?",
       registerHere: "S'INSCRIRE ICI",
       registerTitle: "S'INSCRIRE",
-      registerSub: "Rejoignez DBJ Karukera aujourd'hui.",
+      registerSub: "Rejoignez BDJ Karukera aujourd'hui.",
       gamerTag: "TAG JOUEUR",
       gamerTagPlaceholder: "Faker#1234",
       createAccount: "CRÉER UN COMPTE",

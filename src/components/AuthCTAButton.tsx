@@ -18,7 +18,7 @@ export default function AuthCTAButton({ primaryText, secondaryText, className }:
   const handleClick = () => {
     if (!user) router.push('/register');
     else if (isAdmin) router.push('/operations');
-    else router.push('/planning');
+    else router.push('/dashboard');
   };
 
   const displayText = !user ? primaryText : isAdmin ? "GO TO OPERATIONS" : secondaryText;

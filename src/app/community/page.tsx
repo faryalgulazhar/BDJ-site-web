@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -110,6 +111,9 @@ export default function CommunityPage() {
   const [boardForm, setBoardForm] = useState<Partial<BoardMember>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
+  const [isDeleteBoardModalOpen, setIsDeleteBoardModalOpen] = useState(false);
+  const [targetDeleteId, setTargetDeleteId] = useState<string | null>(null);
 
   // All Members
   const [allMembers, setAllMembers] = useState<any[]>([]);
@@ -195,8 +199,16 @@ export default function CommunityPage() {
     }
   };
 
-  const handleDeletePost = async (postId: string) => {
-    if (!confirm(t.community.deletePostConfirm)) return;
+  const handleDeletePost = (postId: string) => {
+    setTargetDeleteId(postId);
+    setIsDeletePostModalOpen(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!targetDeleteId) return;
+    const postId = targetDeleteId;
+    setIsDeletePostModalOpen(false);
+
     try {
       await deleteDoc(doc(db, "posts", postId));
       toast.success("Post deleted.");
@@ -205,6 +217,7 @@ export default function CommunityPage() {
       toast.error("Failed to delete post.");
       console.error(error);
     }
+    setTargetDeleteId(null);
   };
 
   const handleToggleLike = async (post: Post) => {
@@ -331,9 +344,17 @@ export default function CommunityPage() {
     setSelectedFile(file);
   };
 
-  const handleAdminDeleteBoardMember = async (id: string | undefined) => {
+  const handleAdminDeleteBoardMember = (id: string | undefined) => {
     if (!id || !isAdmin) return;
-    if (!confirm("Remove this member from the board?")) return;
+    setTargetDeleteId(id);
+    setIsDeleteBoardModalOpen(true);
+  };
+
+  const confirmDeleteBoardMember = async () => {
+    if (!targetDeleteId || !isAdmin) return;
+    const id = targetDeleteId;
+    setIsDeleteBoardModalOpen(false);
+
     try {
       await deleteDoc(doc(db, "boardMembers", id));
       toast.success("Board member removed.");
@@ -342,6 +363,7 @@ export default function CommunityPage() {
       toast.error("Action failed.");
       console.error(error);
     }
+    setTargetDeleteId(null);
   };
 
   // Format timestamp safely
@@ -827,6 +849,21 @@ export default function CommunityPage() {
         </div>
       )}
 
+      <DeleteConfirmModal
+        isOpen={isDeletePostModalOpen}
+        onClose={() => setIsDeletePostModalOpen(false)}
+        onConfirm={confirmDeletePost}
+        title="ERASE POST?"
+        description={t.community.deletePostConfirm}
+      />
+
+      <DeleteConfirmModal
+        isOpen={isDeleteBoardModalOpen}
+        onClose={() => setIsDeleteBoardModalOpen(false)}
+        onConfirm={confirmDeleteBoardMember}
+        title="REMOVE MEMBER?"
+        description="Remove this member from the board? This action is irreversible."
+      />
     </div>
   );
 }

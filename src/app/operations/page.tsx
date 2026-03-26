@@ -24,7 +24,8 @@ import {
   serverTimestamp,
   deleteDoc,
   doc,
-  addDoc
+  addDoc,
+  updateDoc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { 
@@ -34,6 +35,7 @@ import {
   deleteTaskAction,
   toggleTaskAction 
 } from "@/app/games/actions";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 // ─────────────────────────────────────────────
 // Types
@@ -103,7 +105,7 @@ function PendingCard({ session, onApprove, onReject, onMessage }: {
         <button
           onClick={() => onMessage(session)}
           className="flex items-center justify-center gap-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
-          title="Message Suggseter"
+          title="Message Suggester"
         >
           <MessageSquare size={14} />
         </button>
@@ -142,6 +144,10 @@ export default function AdminOpsPage() {
   const [newTaskContent, setNewTaskContent] = useState("");
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Deletion state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // Live Clock Effect
   useEffect(() => {
@@ -275,26 +281,35 @@ export default function AdminOpsPage() {
     );
     toast.success("Session approved!");
     try {
-      const result = await approveSessionAction(id);
-      if (!result.success) throw new Error(result.error);
+      await updateDoc(doc(db, "sessions", id), { approval: "approved" });
+      await loadData();
     } catch (e) {
       toast.error("Failed to approve session.");
       setSessions(restoredSessions);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this suggestion permanently?")) return;
+  const handleDelete = (id: string) => {
+    setDeleteTargetId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
+    setIsDeleteModalOpen(false);
+
     const restoredSessions = [...sessions];
     setSessions(prev => prev.filter(s => s.id !== id));
     toast.success("Session removed.");
     try {
-      const result = await deleteSessionAction(id);
-      if (!result.success) throw new Error(result.error);
+      await deleteDoc(doc(db, "sessions", id));
+      await loadData();
     } catch (e) { 
       toast.error("Failed to delete session.");
       setSessions(restoredSessions);
     }
+    setDeleteTargetId(null);
   };
 
   if (isLoading) {
@@ -574,6 +589,14 @@ export default function AdminOpsPage() {
 
         </div>
       </section>
+
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="REJECT SUGGESTION?"
+        description="Delete this suggestion permanently? This action cannot be undone."
+      />
     </div>
   );
 }

@@ -140,7 +140,7 @@ export default function RegisterForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#ff4040] hover:bg-red-600 active:scale-[0.98] text-white py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 shadow-lg mt-4 flex items-center justify-center gap-2"
+                className="bg-[#FF5F5F] hover:bg-[#ff4040] disabled:opacity-50 text-white py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F] mt-4 flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : "CREATE ACCOUNT"}
         </button>

@@ -11,7 +11,7 @@ export default function MembershipPage() {
     <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20">
       
       {/* ── Hero Section ── */}
-      <section className="relative w-full flex flex-col items-center justify-center pt-28 pb-24 text-center px-6 overflow-hidden">
+      <section className="relative w-full flex flex-col items-center justify-center pt-32 pb-24 text-center px-6 overflow-hidden">
         {/* Background ambient glow matching screenshot */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/10 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-red-900/5 blur-[150px] rounded-full pointer-events-none"></div>
@@ -141,11 +141,11 @@ export default function MembershipPage() {
               Membership is completely free. Join 25+ students already part of the association.
             </p>
             
-            <AuthCTAButton 
-              primaryText={t.membership.becomeMemberCTA}
-              secondaryText="VIEW YOUR PROFILE"
-              className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-5 rounded-full text-[13px] font-black tracking-widest uppercase shadow-[0_0_30px_-5px_#FF5F5F] transition-all duration-300"
-            />
+          <AuthCTAButton 
+            primaryText={t.membership.becomeMemberCTA}
+            secondaryText="VIEW YOUR PROFILE"
+            className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-10 py-5 rounded-full text-[13px] font-black tracking-widest uppercase shadow-[0_0_30px_-5px_#FF5F5F] transition-all duration-300"
+          />
           </div>
         </div>
       </section>

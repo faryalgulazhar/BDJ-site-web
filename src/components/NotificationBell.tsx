@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, X, MessageSquare, CheckCheck } from "lucide-react";
+import { Bell, X, MessageSquare, CheckCheck, Loader2 } from "lucide-react";
 import {
   collection,
   query,
@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { addDoc, serverTimestamp } from "firebase/firestore";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -28,6 +30,12 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Reply state
+  const [isReplyOpen, setIsReplyOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState<Notification | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   // Real-time listener for this user's notifications
   useEffect(() => {
@@ -77,6 +85,31 @@ export default function NotificationBell() {
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   };
 
+  const handleSendReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !replyTo || !replyText.trim()) return;
+
+    setIsSending(true);
+    try {
+      await addDoc(collection(db, "member_messages"), {
+        fromUid: user.uid,
+        fromEmail: user.email,
+        toUid: "admin", // Special ID or handle
+        originalSession: replyTo.sessionTitle,
+        content: replyText.trim(),
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+      setIsReplyOpen(false);
+      setReplyTo(null);
+      setReplyText("");
+      toast.success("Reply sent to admin.");
+    } catch (e) {
+      toast.error("Failed to send reply.");
+    }
+    setIsSending(false);
+  };
+
   if (!user) return null;
 
   return (
@@ -123,7 +156,19 @@ export default function NotificationBell() {
                       {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5F5F] shrink-0" />}
                     </div>
                     <p className="text-[12px] text-gray-300 leading-relaxed">{n.message}</p>
-                    <span className="text-[10px] text-gray-600 font-medium">{formatDate(n.createdAt)}</span>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[10px] text-gray-600 font-medium">{formatDate(n.createdAt)}</span>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReplyTo(n);
+                          setIsReplyOpen(true);
+                        }}
+                        className="text-[10px] text-[#FF5F5F] font-black uppercase tracking-widest hover:underline"
+                      >
+                        Reply
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -138,6 +183,34 @@ export default function NotificationBell() {
               </button>
             </div>
           )}
+        </div>
+      )}
+      {/* Reply Modal */}
+      {isReplyOpen && replyTo && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+          <div className="bg-[#141414] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+            <button onClick={() => setIsReplyOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><X size={18} /></button>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-4">Reply to Admin</h3>
+            <p className="text-[10px] text-amber-500/70 uppercase font-bold mb-4">RE: {replyTo.sessionTitle}</p>
+            
+            <form onSubmit={handleSendReply} className="flex flex-col gap-4">
+              <textarea 
+                required
+                rows={4}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Type your reply here..."
+                className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-all resize-none"
+              />
+              <button 
+                disabled={isSending}
+                className="bg-[#FF5F5F] hover:bg-[#ff4040] disabled:opacity-50 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+              >
+                {isSending ? <Loader2 size={14} className="animate-spin" /> : <MessageSquare size={14} />}
+                {isSending ? "SENDING..." : "SEND REPLY"}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

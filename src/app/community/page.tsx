@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, ThumbsUp, MessageCircle, X, Loader2, Trash2 } from "lucide-react";
+import { Plus, ThumbsUp, MessageCircle, X, Loader2, Trash2, Upload } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { db, storage } from "@/lib/firebase";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -78,6 +79,7 @@ export default function CommunityPage() {
   const [selectedBoardMember, setSelectedBoardMember] = useState<BoardMember | null>(null);
   const [isEditBoardModalOpen, setIsEditBoardModalOpen] = useState(false);
   const [boardForm, setBoardForm] = useState<Partial<BoardMember>>({});
+  const [isUploadingImg, setIsUploadingImg] = useState(false);
 
   const isAdmin = user?.email === "admin@bdj-karukera.com";
 
@@ -245,6 +247,7 @@ export default function CommunityPage() {
   const handleAdminBoardSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAdmin) return;
+    setIsSubmitting(true);
     try {
       if (boardForm.id) {
         // Update existing member
@@ -261,7 +264,39 @@ export default function CommunityPage() {
     } catch (error) {
       toast.error("Action failed.");
       console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+
+    setIsUploadingImg(true);
+    const fileRef = ref(storage, `board_profiles/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(fileRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      null,
+      (error) => {
+        toast.error("Image upload failed.");
+        setIsUploadingImg(false);
+        console.error(error);
+      },
+      async () => {
+        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        setBoardForm(prev => ({ ...prev, img: downloadUrl }));
+        setIsUploadingImg(false);
+        toast.success("Image uploaded!");
+      }
+    );
   };
 
   const handleAdminDeleteBoardMember = async (id: string | undefined) => {
@@ -361,7 +396,14 @@ export default function CommunityPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.imageUrl}</label>
-                <input required type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({...boardForm, img: e.target.value})} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                <div className="flex gap-2">
+                  <input placeholder="https://..." type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({...boardForm, img: e.target.value})} className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                  <label className="flex-shrink-0 cursor-pointer flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all">
+                    {isUploadingImg ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                    {isUploadingImg ? "UPLOADING..." : "UPLOAD"}
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                </div>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.descEn}</label>
@@ -423,10 +465,10 @@ export default function CommunityPage() {
       )}
 
       {/* ── Header ── */}
-      <section className="max-w-7xl mx-auto w-full px-6 pt-16 pb-12">
+      <section className="max-w-7xl mx-auto w-full px-6 pt-32 pb-12">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-[#ffdbdb] leading-none uppercase drop-shadow-[0_0_15px_rgba(255,95,95,0.2)]">
+            <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-[#ffdbdb] leading-none uppercase drop-shadow-[0_0_15px_rgba(255,95,95,0.2)]">
               {t.community.heroTitle}
             </h1>
             <p className="mt-6 text-gray-400 max-w-lg text-sm md:text-base leading-relaxed">

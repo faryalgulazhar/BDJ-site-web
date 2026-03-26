@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, useSpring, useMotionValue } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function CustomCursor() {
+  const { isIceTheme } = useTheme();
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -58,7 +60,9 @@ export default function CustomCursor() {
           left: -16,
           top: -16,
           scale: isHovering ? 2.5 : 1,
-          backgroundColor: isHovering ? "rgba(255, 95, 95, 0.1)" : "transparent",
+          backgroundColor: isHovering 
+            ? (isIceTheme ? "rgba(6, 182, 212, 0.1)" : "rgba(255, 95, 95, 0.1)") 
+            : "transparent",
         }}
         transition={{ type: "spring", damping: 20, stiffness: 200 }}
       />

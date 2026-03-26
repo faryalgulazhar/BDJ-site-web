@@ -21,12 +21,14 @@ interface Notification {
   id: string;
   sessionTitle: string;
   message: string;
+  fromUid?: string;
   read: boolean;
   createdAt: any;
 }
 
 export default function NotificationBell() {
   const { user } = useAuth();
+  const isAdmin = user?.email === "admin@bdj-karukera.com";
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ export default function NotificationBell() {
       await addDoc(collection(db, "member_messages"), {
         fromUid: user.uid,
         fromEmail: user.email,
-        toUid: "admin", // Special ID or handle
+        toUid: isAdmin ? (replyTo.fromUid || "unknown") : "admin", // Special ID or targeted user
         originalSession: replyTo.sessionTitle,
         content: replyText.trim(),
         read: false,
@@ -103,7 +105,7 @@ export default function NotificationBell() {
       setIsReplyOpen(false);
       setReplyTo(null);
       setReplyText("");
-      toast.success("Reply sent to admin.");
+      toast.success(isAdmin ? "Reply sent to user." : "Reply sent to admin.");
     } catch (e) {
       toast.error("Failed to send reply.");
     }
@@ -190,7 +192,7 @@ export default function NotificationBell() {
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
           <div className="bg-[#141414] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
             <button onClick={() => setIsReplyOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><X size={18} /></button>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-4">Reply to Admin</h3>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-4">{isAdmin ? "Reply to User" : "Reply to Admin"}</h3>
             <p className="text-[10px] text-amber-500/70 uppercase font-bold mb-4">RE: {replyTo.sessionTitle}</p>
             
             <form onSubmit={handleSendReply} className="flex flex-col gap-4">

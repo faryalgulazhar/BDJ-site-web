@@ -374,6 +374,7 @@ export default function GamesPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("ALL");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   // Modals
@@ -750,7 +751,13 @@ export default function GamesPage() {
 
   const filteredSessions = visibleSessions.filter(s =>
     activeTab === "ALL" ? true : categoryToTab[s.category] === activeTab
-  );
+  ).sort((a, b) => {
+    // Attempt standard JS date parse on "MAY 14, 2025" format
+    const timeA = new Date(a.date).getTime();
+    const timeB = new Date(b.date).getTime();
+    if (isNaN(timeA) || isNaN(timeB)) return 0; // fallback if invalid string format
+    return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+  });
 
 
 
@@ -849,18 +856,26 @@ export default function GamesPage() {
 
       {/* ── Filters ── */}
       <section className="max-w-7xl mx-auto w-full px-6 pb-10">
-        <div className="flex flex-wrap gap-2">
-          {tabs.map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
-                activeTab === tab
-                  ? "bg-primary text-white shadow-[var(--shadow-primary)]"
-                  : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
-              }`}
-            >
-              {tab === "ALL" ? t.games.allPlatforms : tab === "VIDEO GAMES" ? t.games.consoleTab : tab === "BOARD GAMES" ? t.games.tabletopTab : "TOURNAMENTS"}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map(tab => (
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
+                  activeTab === tab
+                    ? "bg-primary text-white shadow-[var(--shadow-primary)]"
+                    : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
+                }`}
+              >
+                {tab === "ALL" ? t.games.allPlatforms : tab === "VIDEO GAMES" ? t.games.consoleTab : tab === "BOARD GAMES" ? t.games.tabletopTab : "TOURNAMENTS"}
+              </button>
+            ))}
+          </div>
+          <button 
+            onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5 whitespace-nowrap"
+          >
+            SORT BY DATE: {sortOrder === "desc" ? "NEWEST" : "OLDEST"}
+          </button>
         </div>
       </section>
 
@@ -897,7 +912,7 @@ export default function GamesPage() {
       {/* ── Locked CTA (hidden when logged in) ── */}
       {!isLoggedIn && (
         <section className="max-w-7xl mx-auto w-full px-6 mt-20">
-          <div className="relative rounded-3xl border border-primary/20 bg-gradient-to-b from-[#1a0a0a] to-[#0f0808] p-16 md:p-24 text-center overflow-hidden shadow-[var(--shadow-primary)]">
+          <div className={`relative rounded-3xl border border-primary/20 bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a0a0a] to-[#0f0808]'} p-16 md:p-24 text-center overflow-hidden shadow-[var(--shadow-primary)]`}>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
             <div className="relative flex flex-col items-center gap-6">
               <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">

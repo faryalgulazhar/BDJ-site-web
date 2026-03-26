@@ -118,7 +118,7 @@ export default function UserMenu() {
       await addDoc(collection(db, "member_messages"), {
         fromUid: user.uid,
         fromEmail: user.email,
-        toUid: "admin",
+        toUid: isAdmin ? (replyTo.fromUid || "unknown") : "admin",
         originalSession: replyTo.sessionTitle,
         content: replyText.trim(),
         read: false,
@@ -127,7 +127,7 @@ export default function UserMenu() {
       setIsReplyOpen(false);
       setReplyTo(null);
       setReplyText("");
-      toast.success("Reply sent to admin.");
+      toast.success(isAdmin ? "Reply sent to user." : "Reply sent to admin.");
     } catch (e) {
       toast.error("Failed to send reply.");
     }
@@ -218,7 +218,7 @@ export default function UserMenu() {
                           onClick={() => { setReplyTo(n); setIsReplyOpen(true); }}
                           className="text-[9px] text-white/50 hover:text-primary font-black uppercase tracking-widest flex items-center gap-1 transition-colors"
                         >
-                          <MessageSquare size={10} /> Reply to admin
+                          <MessageSquare size={10} /> {isAdmin ? "Reply to user" : "Reply to admin"}
                         </button>
                       </div>
                     ))}
@@ -259,7 +259,7 @@ export default function UserMenu() {
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
           <div className="bg-[#141414] border border-white/10 w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
             <button onClick={() => setIsReplyOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-1">REPLY TO ADMIN</h3>
+            <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-1">{isAdmin ? "REPLY TO USER" : "REPLY TO ADMIN"}</h3>
             <p className="text-primary text-[10px] font-black uppercase tracking-widest mb-6">RE: {replyTo.sessionTitle}</p>
             
             <form onSubmit={handleSendReply} className="flex flex-col gap-5">

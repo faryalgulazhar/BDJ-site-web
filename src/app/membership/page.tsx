@@ -3,9 +3,11 @@
 import AuthCTAButton from "@/components/AuthCTAButton";
 import { GraduationCap, Share2, Eye } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function MembershipPage() {
   const { t, language } = useLanguage();
+  const { isIceTheme } = useTheme();
 
   return (
     <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20">
@@ -13,8 +15,8 @@ export default function MembershipPage() {
       {/* ── Hero Section ── */}
       <section className="relative w-full flex flex-col items-center justify-center pt-32 pb-24 text-center px-6 overflow-hidden">
         {/* Background ambient glow matching screenshot */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/10 blur-[150px] rounded-full pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-red-900/5 blur-[150px] rounded-full pointer-events-none"></div>
+        <div className={`absolute top-0 right-0 w-[500px] h-[500px] ${isIceTheme ? 'bg-cyan-500/10' : 'bg-red-500/10'} blur-[150px] rounded-full pointer-events-none`}></div>
+        <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] ${isIceTheme ? 'bg-cyan-900/5' : 'bg-red-900/5'} blur-[150px] rounded-full pointer-events-none`}></div>
         
         <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-white uppercase leading-[0.9] z-10 drop-shadow-lg">
           {t.membership.heroTitle}
@@ -116,7 +118,7 @@ export default function MembershipPage() {
 
       {/* ── Bottom CTA ── */}
       <section className="max-w-5xl mx-auto w-full px-6 pb-20 z-10 mt-10">
-        <div className="bg-gradient-to-b from-[#1a1212] to-[#140e0e] border border-primary/10 rounded-[3rem] p-16 md:p-24 text-center shadow-[var(--shadow-primary)] relative overflow-hidden">
+        <div className={`bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a1212] to-[#140e0e]'} border border-primary/10 rounded-[3rem] p-16 md:p-24 text-center shadow-[var(--shadow-primary)] relative overflow-hidden`}>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] pointer-events-none"></div>
           
           <div className="relative z-10 flex flex-col items-center gap-6">

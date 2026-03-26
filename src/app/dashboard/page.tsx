@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { Trophy, Star, X, Calendar, Clock } from "lucide-react";
+import { Star, X, Calendar, Clock } from "lucide-react";
 import CyberCalendar from "@/components/CyberCalendar";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import MemberCard from "@/components/MemberCard";
 
 const categoryColors: Record<string, string> = {
   "VIDEO GAME": "bg-primary/20 text-primary border border-primary/40",
@@ -169,22 +170,9 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Achievements */}
-            <div className={`${box} flex-1`}>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/10 border border-primary/20 transition-colors duration-500">
-                <Trophy size={22} className="text-primary transition-colors duration-500" />
-              </div>
-              <div>
-                <h2 className="text-base font-black text-white uppercase tracking-tight">{t.dashboard.achievements}</h2>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  {t.dashboard.achievementsDesc}
-                </p>
-              </div>
-              <div className="mt-auto pt-4 border-t border-white/5">
-                <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                  {t.dashboard.comingSoon}
-                </span>
-              </div>
+            {/* Member Card */}
+            <div className={`${box} flex-1 !p-4 overflow-hidden`}>
+              {user && <MemberCard user={user} />}
             </div>
 
           </div>

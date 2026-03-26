@@ -60,11 +60,11 @@ export default function CommunityPage() {
   const { user } = useAuth();
   const router = useRouter();
   const { t, language } = useLanguage();
-  
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,7 +131,7 @@ export default function CommunityPage() {
       toast.error("Title and content are required.");
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, "posts"), {
@@ -175,7 +175,7 @@ export default function CommunityPage() {
       toast.error(t.community.loginToLike);
       return;
     }
-    
+
     const isLiked = post.likedBy?.includes(user.uid);
     const postRef = doc(db, "posts", post.id);
 
@@ -185,7 +185,7 @@ export default function CommunityPage() {
         if (p.id === post.id) {
           return {
             ...p,
-            likedBy: isLiked 
+            likedBy: isLiked
               ? p.likedBy.filter(uid => uid !== user.uid)
               : [...(p.likedBy || []), user.uid]
           };
@@ -233,7 +233,7 @@ export default function CommunityPage() {
       await updateDoc(postRef, {
         commentsList: arrayUnion(newComment)
       });
-      
+
       setCommentText("");
     } catch (error) {
       console.error("Failed to add comment:", error);
@@ -323,24 +323,24 @@ export default function CommunityPage() {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen selection:bg-[#FF5F5F]/30 pb-20 relative">
-      
+
       {/* ── Modal overlay ── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-lg p-8 relative shadow-2xl">
-            <button 
+            <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
             >
               <X size={24} />
             </button>
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">{t.community.createNewPost}</h2>
-            
+
             <form onSubmit={handlePostSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.postTitle}</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   autoFocus
                   maxLength={60}
                   value={newTitle}
@@ -351,7 +351,7 @@ export default function CommunityPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.content}</label>
-                <textarea 
+                <textarea
                   rows={5}
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
@@ -359,7 +359,7 @@ export default function CommunityPage() {
                   className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 transition-colors resize-none"
                 />
               </div>
-              <button 
+              <button
                 disabled={isSubmitting}
                 type="submit"
                 className="mt-2 flex items-center justify-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]"
@@ -375,7 +375,7 @@ export default function CommunityPage() {
       {isEditBoardModalOpen && isAdmin && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-lg p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button 
+            <button
               onClick={() => setIsEditBoardModalOpen(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
             >
@@ -384,20 +384,20 @@ export default function CommunityPage() {
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">
               {boardForm.id ? t.community.editBoardMember : t.community.addBoardMember}
             </h2>
-            
+
             <form onSubmit={handleAdminBoardSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.name}</label>
-                <input required type="text" value={boardForm.name || ""} onChange={(e) => setBoardForm({...boardForm, name: e.target.value.toUpperCase()})} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                <input required type="text" value={boardForm.name || ""} onChange={(e) => setBoardForm({ ...boardForm, name: e.target.value.toUpperCase() })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.role}</label>
-                <input required type="text" value={boardForm.role || ""} onChange={(e) => setBoardForm({...boardForm, role: e.target.value.toUpperCase()})} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                <input required type="text" value={boardForm.role || ""} onChange={(e) => setBoardForm({ ...boardForm, role: e.target.value.toUpperCase() })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.imageUrl}</label>
                 <div className="flex gap-2">
-                  <input placeholder="https://..." type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({...boardForm, img: e.target.value})} className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
+                  <input placeholder="https://..." type="url" value={boardForm.img || ""} onChange={(e) => setBoardForm({ ...boardForm, img: e.target.value })} className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50" />
                   <label className="flex-shrink-0 cursor-pointer flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all">
                     {isUploadingImg ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                     {isUploadingImg ? "UPLOADING..." : "UPLOAD"}
@@ -407,11 +407,11 @@ export default function CommunityPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.descEn}</label>
-                <textarea required rows={3} value={boardForm.descEn || ""} onChange={(e) => setBoardForm({...boardForm, descEn: e.target.value})} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
+                <textarea required rows={3} value={boardForm.descEn || ""} onChange={(e) => setBoardForm({ ...boardForm, descEn: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">{t.community.descFr}</label>
-                <textarea required rows={3} value={boardForm.descFr || ""} onChange={(e) => setBoardForm({...boardForm, descFr: e.target.value})} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
+                <textarea required rows={3} value={boardForm.descFr || ""} onChange={(e) => setBoardForm({ ...boardForm, descFr: e.target.value })} className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FF5F5F]/50 resize-none" />
               </div>
               <button type="submit" className="mt-4 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300">
                 {t.community.saveChanges}
@@ -443,17 +443,17 @@ export default function CommunityPage() {
       {selectedBoardMember && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#121212] border border-white/10 rounded-[3rem] w-full max-w-lg p-10 relative shadow-[0_0_50px_-15px_rgba(255,95,95,0.15)] flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
-            <button 
+            <button
               onClick={() => { setSelectedBoardMember(null); }}
               className="absolute top-8 right-8 text-gray-400 hover:text-white transition-colors"
             >
               <X size={24} />
             </button>
-            
+
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#FF5F5F]/50 mb-6 shadow-[0_0_30px_-5px_#FF5F5F]">
               <Image src={selectedBoardMember.img} alt={selectedBoardMember.name} width={96} height={96} className="w-full h-full object-cover" />
             </div>
-            
+
             <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-1">{selectedBoardMember.name}</h2>
             <p className="text-xs font-black text-[#FF5F5F] tracking-[0.2em] uppercase mb-8">{selectedBoardMember.role}</p>
 
@@ -475,7 +475,7 @@ export default function CommunityPage() {
               {t.community.heroDesc}
             </p>
           </div>
-          <button 
+          <button
             onClick={handleOpenModal}
             className="flex items-center gap-2 bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 shadow-[0_0_30px_-5px_#FF5F5F] hover:shadow-[0_0_40px_-3px_#FF5F5F] whitespace-nowrap uppercase self-start"
           >
@@ -490,7 +490,7 @@ export default function CommunityPage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase">{t.community.theBoard}</h2>
           {isAdmin && (
-            <button 
+            <button
               onClick={() => { setBoardForm({}); setIsEditBoardModalOpen(true); }}
               className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-[9px] font-black tracking-widest uppercase transition-colors"
             >
@@ -516,11 +516,11 @@ export default function CommunityPage() {
       {/* ── Bottom Split ── */}
       <section className="max-w-7xl mx-auto w-full px-6">
         <div className="flex flex-col lg:flex-row gap-10">
-          
+
           {/* Left Column: Latest from the community */}
           <div className="flex-[2] flex flex-col gap-6">
             <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase mb-2">{t.community.latestPosts}</h2>
-            
+
             {isLoading ? (
               <div className="py-20 flex justify-center items-center">
                 <Loader2 size={32} className="text-[#FF5F5F] animate-spin" />
@@ -529,7 +529,7 @@ export default function CommunityPage() {
               <div className="bg-[#161616] border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
                 <h3 className="text-xl font-black text-white tracking-tight uppercase mb-2">{t.community.noPosts}</h3>
                 <p className="text-sm text-gray-400">{t.community.beTheFirst}</p>
-                <button 
+                <button
                   onClick={handleOpenModal}
                   className="mt-4 bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300"
                 >
@@ -542,7 +542,7 @@ export default function CommunityPage() {
                   <div className="absolute top-8 right-8 bg-[#FF5F5F]/10 text-[#FF5F5F] border border-[#FF5F5F]/20 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
                     {t.community.publishedBadge}
                   </div>
-                  
+
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
                       <Image src={post.authorImg} alt={post.authorName} width={40} height={40} className="w-full h-full object-cover" />
@@ -559,14 +559,14 @@ export default function CommunityPage() {
                   </div>
 
                   <div className="flex items-center gap-6 mt-2 pt-6 border-t border-white/5">
-                    <button 
+                    <button
                       onClick={() => handleToggleLike(post)}
                       className={`flex items-center gap-2 transition-colors ${post.likedBy?.includes(user?.uid || "") ? "text-[#FF5F5F]" : "text-gray-500 hover:text-[#FF5F5F]"}`}
                     >
                       <ThumbsUp size={14} className={post.likedBy?.includes(user?.uid || "") ? "fill-current" : ""} />
                       <span className="text-xs font-bold">{post.likedBy?.length || 0}</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => setActiveCommentPostId(activeCommentPostId === post.id ? null : post.id)}
                       className={`flex items-center gap-2 transition-colors ${activeCommentPostId === post.id ? "text-white" : "text-gray-500 hover:text-white"}`}
                     >
@@ -574,7 +574,7 @@ export default function CommunityPage() {
                       <span className="text-xs font-bold">{post.commentsList?.length || 0}</span>
                     </button>
                     {(user?.uid === post.authorId || user?.email === "admin@bdj-karukera.com") && (
-                      <button 
+                      <button
                         onClick={() => handleDeletePost(post.id)}
                         className="ml-auto flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
                         title="Delete Post"
@@ -587,7 +587,7 @@ export default function CommunityPage() {
                   {/* Comments Section */}
                   {activeCommentPostId === post.id && (
                     <div className="mt-4 flex flex-col gap-4 pt-4 border-t border-white/5 animate-in fade-in duration-300">
-                      
+
                       {/* Comments List */}
                       <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                         {(!post.commentsList || post.commentsList.length === 0) ? (
@@ -608,15 +608,15 @@ export default function CommunityPage() {
                       {/* Add Comment Input */}
                       {user ? (
                         <div className="flex gap-2 mt-2">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleAddComment(post.id)}
                             placeholder={t.community.writeComment}
                             className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#FF5F5F]/50 transition-colors"
                           />
-                          <button 
+                          <button
                             disabled={isCommenting || !commentText.trim()}
                             onClick={() => handleAddComment(post.id)}
                             className="bg-white/10 hover:bg-white/20 disabled:bg-transparent disabled:text-gray-600 disabled:border disabled:border-white/5 text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
@@ -639,13 +639,13 @@ export default function CommunityPage() {
                 {user ? t.community.readyToPost : t.community.wantToJoin}
               </h2>
               <p className="text-gray-400 text-sm max-w-sm mb-4">
-                {user 
+                {user
                   ? t.community.loggedInDesc
                   : t.community.loggedOutDesc
                 }
               </p>
               {user ? (
-                <button 
+                <button
                   onClick={handleOpenModal}
                   className="bg-[#FF5F5F] hover:bg-[#ff4040] text-white px-8 py-3.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_-5px_#FF5F5F]"
                 >
@@ -664,7 +664,7 @@ export default function CommunityPage() {
           {/* Right Column: Our Members */}
           <div className="flex-1 flex flex-col gap-6">
             <h2 className="text-[#ffdbdb] text-xl font-black tracking-tighter uppercase mb-2">{t.community.ourMembers}</h2>
-            
+
             <div className="grid grid-cols-2 gap-4">
               {regularMembers.map(member => (
                 <div key={member.id} className="bg-[#161616] border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-[#1a1a1a] transition-colors">

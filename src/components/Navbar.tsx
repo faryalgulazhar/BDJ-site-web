@@ -16,11 +16,14 @@ export default function Navbar() {
   const { user, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
   const navLinks = [
     { name: t.nav.homepage, href: "/" },
     { name: t.nav.games, href: "/games" },
     { name: t.nav.membership, href: "/membership" },
     { name: t.nav.community, href: "/community" },
+    ...(isAdmin ? [{ name: "OPERATIONS", href: "/admin-ops" }] : [])
   ];
 
   return (

@@ -761,7 +761,7 @@ export default function CommunityPage() {
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-xs font-black text-white uppercase truncate max-w-[100px]">{member.gamerTag || member.email?.split('@')[0]}</span>
-                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email?.includes('admin') ? 'ADMIN' : 'MEMBER'}</span>
+                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj-karukera.com' ? 'ADMIN' : 'MEMBER'}</span>
                   </div>
                 </div>
               ))}
@@ -785,11 +785,7 @@ export default function CommunityPage() {
             {/* Header */}
             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
-                  <div className="rotate-45">
-                    <Plus size={24} className="text-primary" />
-                  </div>
-                </div>
+
                 <div>
                   <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Association Members</h2>
                   <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{allMembers.length} Active Participants</p>
@@ -828,7 +824,7 @@ export default function CommunityPage() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-black text-white uppercase tracking-tight">{member.gamerTag || member.email?.split('@')[0]}</span>
-                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email?.includes('admin') ? 'ADMIN' : 'STUDENT MEMBER'}</span>
+                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj-karukera.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
                       </div>
                     </div>
                   ))
@@ -836,15 +832,7 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t border-white/5 bg-white/[0.01] flex justify-center">
-              <button 
-                onClick={() => setIsAllMembersOpen(false)}
-                className="bg-primary hover:bg-primary/80 text-white px-10 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]"
-              >
-                Close Members List
-              </button>
-            </div>
+            {/* Footer Removed */}
           </div>
         </div>
       )}

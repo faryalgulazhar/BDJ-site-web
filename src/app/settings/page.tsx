@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTheme } from "@/context/ThemeContext";
 import { toast } from "sonner";
 import { 
   User, 
@@ -13,7 +14,8 @@ import {
   History,
   AlertCircle,
   Upload,
-  X
+  X,
+  Lock
 } from "lucide-react";
 import Image from "next/image";
 import { 
@@ -23,6 +25,7 @@ import {
   arrayUnion, 
   Timestamp 
 } from "firebase/firestore";
+import { updatePassword } from "firebase/auth";
 import { db } from "@/lib/firebase";
 
 const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
@@ -62,6 +65,7 @@ const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<s
 export default function SettingsPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { isIceTheme } = useTheme();
   const router = useRouter();
 
   const [gamerTag, setGamerTag] = useState("");
@@ -70,6 +74,9 @@ export default function SettingsPage() {
   const [userData, setUserData] = useState<any>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const [newPassword, setNewPassword] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -149,6 +156,45 @@ export default function SettingsPage() {
       toast.error("Failed to update profile.");
     }
     setSaving(false);
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !userData) return;
+    if (!newPassword || newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+
+    const now = new Date();
+    if (userData.lastPasswordReset) {
+      const lastResetDate = userData.lastPasswordReset.toDate ? userData.lastPasswordReset.toDate() : new Date(userData.lastPasswordReset);
+      const hoursSinceLastReset = (now.getTime() - lastResetDate.getTime()) / (1000 * 60 * 60);
+      if (hoursSinceLastReset < 12) {
+        const hoursLeft = (12 - hoursSinceLastReset).toFixed(1);
+        toast.error(`Please wait ${hoursLeft} hours before resetting your password again.`);
+        return;
+      }
+    }
+
+    setIsResettingPassword(true);
+    try {
+      await updatePassword(user, newPassword);
+      await updateDoc(doc(db, "users", user.uid), {
+        lastPasswordReset: Timestamp.now()
+      });
+      setUserData({ ...userData, lastPasswordReset: Timestamp.now() });
+      setNewPassword("");
+      toast.success("Password updated successfully!");
+    } catch (error: any) {
+      console.error(error);
+      if (error.code === 'auth/requires-recent-login') {
+        toast.error("Please re-login to change your password.");
+      } else {
+        toast.error("Failed to update password.");
+      }
+    }
+    setIsResettingPassword(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,6 +319,39 @@ export default function SettingsPage() {
               <p className="text-gray-400 text-xs leading-relaxed">
                 To maintain community integrity, we limit username changes to <span className="text-white font-bold">3 changes per 30-day period</span>. Choose wisely.
               </p>
+            </div>
+
+            {/* Password Reset Section */}
+            <div className="bg-[#1a1a1a] border border-white/5 rounded-3xl p-8 flex flex-col gap-6 relative overflow-hidden mt-2">
+               <div className={`absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent ${isIceTheme ? 'via-cyan-500/30' : 'via-red-500/30'} to-transparent`} />
+               <h3 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+                 <Lock size={20} className={isIceTheme ? "text-cyan-500" : "text-red-500"} /> CHANGE PASSWORD
+               </h3>
+               <form onSubmit={handlePasswordReset} className="flex flex-col gap-6">
+                 <div className="flex flex-col gap-2">
+                    <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest px-1">New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                      <input 
+                        type="password" 
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter new password..."
+                        className={`w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none transition-all text-sm ${isIceTheme ? 'focus:border-cyan-500/50' : 'focus:border-red-500/50'}`}
+                      />
+                    </div>
+                 </div>
+                 <button 
+                  disabled={isResettingPassword || !newPassword}
+                  className={`${isIceTheme ? 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-500 border-cyan-500/20 disabled:hover:bg-cyan-500/10' : 'bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20 disabled:hover:bg-red-500/10'} disabled:opacity-50 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2`}
+                 >
+                   {isResettingPassword ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                   {isResettingPassword ? "UPDATING..." : "UPDATE PASSWORD"}
+                 </button>
+               </form>
+               <p className={`text-[9px] ${isIceTheme ? 'text-cyan-500/80' : 'text-red-500/80'} uppercase font-bold tracking-widest mt-2 flex items-center gap-2`}>
+                 <AlertCircle size={10} /> 12-HOUR COOLDOWN APPLIES AFTER EACH RESET
+               </p>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Bell, X, MessageSquare, CheckCheck, Loader2 } from "lucide-react";
 import {
   collection,
@@ -38,6 +39,11 @@ export default function NotificationBell() {
   const [replyTo, setReplyTo] = useState<Notification | null>(null);
   const [replyText, setReplyText] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Real-time listener for this user's notifications
   useEffect(() => {
@@ -188,7 +194,7 @@ export default function NotificationBell() {
         </div>
       )}
       {/* Reply Modal */}
-      {isReplyOpen && replyTo && (
+      {mounted && isReplyOpen && replyTo && createPortal(
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
           <div className="bg-[#141414] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
             <button onClick={() => setIsReplyOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"><X size={18} /></button>
@@ -213,7 +219,8 @@ export default function NotificationBell() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

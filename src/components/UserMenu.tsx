@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -44,6 +45,11 @@ export default function UserMenu() {
   const [replyTo, setReplyTo] = useState<any>(null);
   const [replyText, setReplyText] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -255,7 +261,7 @@ export default function UserMenu() {
       )}
 
       {/* Reply Modal (Integrated) */}
-      {isReplyOpen && replyTo && (
+      {mounted && isReplyOpen && replyTo && createPortal(
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
           <div className="bg-[#141414] border border-white/10 w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
             <button onClick={() => setIsReplyOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
@@ -280,7 +286,8 @@ export default function UserMenu() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

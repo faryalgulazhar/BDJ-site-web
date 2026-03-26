@@ -373,7 +373,7 @@ export default function AdminOpsPage() {
                   value={messageText}
                   onChange={e => setMessageText(e.target.value)}
                   placeholder="E.g. Great suggestion! Your session has been approved and will appear on the games page."
-                  className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed"
+                  className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed"
                 />
               </div>
               <button disabled={isSendingMsg} type="submit"
@@ -389,7 +389,7 @@ export default function AdminOpsPage() {
       <section className="max-w-7xl mx-auto w-full px-6 py-12 flex flex-col gap-12 mt-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6 border-b border-white/5 pb-8">
           <div className="flex flex-col gap-1">
-            <h1 className="text-4xl font-black text-white uppercase tracking-tighter">Admin Area</h1>
+            <h1 className="font-black text-white uppercase tracking-tighter" style={{ fontSize: 'clamp(2rem, 8vw, 2.5rem)' }}>Admin Area</h1>
             <p className="text-gray-500 text-[10px] font-black tracking-[0.2em] uppercase">Control Center & Operations</p>
           </div>
           
@@ -535,7 +535,7 @@ export default function AdminOpsPage() {
                 value={newTaskContent}
                 onChange={e => setNewTaskContent(e.target.value)}
                 placeholder="What needs to be done?..."
-                className="flex-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-all shadow-inner"
+                className="flex-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-base text-white focus:outline-none focus:border-violet-500/50 transition-all shadow-inner"
               />
               <button 
                 disabled={isAddingTask}

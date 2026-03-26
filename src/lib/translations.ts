@@ -170,6 +170,7 @@ export const translations = {
       createAccount: "CREATE ACCOUNT",
       hasAccount: "ALREADY HAVE AN ACCOUNT?",
       loginHere: "LOGIN HERE",
+      logout: "LOG OUT"
     },
     // Dashboard Page
     dashboard: {
@@ -364,6 +365,7 @@ export const translations = {
       createAccount: "CRÉER UN COMPTE",
       hasAccount: "VOUS AVEZ DÉJÀ UN COMPTE ?",
       loginHere: "SE CONNECTER ICI",
+      logout: "DÉCONNEXION"
     },
     // Dashboard Page
     dashboard: {

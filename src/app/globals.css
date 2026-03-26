@@ -48,5 +48,51 @@ body {
 }
 
 * {
+  box-sizing: border-box;
   transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive container defaults */
+.container-responsive {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  /* Universal section padding reduction */
+  section {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Minimum touch targets */
+  button, a, input[type="submit"] {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .container-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

@@ -237,7 +237,7 @@ export default function SettingsPage() {
         </button>
 
         <div className="flex flex-col gap-2 mb-12">
-          <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">SETTINGS</h1>
+          <h1 className="font-black text-white uppercase tracking-tighter" style={{ fontSize: 'clamp(2.5rem, 10vw, 4.5rem)' }}>SETTINGS</h1>
           <p className="text-gray-500 uppercase text-[11px] font-black tracking-[0.2em]">Manage your Arena Profile</p>
         </div>
 
@@ -295,7 +295,7 @@ export default function SettingsPage() {
                         value={gamerTag}
                         onChange={(e) => setGamerTag(e.target.value)}
                         placeholder="Choose your handle..."
-                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none focus:border-primary/50 transition-all text-sm"
+                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none focus:border-primary/50 transition-all text-base focus:text-base"
                       />
                     </div>
                     <p className="text-[10px] text-gray-600 px-1 mt-1 uppercase tracking-tight">Characters: {gamerTag.length} / 20</p>
@@ -337,7 +337,7 @@ export default function SettingsPage() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Enter new password..."
-                        className={`w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none transition-all text-sm ${isIceTheme ? 'focus:border-cyan-500/50' : 'focus:border-red-500/50'}`}
+                        className={`w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none transition-all text-base focus:text-base ${isIceTheme ? 'focus:border-cyan-500/50' : 'focus:border-red-500/50'}`}
                       />
                     </div>
                  </div>

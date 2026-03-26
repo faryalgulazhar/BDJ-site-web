@@ -18,7 +18,7 @@ export default function MembershipPage() {
         <div className={`absolute top-0 right-0 w-[500px] h-[500px] ${isIceTheme ? 'bg-cyan-500/10' : 'bg-red-500/10'} blur-[150px] rounded-full pointer-events-none`}></div>
         <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] ${isIceTheme ? 'bg-cyan-900/5' : 'bg-red-900/5'} blur-[150px] rounded-full pointer-events-none`}></div>
         
-        <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-white uppercase leading-[0.9] z-10 drop-shadow-lg">
+        <h1 className="font-black tracking-tighter text-white uppercase leading-[0.9] z-10 drop-shadow-lg" style={{ fontSize: 'clamp(2.5rem, 10vw, 6rem)' }}>
           {t.membership.heroTitle}
         </h1>
         <p className="mt-6 text-gray-400 max-w-lg mx-auto text-base md:text-lg leading-relaxed z-10">
@@ -37,8 +37,8 @@ export default function MembershipPage() {
 
       {/* ── Who Can Join Section ── */}
       <section className="max-w-7xl mx-auto w-full px-6 py-16 z-10">
-        <div className="mb-10">
-          <h2 className="text-3xl font-black tracking-tighter text-white uppercase inline-block border-b-2 border-primary/50 pb-2">
+        <div className="mb-10 px-4 md:px-0">
+          <h2 className="font-black tracking-tighter text-white uppercase inline-block border-b-2 border-primary/50 pb-2" style={{ fontSize: 'clamp(1.8rem, 6vw, 3rem)' }}>
             {t.membership.whoCanJoin}
           </h2>
         </div>
@@ -89,9 +89,9 @@ export default function MembershipPage() {
       </section>
 
       {/* ── The Rules Section ── */}
-      <section className="max-w-5xl mx-auto w-full px-6 py-20 z-10 text-center">
-        <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white uppercase mb-4">{t.membership.theRules}</h2>
-        <p className="text-gray-400 text-sm md:text-base mb-12">
+      <section className="max-w-5xl mx-auto w-full px-6 py-12 md:py-20 z-10 text-center">
+        <h2 className="font-black tracking-tighter text-white uppercase mb-4" style={{ fontSize: 'clamp(1.8rem, 6vw, 3.5rem)' }}>{t.membership.theRules}</h2>
+        <p className="text-gray-400 text-sm md:text-base mb-10 md:mb-12 px-4">
           By joining BDJ Karukera, you agree to the following guidelines.
         </p>
 
@@ -117,8 +117,8 @@ export default function MembershipPage() {
       </section>
 
       {/* ── Bottom CTA ── */}
-      <section className="max-w-5xl mx-auto w-full px-6 pb-20 z-10 mt-10">
-        <div className={`bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a1212] to-[#140e0e]'} border border-primary/10 rounded-[3rem] p-16 md:p-24 text-center shadow-[var(--shadow-primary)] relative overflow-hidden`}>
+      <section className="max-w-5xl mx-auto w-full px-6 pb-12 md:pb-20 z-10 mt-6 md:mt-10">
+        <div className={`bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a1212] to-[#140e0e]'} border border-primary/10 rounded-[2rem] md:rounded-[3rem] p-10 md:p-24 text-center shadow-[var(--shadow-primary)] relative overflow-hidden`}>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] pointer-events-none"></div>
           
           <div className="relative z-10 flex flex-col items-center gap-6">
@@ -127,19 +127,19 @@ export default function MembershipPage() {
               {t.membership.liveCommunity}
             </span>
             
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase">
+            <h2 className="font-black tracking-tighter text-white uppercase" style={{ fontSize: 'clamp(1.8rem, 8vw, 4rem)' }}>
               {t.membership.readyToJoin}
             </h2>
             
-            <p className="text-gray-400 text-sm md:text-base max-w-md mx-auto mb-4">
+            <p className="text-gray-400 text-sm md:text-base max-w-md mx-auto mb-2 md:mb-4">
               Membership is completely free. Join 25+ students already part of the association.
             </p>
             
-          <AuthCTAButton 
-            primaryText={t.membership.becomeMemberCTA}
-            secondaryText="VIEW YOUR PROFILE"
-            className="bg-primary hover:bg-primary/80 text-white px-10 py-5 rounded-full text-[13px] font-black tracking-widest uppercase shadow-[var(--shadow-primary)] transition-all duration-500"
-          />
+            <AuthCTAButton 
+              primaryText={t.membership.becomeMemberCTA}
+              secondaryText="VIEW YOUR PROFILE"
+              className="bg-primary hover:bg-primary/80 text-white px-8 py-4 md:px-10 md:py-5 rounded-full text-[11px] md:text-[13px] font-black tracking-widest uppercase shadow-[var(--shadow-primary)] transition-all duration-500"
+            />
           </div>
         </div>
       </section>

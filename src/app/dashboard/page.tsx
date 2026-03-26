@@ -112,11 +112,11 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 flex flex-col min-h-screen pb-20 selection:bg-primary/30">
       {/* Header */}
-      <section className="max-w-7xl mx-auto w-full px-6 pt-32 pb-10">
-        <p className="text-[10px] font-black tracking-[0.3em] text-primary uppercase mb-3 transition-colors duration-500">
+      <section className="max-w-7xl mx-auto w-full px-6 pt-24 md:pt-32 pb-8 md:pb-10">
+        <p className="text-[10px] font-black tracking-[0.3em] text-primary uppercase mb-2 md:mb-3 transition-colors duration-500">
           {t.dashboard.yourSpace}
         </p>
-        <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-white uppercase leading-none">
+        <h1 className="font-black tracking-tighter text-white uppercase leading-none" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>
           {t.dashboard.title}
         </h1>
         <p className="mt-4 text-gray-400 text-sm max-w-md leading-relaxed">
@@ -133,7 +133,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* ── Largest Box: Cyber Calendar (spans 2 cols on desktop) ── */}
-          <div className={`${box} md:col-span-2 min-h-[520px]`}>
+          <div className={`${box} md:col-span-2 min-h-[400px] md:min-h-[520px] overflow-hidden px-4 md:px-6`}>
             <CyberCalendar />
           </div>
 
@@ -171,7 +171,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Member Card */}
-            <div className={`${box} flex-1 !p-4 overflow-hidden`}>
+            <div className={`${box} flex-1 !p-2 md:!p-4 overflow-hidden items-center justify-center`}>
               {user && <MemberCard user={user} />}
             </div>
 
@@ -182,13 +182,13 @@ export default function DashboardPage() {
 
       {/* ── Registered Events Modal ── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-          <div className="bg-[#0a0e1a] border border-white/10 w-full max-w-lg rounded-3xl p-8 relative shadow-2xl max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 text-white">
+          <div className="bg-[#0a0e1a] border border-white/10 w-full max-w-lg rounded-2xl md:rounded-3xl p-6 md:p-10 relative shadow-2xl max-h-[85vh] flex flex-col">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent transition-colors duration-500" />
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-5 right-5 md:top-6 md:right-6 text-gray-400 hover:text-white transition-colors">
               <X size={22} />
             </button>
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-1">
+            <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter mb-1">
               {isAdmin ? t.dashboard.leaderboardTitle : t.dashboard.yourEvents}
             </h2>
             <p className="text-primary text-[10px] uppercase font-black tracking-widest mb-6 transition-colors duration-500">

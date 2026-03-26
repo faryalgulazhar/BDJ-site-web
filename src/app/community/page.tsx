@@ -410,7 +410,7 @@ export default function CommunityPage() {
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
                   placeholder={t.community.contentPlaceholder}
-                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                  className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-primary/50 transition-colors resize-none"
                 />
               </div>
               <button
@@ -523,23 +523,23 @@ export default function CommunityPage() {
       )}
 
       {selectedBoardMember && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[3rem] w-full max-w-lg p-10 relative shadow-[0_0_50px_-15px_var(--shadow-primary)] flex flex-col items-center text-center animate-in zoom-in-95 duration-500 transition-colors">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-colors">
+          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[2rem] md:rounded-[3rem] w-full max-w-lg p-6 md:p-10 relative shadow-[0_0_50px_-15px_var(--shadow-primary)] flex flex-col items-center text-center animate-in zoom-in-95 duration-500 transition-colors">
             <button
               onClick={() => { setSelectedBoardMember(null); }}
-              className="absolute top-8 right-8 text-gray-400 hover:text-white transition-colors"
+              className="absolute top-6 right-6 md:top-8 md:right-8 text-gray-400 hover:text-white transition-colors"
             >
               <X size={24} />
             </button>
 
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/50 mb-6 shadow-[0_0_30px_-5px_var(--shadow-primary)] transition-all duration-500">
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-primary/50 mb-6 shadow-[0_0_30px_-5px_var(--shadow-primary)] transition-all duration-500">
               <Image src={selectedBoardMember.img} alt={selectedBoardMember.name} width={96} height={96} className="w-full h-full object-cover" />
             </div>
 
-            <h2 className="text-3xl font-black text-primary uppercase tracking-tighter mb-1 transition-colors duration-500">{selectedBoardMember.name}</h2>
-            <p className="text-xs font-black text-primary tracking-[0.2em] uppercase mb-8 transition-colors duration-500">{selectedBoardMember.role}</p>
+            <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter mb-1 transition-colors duration-500">{selectedBoardMember.name}</h2>
+            <p className="text-[10px] md:text-xs font-black text-primary tracking-[0.2em] uppercase mb-6 md:mb-8 transition-colors duration-500">{selectedBoardMember.role}</p>
 
-            <p className="text-sm text-gray-300 leading-relaxed max-w-sm transition-colors duration-500">
+            <p className="text-xs md:text-sm text-gray-300 leading-relaxed max-w-sm transition-colors duration-500 px-2">
               {language === "EN" ? selectedBoardMember.descEn : selectedBoardMember.descFr}
             </p>
           </div>
@@ -547,19 +547,19 @@ export default function CommunityPage() {
       )}
 
       {/* ── Header ── */}
-      <section className="max-w-7xl mx-auto w-full px-6 pt-32 pb-12">
+      <section className="max-w-7xl mx-auto w-full px-6 pt-24 md:pt-32 pb-8 md:pb-12">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
-            <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter text-white leading-none uppercase drop-shadow-[0_0_15px_var(--shadow-primary)] transition-all duration-500">
+            <h1 className="font-black tracking-tighter text-white leading-[0.9] uppercase drop-shadow-[0_0_15px_var(--shadow-primary)] transition-all duration-500" style={{ fontSize: 'clamp(2.5rem, 12vw, 6rem)' }}>
               {t.community.heroTitle}
             </h1>
-            <p className="mt-6 text-gray-400 max-w-lg text-sm md:text-base leading-relaxed">
+            <p className="mt-4 md:mt-6 text-gray-400 max-w-lg text-sm md:text-base leading-relaxed">
               {t.community.heroDesc}
             </p>
           </div>
           <button
             onClick={handleOpenModal}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[0_0_30px_-5px_var(--shadow-primary)] hover:shadow-[0_0_40px_-3px_var(--shadow-primary)] whitespace-nowrap uppercase self-start"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-3.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[0_0_30px_-5px_var(--shadow-primary)] hover:shadow-[0_0_40px_-3px_var(--shadow-primary)] whitespace-nowrap uppercase self-start w-full sm:w-auto justify-center"
           >
             <Plus size={16} strokeWidth={3} />
             {t.community.newPost}
@@ -596,8 +596,8 @@ export default function CommunityPage() {
       </section>
 
       {/* ── Bottom Split ── */}
-      <section className="max-w-7xl mx-auto w-full px-6">
-        <div className="flex flex-col lg:flex-row gap-10">
+      <section className="max-w-7xl mx-auto w-full px-6 pb-12">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-10">
 
           {/* Left Column: Latest from the community */}
           <div className="flex-[2] flex flex-col gap-6">
@@ -621,7 +621,7 @@ export default function CommunityPage() {
             ) : (
               posts.map(post => (
                 <div key={post.id} className="bg-[var(--card-bg)] border border-[var(--border)] rounded-[2rem] p-8 flex flex-col gap-6 relative group hover:border-primary/50 transition-all duration-500">
-                  <div className="absolute top-8 right-8 bg-primary/10 text-primary border border-primary/20 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                  <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-primary/10 text-primary border border-primary/20 text-[8px] md:text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
                     {t.community.publishedBadge}
                   </div>
 
@@ -635,9 +635,9 @@ export default function CommunityPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-lg md:text-xl font-black text-white tracking-tight uppercase mb-3">{post.title}</h3>
-                    <p className="text-sm text-gray-400 leading-relaxed pr-8 whitespace-pre-wrap">{post.content}</p>
+                  <div className="pr-4 md:pr-0">
+                    <h3 className="text-base md:text-xl font-black text-white tracking-tight uppercase mb-1 md:mb-3">{post.title}</h3>
+                    <p className="text-xs md:text-sm text-gray-400 leading-relaxed pr-0 md:pr-8 whitespace-pre-wrap">{post.content}</p>
                   </div>
 
                   <div className="flex items-center gap-6 mt-2 pt-6 border-t border-white/5">

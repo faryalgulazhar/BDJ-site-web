@@ -11,12 +11,12 @@ export default function Home() {
   return (
     <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center pt-32 pb-32 text-center px-4 relative overflow-hidden">
+      <section className="flex-1 flex flex-col items-center justify-center pt-24 pb-20 md:pt-32 md:pb-32 text-center px-6 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--glow-bg)] blur-[120px] rounded-full pointer-events-none transition-colors duration-500"></div>
         
         <p className="text-[#c79a63] text-xs font-bold tracking-[0.2em] uppercase mb-8 z-10">{t.home.tagline}</p>
         
-        <h1 className="text-7xl md:text-[8rem] font-black leading-[0.85] tracking-tighter z-10 text-white transition-colors duration-500">
+        <h1 className="font-black leading-[0.9] tracking-tighter z-10 text-white transition-colors duration-500 uppercase" style={{ fontSize: 'clamp(2.5rem, 12vw, 8rem)' }}>
           PLAY<br/>
           {t.home.heroCompeteRed}<br/>
           <span className="text-primary transition-colors duration-500">{t.home.heroDominate}</span>
@@ -40,17 +40,17 @@ export default function Home() {
       </section>
 
       {/* Ecosystem Section */}
-      <section className="w-full max-w-7xl mx-auto px-6 py-24 relative z-10">
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6 w-full object-contain">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-white uppercase">{t.home.ecosystemObj}</h2>
-            <p className="text-gray-400 max-w-lg text-sm md:text-base leading-relaxed">
+      <section className="w-full max-w-7xl mx-auto px-6 py-16 md:py-24 relative z-10">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 md:mb-12 gap-6 w-full">
+          <div className="max-w-2xl px-4 md:px-0">
+            <h2 className="font-black tracking-tight mb-4 text-white uppercase" style={{ fontSize: 'clamp(1.8rem, 6vw, 3.5rem)' }}>{t.home.ecosystemObj}</h2>
+            <p className="text-gray-400 text-sm md:text-base leading-relaxed">
               From the intensity of eSports arenas to the strategy of board game nights, we've built a home for every player.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/5 px-4 py-2 rounded-full shadow-lg">
+          <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/5 px-4 py-2 rounded-full shadow-lg shrink-0">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-            <span className="text-[10px] font-bold tracking-widest text-gray-300">LIVE SESSION</span>
+            <span className="text-[10px] font-bold tracking-widest text-gray-300 uppercase">LIVE SESSION</span>
           </div>
         </div>
 
@@ -58,7 +58,7 @@ export default function Home() {
           {/* Left Column (Images & small cards) */}
           <div className="flex-1 flex flex-col gap-6">
             {/* Big Competitive Leagues */}
-            <div className="relative h-[300px] md:h-[450px] rounded-[2rem] overflow-hidden group border border-white/5">
+            <div className="relative h-[350px] md:h-[450px] rounded-[2rem] overflow-hidden group border border-white/5 mx-4 md:mx-0">
               <Image 
                 src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop" 
                 width={800}
@@ -68,9 +68,9 @@ export default function Home() {
                 alt="Esports Room" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/40 to-transparent"></div>
-              <div className="absolute bottom-10 left-10 right-10">
+              <div className="absolute bottom-8 left-8 right-8 md:bottom-10 md:left-10 md:right-10">
                 <span className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest mb-4 inline-block">{t.home.tournamentsBadge}</span>
-                <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase">{t.home.compLeagues}</h3>
+                <h3 className="text-2xl md:text-4xl font-black text-white tracking-tight uppercase leading-tight">{t.home.compLeagues}</h3>
               </div>
             </div>
             
@@ -107,18 +107,20 @@ export default function Home() {
       </section>
 
       {/* Ready To Level Up Section */}
-      <section className="w-full max-w-[1000px] mx-auto px-6 py-20 mb-10 relative z-10">
-        <div className="bg-gradient-to-b from-[#1c1a1a] to-[#121212] rounded-[2.5rem] border border-white/5 p-16 md:p-24 text-center shadow-2xl relative overflow-hidden">
+      <section className="w-full max-w-[1000px] mx-auto px-6 py-12 md:py-20 mb-10 relative z-10">
+        <div className="bg-gradient-to-b from-[#1c1a1a] to-[#121212] rounded-[2rem] md:rounded-[2.5rem] border border-white/5 p-10 md:p-24 text-center shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[150px] bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
           
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6 text-white uppercase">{t.home.readyToLevelUp}</h2>
-          <p className="text-gray-400 max-w-md mx-auto mb-10 text-sm md:text-base leading-relaxed">
+          <h2 className="font-black tracking-tight mb-6 text-white uppercase" style={{ fontSize: 'clamp(1.8rem, 6vw, 3.5rem)' }}>{t.home.readyToLevelUp}</h2>
+          <p className="text-gray-400 max-w-md mx-auto mb-10 text-sm md:text-base leading-relaxed px-4">
             {t.home.readyDesc}
           </p>
-          <AuthCTAButton 
-            primaryText={t.home.becomeMember}
-            secondaryText="VIEW YOUR PERKS"
-          />
+          <div className="flex flex-col items-center">
+            <AuthCTAButton 
+              primaryText={t.home.becomeMember}
+              secondaryText="VIEW YOUR PERKS"
+            />
+          </div>
         </div>
       </section>
 

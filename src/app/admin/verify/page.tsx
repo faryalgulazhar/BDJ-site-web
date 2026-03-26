@@ -12,7 +12,9 @@ const ADMIN_EMAIL = "admin@bdj-karukera.com";
 type State = "loading" | "valid" | "inactive" | "not_found";
 
 interface MemberData {
-  displayName: string;
+  displayName?: string;
+  gamerTag?: string;
+  email?: string;
   photoURL?: string;
   role: string;
   memberId: string;
@@ -66,23 +68,27 @@ function VerifyContent() {
   if (!user || user.email !== ADMIN_EMAIL) return null;
 
   const cfg = {
-    valid:     { border: "#22c55e", icon: <CheckCircle2 size={56} color="#22c55e" strokeWidth={1.5} />, bannerColor: "#22c55e", bannerLabel: "VERIFIED",  subtitle: "This person is a registered BDJ Karukera member." },
-    inactive:  { border: "#f59e0b", icon: <AlertTriangle size={56} color="#f59e0b" strokeWidth={1.5} />, bannerColor: "#f59e0b", bannerLabel: "INACTIVE",  subtitle: "This account exists but is not an active member." },
-    not_found: { border: "#FF4D2E", icon: <XCircle size={56} color="#FF4D2E" strokeWidth={1.5} />,       bannerColor: "#FF4D2E", bannerLabel: "INVALID",   subtitle: "No member found with this ID. This QR code may be invalid or expired." },
+    valid:     { border: "#22c55e", icon: <CheckCircle2 size={64} color="#22c55e" strokeWidth={1.5} />, bannerColor: "#22c55e", bannerLabel: "VERIFIED",  subtitle: "This person is a registered BDJ Karukera member." },
+    inactive:  { border: "#f59e0b", icon: <AlertTriangle size={64} color="#f59e0b" strokeWidth={1.5} />, bannerColor: "#f59e0b", bannerLabel: "INACTIVE",  subtitle: "This account exists but is not an active member." },
+    not_found: { border: "#FF4D2E", icon: <XCircle size={64} color="#FF4D2E" strokeWidth={1.5} />,       bannerColor: "#FF4D2E", bannerLabel: "INVALID",   subtitle: "No member found with this ID. This QR code may be invalid or expired." },
   }[state];
 
-  const displayName = member?.displayName || "Unknown Member";
+  const displayName =
+    member?.displayName ||
+    member?.gamerTag ||
+    member?.email?.split("@")[0] ||
+    "Unknown Member";
   const initials = displayName.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <div style={{
-      width: "100%", maxWidth: 360, background: "#0a0e1a",
+      width: "100%", maxWidth: "min(360px, 92vw)", background: "#0a0e1a",
       borderRadius: 24, border: `1px solid ${cfg.border}33`,
       overflow: "hidden", boxShadow: `0 0 60px ${cfg.border}22`,
     }}>
-      <div style={{ height: 3, background: cfg.border }} />
+      <div style={{ height: 4, background: cfg.border }} />
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 36 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 40 }}>
         {cfg.icon}
       </div>
 
@@ -93,32 +99,32 @@ function VerifyContent() {
       </div>
 
       {state !== "not_found" && member ? (
-        <div style={{ padding: "20px 24px 28px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: "50%",
-            border: `2px solid ${cfg.border}66`, overflow: "hidden",
-            background: `${cfg.border}22`, display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            {member.photoURL
-              ? <Image src={member.photoURL} alt="avatar" width={72} height={72} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
-              : <span style={{ fontSize: 26, fontWeight: 900, color: "white" }}>{initials}</span>
-            }
-          </div>
+          <div style={{ padding: "24px 24px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: "50%",
+              border: `2px solid ${cfg.border}66`, overflow: "hidden",
+              background: `${cfg.border}22`, display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {member.photoURL
+                ? <Image src={member.photoURL} alt="avatar" width={80} height={80} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
+                : <span style={{ fontSize: 28, fontWeight: 900, color: "white" }}>{initials}</span>
+              }
+            </div>
 
-          <div style={{ textAlign: "center" }}>
-            <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "white" }}>{displayName}</p>
-            {member.memberId && (
-              <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", background: `${cfg.border}18`, border: `1px solid ${cfg.border}55`, borderRadius: 8, padding: "4px 12px" }}>
-                <span style={{ fontFamily: "monospace", fontSize: 12, color: cfg.border, fontWeight: 700, letterSpacing: "0.1em" }}>
-                  #{member.memberId}
-                </span>
-              </div>
-            )}
-          </div>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: "clamp(1.1rem, 5vw, 1.4rem)", fontWeight: 700, color: "white" }}>{displayName}</p>
+              {member.memberId && (
+                <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", background: `${cfg.border}18`, border: `1px solid ${cfg.border}55`, borderRadius: 10, padding: "6px 16px" }}>
+                  <span style={{ fontFamily: "monospace", fontSize: 13, color: cfg.border, fontWeight: 700, letterSpacing: "0.1em" }}>
+                    #{member.memberId}
+                  </span>
+                </div>
+              )}
+            </div>
 
-          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", background: `${cfg.border}22`, color: cfg.border, padding: "4px 14px", borderRadius: 20 }}>
-            {member.role || "Member"}
-          </span>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", background: `${cfg.border}22`, color: cfg.border, padding: "6px 18px", borderRadius: 20 }}>
+              {member.role || "Member"}
+            </span>
 
           {joinDate && (
             <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>

@@ -119,7 +119,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         required
         value={form.category}
         onChange={e => setForm({ ...form, category: e.target.value as GameCategory })}
-        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+        className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-base focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
       >
         <option value="VIDEO GAME">VIDEO GAME</option>
         <option value="BOARD GAME">BOARD GAME</option>
@@ -157,7 +157,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
           value={form.time}
           onChange={e => setForm({ ...form, time: e.target.value })}
           placeholder="19:00 - 22:00"
-          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
+          className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-base focus:outline-none focus:border-primary/50 transition-all shadow-inner"
         />
       </div>
     </div>
@@ -767,9 +767,9 @@ export default function GamesPage() {
       {/* ── Suggest Session Modal (members) ── */}
       {isSuggestOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-[2.5rem] w-full max-w-md p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] md:rounded-[2.5rem] w-full max-w-md p-6 md:p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
             <button onClick={() => setIsSuggestOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">SUGGEST A SESSION</h2>
+            <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter mb-6">SUGGEST A SESSION</h2>
             <form onSubmit={handleSuggest} className="flex flex-col gap-4">
               <SessionFormFields form={suggestForm} setForm={(f: any) => setSuggestForm({ ...f, reason: suggestForm.reason })} />
               <div className="flex flex-col gap-1.5">
@@ -823,18 +823,18 @@ export default function GamesPage() {
 
 
       {/* ── Hero ── */}
-      <section className="max-w-7xl mx-auto w-full px-6 pt-32 pb-10">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
-          <div>
-            <h1 className="text-7xl md:text-8xl font-black tracking-tighter text-white leading-none uppercase">{t.games.heroTitle}</h1>
-            <p className="mt-4 text-gray-400 max-w-md text-sm md:text-base leading-relaxed">{t.games.heroDesc}</p>
+      <section className="max-w-7xl mx-auto w-full px-6 pt-24 md:pt-32 pb-8 md:pb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="max-w-2xl">
+            <h1 className="font-black tracking-tighter text-white leading-[0.9] uppercase" style={{ fontSize: 'clamp(2.5rem, 10vw, 6rem)' }}>{t.games.heroTitle}</h1>
+            <p className="mt-4 text-gray-400 max-w-md text-sm md:text-base leading-relaxed px-1">{t.games.heroDesc}</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 self-start sm:self-auto">
+          <div className="flex flex-col sm:flex-row gap-3">
             {isAdmin && (
               <button
                 onClick={() => { setAdminForm({ ...EMPTY_FORM }); setIsCreateOpen(true); }}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase w-full sm:w-auto justify-center"
               >
                 <Plus size={16} strokeWidth={3} />
                 CREATE SESSION
@@ -843,7 +843,7 @@ export default function GamesPage() {
             {isLoggedIn && !isAdmin && (
               <button
                 onClick={() => setIsSuggestOpen(true)}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase w-full sm:w-auto justify-center"
               >
                 <Plus size={16} strokeWidth={3} />
                 {t.games.proposeEvent}
@@ -856,11 +856,11 @@ export default function GamesPage() {
 
       {/* ── Filters ── */}
       <section className="max-w-7xl mx-auto w-full px-6 pb-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full md:w-auto">
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
+                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
                   activeTab === tab
                     ? "bg-primary text-white shadow-[var(--shadow-primary)]"
                     : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
@@ -872,9 +872,10 @@ export default function GamesPage() {
           </div>
           <button 
             onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5 whitespace-nowrap"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-500 bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5 whitespace-nowrap w-fit self-end md:self-auto"
           >
             SORT BY DATE: {sortOrder === "desc" ? "NEWEST" : "OLDEST"}
+            <span className={`transition-transform duration-300 ${sortOrder === "asc" ? "rotate-180" : ""}`}>↓</span>
           </button>
         </div>
       </section>
@@ -888,7 +889,7 @@ export default function GamesPage() {
             {t.games.noGamesMatch}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredSessions.map(s => (
               <SessionCard
                 key={s.id}

@@ -39,12 +39,17 @@ function CardLayout({
   const s = size; // shorthand
 
   return (
-    <div style={{
-      width: W, height: H, borderRadius: 16 * s,
-      background: tk.bg, position: "relative", overflow: "hidden",
-      flexShrink: 0, transition: "background 0.4s ease",
-      boxShadow: `0 ${8 * s}px ${40 * s}px rgba(0,0,0,0.6)`,
-    }}>
+    <div 
+      className="relative overflow-hidden shrink-0 transition-all duration-500"
+      style={{
+        width: size === 1 ? 'min(320px, 92vw)' : W,
+        aspectRatio: '320/190',
+        borderRadius: 16 * s,
+        background: tk.bg,
+        boxShadow: `0 ${8 * s}px ${40 * s}px rgba(0,0,0,0.6)`,
+        containerType: 'size',
+      }}
+    >
       {/* Accent line */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3 * s, background: tk.accent }} />
 
@@ -127,7 +132,7 @@ function CardLayout({
 
         {/* Row 3 */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", gap: 5 * s }}>
+          <div style={{ display: "flex", gap: '1.5%' }}>
             {[0, 1, 2, 3].map((i) => (
               <div key={i} style={{
                 width: 5 * s, height: 5 * s, borderRadius: "50%",
@@ -176,12 +181,18 @@ export default function MemberCard({ user }: MemberCardProps) {
           const d: Date = data.createdAt.toDate();
           setJoinedLabel(`Since ${d.toLocaleString("en-US", { month: "long" })} ${d.getFullYear()}`);
         }
+        // Patch missing fields if they exist in Auth but not in Firestore
+        await setDoc(ref, {
+          email: user.email,
+          displayName: data.displayName || user.displayName || null,
+          photoURL: data.photoURL || user.photoURL || null,
+        }, { merge: true });
       } else {
         const createdAt = new Date();
         await setDoc(ref, {
           email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
+          displayName: user.displayName || null,
+          photoURL: user.photoURL || null,
           role: "Member",
           cardTheme: "fire",
           createdAt: serverTimestamp(),
@@ -253,40 +264,50 @@ export default function MemberCard({ user }: MemberCardProps) {
 
   return (
     <div className="flex flex-col items-center gap-3 w-full h-full justify-center py-1">
-      {/* Theme swatches */}
-      <div className="flex items-center gap-3">
-        {(["fire", "water"] as CardTheme[]).map((t) => (
-          <button key={t} onClick={() => switchTheme(t)} style={{
-            width: 24, height: 24, borderRadius: "50%", background: THEMES[t].accent,
-            outline: theme === t ? "3px solid rgba(255,255,255,0.8)" : "none",
-            outlineOffset: 2, boxShadow: theme === t ? "0 0 0 5px rgba(0,0,0,0.6)" : "none",
-            transition: "all 0.25s ease", cursor: "pointer", border: "none", flexShrink: 0,
-          }} />
-        ))}
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase" }}>CARD THEME</span>
-      </div>
-
       {/* Clickable card — opens expanded modal */}
       <div
         ref={cardRef}
         onClick={() => setExpanded(true)}
-        style={{ cursor: "pointer", transition: "transform 0.2s ease", display: "inline-block" }}
+        className="cursor-pointer transition-transform duration-200 active:scale-95 w-full flex justify-center"
         onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = "scale(1.02)"}
         onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = "scale(1)"}
       >
-        <CardLayout {...sharedProps} size={0.88} />
+        <CardLayout {...sharedProps} size={1} />
       </div>
 
-      {/* Download button */}
-      <button onClick={handleDownload} disabled={downloading} style={{
-        fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase",
-        padding: "6px 20px", borderRadius: 20, border: `1px solid ${tk.accent}55`,
-        background: `${tk.accent}18`, color: tk.accent,
-        cursor: downloading ? "not-allowed" : "pointer", opacity: downloading ? 0.5 : 1,
-        transition: "all 0.4s ease",
-      }}>
-        {downloading ? "EXPORTING..." : "↓ DOWNLOAD CARD"}
-      </button>
+      {/* Layout Row for Controls */}
+      <div className="flex items-center justify-between w-full max-w-[320px] mt-4 px-1">
+        {/* Theme swatches (Left) */}
+        <div className="flex items-center gap-3">
+          <div className="flex gap-2">
+            {(["fire", "water"] as CardTheme[]).map((t) => (
+              <button key={t} onClick={() => switchTheme(t)} 
+                className="w-8 h-8 md:w-6 md:h-6 rounded-full border-none cursor-pointer transition-all duration-300"
+                style={{
+                  background: THEMES[t].accent,
+                  outline: theme === t ? "2px solid white" : "none",
+                  outlineOffset: 3,
+                  boxShadow: theme === t ? `0 0 15px ${THEMES[t].accent}88` : "none",
+                  minWidth: '24px', 
+                  minHeight: '24px'
+                }} 
+              />
+            ))}
+          </div>
+          <span className="text-[9px] text-white/30 tracking-widest uppercase ml-1 block">THEME</span>
+        </div>
+
+        {/* Download button (Right) */}
+        <button onClick={handleDownload} disabled={downloading} style={{
+          fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase",
+          padding: "8px 16px", borderRadius: 20, border: `1px solid ${tk.accent}55`,
+          background: `${tk.accent}18`, color: tk.accent,
+          cursor: downloading ? "not-allowed" : "pointer", opacity: downloading ? 0.5 : 1,
+          transition: "all 0.4s ease",
+        }}>
+          {downloading ? "EXPORTING..." : "↓ DOWNLOAD CARD"}
+        </button>
+      </div>
 
       {/* No more hidden print div — export is done dynamically */}
 
@@ -302,11 +323,9 @@ export default function MemberCard({ user }: MemberCardProps) {
           }}
         >
           <style>{`@keyframes fadeIn{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}}`}</style>
-          <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+          <div onClick={e => e.stopPropagation()} className="flex flex-col items-center gap-5 w-[95vw] max-w-md">
             <CardLayout {...sharedProps} size={1.5} />
-            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase", margin: 0 }}>
-              Click outside to close
-            </p>
+            <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">TAP OUTSIDE TO CLOSE</p>
           </div>
         </div>,
         document.body

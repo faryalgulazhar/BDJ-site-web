@@ -7,10 +7,12 @@ import {
   createUserWithEmailAndPassword, 
   GoogleAuthProvider, 
   signInWithPopup,
+  sendEmailVerification
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Mail, Lock, User, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const friendlyError = (code: string): string => {
   switch (code) {
@@ -53,6 +55,9 @@ export default function RegisterForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Send verification email
+      await sendEmailVerification(user);
+
       // Persist Gamer Tag and user data to Firestore
       await setDoc(doc(db, "users", user.uid), {
         gamerTag: gamerTag || "New Player",
@@ -62,7 +67,12 @@ export default function RegisterForm() {
         role: "member"
       });
 
-      router.push("/planning");
+      toast.success("🎉 Welcome to BDJ Karukera! Your account has been created. Please check your email to verify it.");
+      
+      // Delay redirect so user can read the message
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 4000);
     } catch (err) {
       if (err instanceof FirebaseError) {
         setError(friendlyError(err.code));
@@ -90,9 +100,12 @@ export default function RegisterForm() {
           createdAt: serverTimestamp(),
           role: "member"
         });
+        toast.success("🎉 Welcome to BDJ Karukera! Logged in with Google.");
+      } else {
+        toast.success("Logged in successfully with Google!");
       }
 
-      router.push("/planning");
+      router.push("/dashboard");
     } catch (err: any) {
       console.error(err);
     }

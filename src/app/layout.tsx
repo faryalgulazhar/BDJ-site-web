@@ -9,6 +9,7 @@ import CustomCursor from "@/components/CustomCursor";
 import TopLoader from "@/components/TopLoader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,6 +40,7 @@ export default function RootLayout({
             <AuthProvider>
             <TopLoader />
             <CustomCursor />
+            <EmailVerificationBanner />
             <Navbar />
             <main className="flex-1 flex flex-col min-h-screen">
               <PageTransition>

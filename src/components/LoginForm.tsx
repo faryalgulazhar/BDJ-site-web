@@ -7,11 +7,13 @@ import {
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
   signInWithPopup,
+  sendPasswordResetEmail
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const friendlyError = (code: string): string => {
   switch (code) {
@@ -79,11 +81,32 @@ export default function LoginForm() {
           createdAt: serverTimestamp(),
           role: "member"
         });
+        toast.success("🎉 Welcome to BDJ Karukera! Logged in with Google.");
+      } else {
+        toast.success("Logged in successfully with Google!");
       }
 
       router.push("/");
     } catch (err: any) {
       console.error(err);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    const email = emailRef.current?.value || "";
+    if (!email.includes("@")) {
+      setError("Please enter your email above to reset your password.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("Password reset email sent! Check your inbox.");
+      setError(null);
+    } catch (err: any) {
+      setError("Failed to send reset email. Ensure your email is correct.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,9 +137,9 @@ export default function LoginForm() {
         </div>
 
         <div className="flex justify-end pt-1">
-          <Link href="#" className="text-xs text-gray-400 hover:text-white transition-colors">
+          <button type="button" onClick={handleResetPassword} className="text-xs text-gray-400 hover:text-white transition-colors cursor-pointer">
             Forgot Password?
-          </Link>
+          </button>
         </div>
 
         {error && <p className="text-red-500 text-xs font-bold text-center mt-2">{error}</p>}

@@ -162,12 +162,20 @@ export default function CommunityPage() {
       router.push("/login");
       return;
     }
+    if (!user.emailVerified) {
+      toast.error("Please verify your email address to post in the community.");
+      return;
+    }
     setIsModalOpen(true);
   };
 
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!user.emailVerified) {
+      toast.error("Please verify your email address to publish a post.");
+      return;
+    }
     if (!newTitle.trim() || !newContent.trim()) {
       toast.error("Title and content are required.");
       return;

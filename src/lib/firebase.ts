@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBmoekvwBA4tdm40F4sgSv-cCHF2AxQUvM",
-  authDomain: "bdj-karukera.firebaseapp.com",
-  projectId: "bdj-karukera",
-  storageBucket: "bdj-karukera.firebasestorage.app",
-  messagingSenderId: "826699093406",
-  appId: "1:826699093406:web:48b83e33bd77833c60b28f",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Avoid initializing Firebase more than once (safe for Next.js hot reloads)

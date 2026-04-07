@@ -842,7 +842,13 @@ export default function GamesPage() {
             )}
             {isLoggedIn && !isAdmin && (
               <button
-                onClick={() => setIsSuggestOpen(true)}
+                onClick={() => {
+                  if (!user?.emailVerified) {
+                    toast.error("Please verify your email address to propose an event.");
+                    return;
+                  }
+                  setIsSuggestOpen(true);
+                }}
                 className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase w-full sm:w-auto justify-center"
               >
                 <Plus size={16} strokeWidth={3} />

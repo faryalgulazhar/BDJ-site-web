@@ -34,6 +34,8 @@ import {
   updateDoc,
   where,
   onSnapshot,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { MessageSquare } from "lucide-react";
@@ -190,6 +192,9 @@ interface CardProps {
   onDelete: (id: string) => void;
   onEdit: (session: Session) => void;
   onViewAttendees: (session: Session) => void;
+  isBulkMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 function SessionCard({ 
@@ -203,7 +208,10 @@ function SessionCard({
   onApprove,
   onDelete, 
   onEdit, 
-  onViewAttendees 
+  onViewAttendees,
+  isBulkMode,
+  isSelected,
+  onToggleSelect
 }: CardProps) {
   const { t } = useLanguage();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -220,6 +228,16 @@ function SessionCard({
           : "bg-[#0f172a] border-white/10 hover:border-primary/40 hover:shadow-[var(--shadow-primary)]"
       }`}
     >
+      {isBulkMode && (
+        <div 
+          onClick={(e) => { e.stopPropagation(); onToggleSelect?.(session.id); }}
+          className="absolute inset-0 z-10 bg-black/50 hover:bg-black/40 rounded-2xl cursor-pointer flex items-center justify-center transition-all backdrop-blur-[2px]"
+        >
+          <div className={`w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all ${isSelected ? "border-primary bg-primary text-white" : "border-white/30 text-transparent"}`}>
+            ✓
+          </div>
+        </div>
+      )}
       {session.approval === "pending" && (
         <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-md uppercase border border-amber-500/20 w-fit">
           PENDING
@@ -386,6 +404,10 @@ export default function GamesPage() {
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   // Registrations state
   const [userRegistrations, setUserRegistrations] = useState<string[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
@@ -407,14 +429,14 @@ export default function GamesPage() {
     const load = async () => {
       setIsLoading(true);
       try {
-        const snap = await getDocs(query(collection(db, "sessions"), orderBy("createdAt", "desc")));
+        const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
         let sessionData: Session[] = [];
         if (snap.empty) {
           // seed initial data
           for (const s of SEED_SESSIONS) {
-            await addDoc(collection(db, "sessions"), { ...s, createdAt: serverTimestamp() });
+            await addDoc(collection(db, "events"), { ...s, createdAt: serverTimestamp() });
           }
-          const snap2 = await getDocs(query(collection(db, "sessions"), orderBy("createdAt", "desc")));
+          const snap2 = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
           sessionData = snap2.docs.map(d => ({ id: d.id, ...d.data() } as Session));
         } else {
           sessionData = snap.docs.map(d => ({ id: d.id, ...d.data() } as Session));
@@ -423,8 +445,11 @@ export default function GamesPage() {
 
         // Fetch current user's registrations
         if (user) {
-          const regSnap = await getDocs(query(collection(db, "registrations"), where("userId", "==", user.uid)));
-          setUserRegistrations(regSnap.docs.map(d => d.data().sessionId));
+          const ids = await Promise.all(sessionData.map(async (ev) => {
+            const regDoc = await getDoc(doc(db, "events", ev.id, "registrations", user.uid));
+            return regDoc.exists() ? ev.id : null;
+          }));
+          setUserRegistrations(ids.filter(Boolean) as string[]);
         } else {
           setUserRegistrations([]);
         }
@@ -437,11 +462,15 @@ export default function GamesPage() {
   }, []);
 
   const reloadSessions = async () => {
-    const snap = await getDocs(query(collection(db, "sessions"), orderBy("createdAt", "desc")));
-    setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() } as Session)));
+    const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
+    const eventsData = snap.docs.map(d => ({ id: d.id, ...d.data() } as Session));
+    setSessions(eventsData);
     if (user) {
-      const regSnap = await getDocs(query(collection(db, "registrations"), where("userId", "==", user.uid)));
-      setUserRegistrations(regSnap.docs.map(d => d.data().sessionId));
+      const ids = await Promise.all(eventsData.map(async (ev) => {
+        const regDoc = await getDoc(doc(db, "events", ev.id, "registrations", user.uid));
+        return regDoc.exists() ? ev.id : null;
+      }));
+      setUserRegistrations(ids.filter(Boolean) as string[]);
     }
 
   };
@@ -451,8 +480,24 @@ export default function GamesPage() {
   // ── Register ──
   const handleApprove = async (id: string) => {
     setLoadingId(id);
+    const session = sessions.find(s => s.id === id);
+    if (!session) return;
+
     try {
-      await updateDoc(doc(db, "sessions", id), { approval: "approved" });
+      await updateDoc(doc(db, "events", id), { approval: "approved" });
+      
+      // Notify the requester
+      if (session.suggestedBy) {
+        await addDoc(collection(db, "notifications"), {
+          toUid: session.suggestedBy,
+          type: "suggestion_approved",
+          title: session.title,
+          message: `🎉 Great news! Your session suggestion "${session.title}" has been approved.`,
+          read: false,
+          createdAt: serverTimestamp(),
+        });
+      }
+
       await reloadSessions();
       toast.success("Session approved!");
     } catch {
@@ -473,16 +518,15 @@ export default function GamesPage() {
       const gamerTag = userSnap.docs[0]?.data()?.gamerTag || user.displayName || "Gamer";
 
       // 1. Create registration doc
-      await addDoc(collection(db, "registrations"), {
-        sessionId: id,
+      await setDoc(doc(db, "events", id, "registrations", user.uid), {
         userId: user.uid,
-        userEmail: user.email,
-        userGamerTag: gamerTag,
+        name: gamerTag,
+        status: "pending",
         timestamp: serverTimestamp(),
       });
 
       // 2. Increment session registrations
-      await updateDoc(doc(db, "sessions", id), {
+      await updateDoc(doc(db, "events", id), {
         currentRegistrations: (session.currentRegistrations || 0) + 1,
         status: (session.currentRegistrations + 1) >= session.totalSpots ? "full" : "open"
       });
@@ -536,14 +580,10 @@ export default function GamesPage() {
     setIsUnregistering(true);
     try {
       // 1. Find and delete registration doc
-      const q = query(collection(db, "registrations"), where("sessionId", "==", unregisterId), where("userId", "==", user.uid));
-      const snap = await getDocs(q);
-      for (const d of snap.docs) {
-        await deleteDoc(doc(db, "registrations", d.id));
-      }
+      await deleteDoc(doc(db, "events", unregisterId, "registrations", user.uid));
 
       // 2. Decrement session registrations
-      await updateDoc(doc(db, "sessions", unregisterId), {
+      await updateDoc(doc(db, "events", unregisterId), {
         currentRegistrations: Math.max(0, session.currentRegistrations - 1),
         status: "open"
       });
@@ -581,14 +621,7 @@ export default function GamesPage() {
 
   // ── Admin: View Attendees ──
   const handleViewAttendees = async (session: Session) => {
-    setActiveSessionForAttendees(session);
-    setAttendees([]);
-    setIsAttendeesOpen(true);
-    try {
-      const q = query(collection(db, "registrations"), where("sessionId", "==", session.id));
-      const snap = await getDocs(q);
-      setAttendees(snap.docs.map(d => d.data()));
-    } catch (e) { toast.error("Failed to fetch attendees."); }
+    router.push(`/admin/events/${session.id}`);
   };
 
   // ── Suggest session (member) ──
@@ -618,7 +651,7 @@ export default function GamesPage() {
     toast.success("Session suggested! Waiting for admin approval.");
 
     try {
-      const docRef = await addDoc(collection(db, "sessions"), {
+      const docRef = await addDoc(collection(db, "events"), {
         ...newSessionData,
         createdAt: serverTimestamp(),
       });
@@ -648,7 +681,7 @@ export default function GamesPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, "sessions"), {
+      await addDoc(collection(db, "events"), {
         title: adminForm.title.toUpperCase(),
         category: adminForm.category,
         date: adminForm.date.toUpperCase(),
@@ -687,13 +720,36 @@ export default function GamesPage() {
     toast.success("Session removed.");
 
     try {
-      await deleteDoc(doc(db, "sessions", id));
+      await deleteDoc(doc(db, "events", id));
       await reloadSessions();
     } catch (e) { 
       toast.error("Failed to delete session.");
       setSessions(restoredSessions);
     }
     setDeleteTargetId(null);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedSessionIds.length === 0) return;
+    setIsBulkDeleteModalOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    setIsBulkDeleteModalOpen(false);
+    setIsSubmitting(true);
+    try {
+      for (const id of selectedSessionIds) {
+        await deleteDoc(doc(db, "events", id));
+      }
+      const count = selectedSessionIds.length;
+      setSelectedSessionIds([]);
+      setIsBulkMode(false);
+      await reloadSessions();
+      toast.success(`${count} event${count > 1 ? "s" : ""} permanently erased.`);
+    } catch (e) {
+      toast.error("Failed to delete events.");
+    }
+    setIsSubmitting(false);
   };
 
   // ── Admin: edit session ──
@@ -733,7 +789,7 @@ export default function GamesPage() {
     toast.success("Session updated.");
 
     try {
-      await updateDoc(doc(db, "sessions", editingSession.id), {
+      await updateDoc(doc(db, "events", editingSession.id), {
         ...updatedData,
         updatedAt: serverTimestamp(),
       });
@@ -832,13 +888,31 @@ export default function GamesPage() {
 
           <div className="flex flex-col sm:flex-row gap-3">
             {isAdmin && (
-              <button
-                onClick={() => { setAdminForm({ ...EMPTY_FORM }); setIsCreateOpen(true); }}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase w-full sm:w-auto justify-center"
-              >
-                <Plus size={16} strokeWidth={3} />
-                CREATE SESSION
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                     if (isBulkMode && selectedSessionIds.length > 0) {
+                        handleBulkDelete();
+                     } else {
+                        setIsBulkMode(!isBulkMode);
+                        setSelectedSessionIds([]);
+                     }
+                  }}
+                  className={`flex items-center gap-2 px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 uppercase w-full sm:w-auto justify-center ${isBulkMode && selectedSessionIds.length > 0 ? "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30" : isBulkMode ? "bg-white/10 hover:bg-white/20 text-white" : "bg-transparent border border-red-500/30 hover:bg-red-500/10 text-red-500"}`}
+                >
+                  {isBulkMode && selectedSessionIds.length > 0 ? `DELETE ${selectedSessionIds.length}` : isBulkMode ? "CANCEL" : "BULK DELETE"}
+                </button>
+
+                {!isBulkMode && (
+                  <button
+                    onClick={() => { setAdminForm({ ...EMPTY_FORM }); setIsCreateOpen(true); }}
+                    className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase w-full sm:w-auto justify-center"
+                  >
+                    <Plus size={16} strokeWidth={3} />
+                    CREATE SESSION
+                  </button>
+                )}
+              </div>
             )}
             {isLoggedIn && !isAdmin && (
               <button
@@ -910,6 +984,9 @@ export default function GamesPage() {
                 onDelete={handleDelete}
                 onEdit={handleOpenEdit}
                 onViewAttendees={handleViewAttendees}
+                isBulkMode={isBulkMode}
+                isSelected={selectedSessionIds.includes(s.id)}
+                onToggleSelect={(id) => setSelectedSessionIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
               />
             ))}
           </div>
@@ -1030,6 +1107,14 @@ export default function GamesPage() {
         onConfirm={confirmDelete}
         title="ERASE SESSION?"
         description="This action is irreversible. The session data will be permanently purged from the mainframe."
+      />
+
+      <DeleteConfirmModal
+        isOpen={isBulkDeleteModalOpen}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        onConfirm={confirmBulkDelete}
+        title={`ERASE ${selectedSessionIds.length} EVENT${selectedSessionIds.length > 1 ? "S" : ""}?`}
+        description={`You are about to permanently delete ${selectedSessionIds.length} selected event${selectedSessionIds.length > 1 ? "s" : ""}. This action cannot be undone.`}
       />
     </div>
   );

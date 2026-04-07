@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@yudiel/react-qr-scanner": "^2.5.1",
     "firebase": "^12.11.0",
     "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",

@@ -13,7 +13,10 @@ import {
   Trash2,
   MessageSquare,
   Plus,
-  Lock
+  Lock,
+  Users,
+  MailWarning,
+  UserX
 } from "lucide-react";
 import {
   collection,
@@ -133,6 +136,8 @@ export default function AdminOpsPage() {
   const [memberMessages, setMemberMessages] = useState<any[]>([]);
   const [adminTasks, setAdminTasks] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
+  const [isDeletingMember, setIsDeletingMember] = useState<string | null>(null);
 
   // Messaging state
   const [isMessageOpen, setIsMessageOpen] = useState(false);
@@ -148,6 +153,7 @@ export default function AdminOpsPage() {
   // Deletion state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [memberDeleteTarget, setMemberDeleteTarget] = useState<{ id: string; email: string } | null>(null);
 
   // Live Clock Effect
   useEffect(() => {
@@ -175,6 +181,10 @@ export default function AdminOpsPage() {
       const notifDocs = notifSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       notifDocs.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       setNotifications(notifDocs);
+
+      // Load members
+      const memberSnap = await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc")));
+      setMembers(memberSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (e) { console.error(e); }
     setIsLoading(false);
   };
@@ -303,13 +313,31 @@ export default function AdminOpsPage() {
     setSessions(prev => prev.filter(s => s.id !== id));
     toast.success("Session removed.");
     try {
-      await deleteDoc(doc(db, "sessions", id));
+      await deleteDoc(doc(db, "events", id));
       await loadData();
     } catch (e) { 
       toast.error("Failed to delete session.");
       setSessions(restoredSessions);
     }
     setDeleteTargetId(null);
+  };
+
+  const handleDeleteMember = (memberId: string, memberEmail: string) => {
+    setMemberDeleteTarget({ id: memberId, email: memberEmail });
+  };
+
+  const confirmDeleteMember = async () => {
+    if (!memberDeleteTarget) return;
+    setIsDeletingMember(memberDeleteTarget.id);
+    setMemberDeleteTarget(null);
+    try {
+      await deleteDoc(doc(db, "users", memberDeleteTarget.id));
+      setMembers(prev => prev.filter(m => m.id !== memberDeleteTarget.id));
+      toast.success(`Member "${memberDeleteTarget.email}" removed.`);
+    } catch (e) {
+      toast.error("Failed to delete member.");
+    }
+    setIsDeletingMember(null);
   };
 
   if (isLoading) {
@@ -596,6 +624,65 @@ export default function AdminOpsPage() {
         onConfirm={confirmDelete}
         title="REJECT SUGGESTION?"
         description="Delete this suggestion permanently? This action cannot be undone."
+      />
+
+      {/* ── Member Directory Section ── */}
+      <section className="max-w-7xl mx-auto w-full px-6 pb-20">
+        <div className="border-t border-white/5 pt-12">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-1.5 h-6 bg-rose-500 rounded-full" />
+            <h2 className="text-xl font-black text-white uppercase tracking-tighter">Member Directory</h2>
+            <span className="bg-rose-500/10 text-rose-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-rose-500/20">{members.length}</span>
+          </div>
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-8 max-w-xl">
+            All registered members. Delete ghost accounts or members who have not verified. Note: this removes their Firestore profile only — their login account remains unless disabled via Firebase Console.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {members.length === 0 ? (
+              <div className="col-span-3 bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">No members found</div>
+            ) : (
+              members.map((m) => (
+                <div key={m.id} className="group bg-[var(--card-bg)] border border-[var(--border)] hover:border-rose-500/20 rounded-2xl p-5 flex items-center justify-between gap-4 transition-all duration-300">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                      {m.photoURL 
+                        ? <img src={m.photoURL} className="w-10 h-10 rounded-xl object-cover" alt="avatar" />
+                        : <Users size={18} className="text-gray-500" />
+                      }
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-black text-sm uppercase tracking-tight truncate">{m.gamerTag || m.displayName || "—"}</p>
+                      <p className="text-gray-500 text-[10px] font-bold tracking-widest truncate">{m.email}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-primary text-[9px] font-black tracking-widest">{m.activityPoints || 0} PTS</span>
+                        {m.role && <span className="text-violet-400 text-[9px] font-black tracking-widest uppercase border border-violet-400/20 px-1.5 rounded">{m.role}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteMember(m.id, m.email)}
+                    disabled={isDeletingMember === m.id}
+                    className="opacity-0 group-hover:opacity-100 flex-shrink-0 bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg transition-all"
+                    title="Delete member"
+                  >
+                    {isDeletingMember === m.id 
+                      ? <Loader2 size={16} className="animate-spin" />
+                      : <UserX size={16} />}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      <DeleteConfirmModal
+        isOpen={!!memberDeleteTarget}
+        onClose={() => setMemberDeleteTarget(null)}
+        onConfirm={confirmDeleteMember}
+        title="REMOVE MEMBER?"
+        description={`This will permanently delete the Firestore profile for "${memberDeleteTarget?.email}". Their login account will still exist in Firebase Auth.`}
       />
     </div>
   );

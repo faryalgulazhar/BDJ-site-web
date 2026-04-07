@@ -7,7 +7,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { Star, X, Calendar, Clock } from "lucide-react";
 import CyberCalendar from "@/components/CyberCalendar";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, getDocs, getDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import MemberCard from "@/components/MemberCard";
 
@@ -28,43 +28,66 @@ export default function DashboardPage() {
   const [registeredSessionIds, setRegisteredSessionIds] = useState<string[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
+  
+  const [leaderboardScores, setLeaderboardScores] = useState<any[]>([]);
+  const [computedPoints, setComputedPoints] = useState(0);
 
   // Auth Guard
   useEffect(() => {
     if (user === null) router.replace("/login");
   }, [user, router]);
 
-  // Points & Registrations Fetcher
+  // Points & Leaderboard Fetcher
   useEffect(() => {
     if (!user) return;
     
     if (isAdmin) {
-      // Admin: Fetch ALL registrations
-      const q = query(collection(db, "registrations"));
-      const unsub = onSnapshot(q, (snap) => {
-        setAllRegistrations(snap.docs.map(d => d.data()));
+      // Admin: Fetch ALL users for leaderboard
+      const unsub = onSnapshot(collection(db, "users"), (snap) => {
+        const scores = snap.docs.map(d => {
+          const u = d.data();
+          return {
+            tag: u.gamerTag || u.email?.split("@")[0] || "PLAYER",
+            email: u.email,
+            score: u.activityPoints || 0
+          };
+        }).sort((a, b) => b.score - a.score);
+        setLeaderboardScores(scores);
       });
       return () => unsub();
     } else {
-      // User: Fetch ONLY their registrations
-      const q = query(collection(db, "registrations"), where("userId", "==", user.uid));
-      const unsub = onSnapshot(q, (snap) => {
-        setRegisteredSessionIds(snap.docs.map(d => d.data().sessionId));
+      // User: Fetch their own activityPoints
+      const unsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
+        const u = snap.data();
+        if (u) setComputedPoints(u.activityPoints || 0);
       });
       return () => unsub();
     }
   }, [user, isAdmin]);
 
-  // Sessions Fetcher
+  // Sessions Fetcher & Registration Filter for Users
   useEffect(() => {
     if (!user) return;
-    const q = query(collection(db, "sessions"));
-    const unsub = onSnapshot(q, (snap) => {
-      setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-    return () => unsub();
-  }, [user]);
+    
+    const loadEvents = async () => {
+      const q = query(collection(db, "events"));
+      const unsub = onSnapshot(q, async (snap) => {
+        const eventsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        if (!isAdmin) {
+           const ids = await Promise.all(eventsData.map(async (ev) => {
+             const regDoc = await getDoc(doc(db, "events", ev.id, "registrations", user.uid));
+             return regDoc.exists() ? ev.id : null;
+           }));
+           setRegisteredSessionIds(ids.filter(Boolean) as string[]);
+        }
+        setSessions(eventsData);
+      });
+      return () => unsub();
+    };
+    
+    loadEvents();
+  }, [user, isAdmin]);
 
   if (user === undefined || user === null) {
     return (
@@ -75,27 +98,6 @@ export default function DashboardPage() {
   }
 
   const validRegisteredSessions = sessions.filter(s => registeredSessionIds.includes(s.id));
-  const computedPoints = validRegisteredSessions.length;
-
-  // Process Leaderboard if Admin
-  const leaderboardScores = useMemo(() => {
-    if (!isAdmin) return [];
-    
-    // Filter out deleted sessions just like points
-    const validSessionIds = new Set(sessions.map(s => s.id));
-    const validRegs = allRegistrations.filter(r => validSessionIds.has(r.sessionId));
-    
-    const userM: Record<string, { tag: string; email: string; score: number }> = {};
-    validRegs.forEach(r => {
-      const id = r.userId;
-      if (!userM[id]) {
-        userM[id] = { tag: r.userGamerTag || r.userEmail?.split("@")[0] || "PLAYER", email: r.userEmail, score: 0 };
-      }
-      userM[id].score += 1;
-    });
-
-    return Object.values(userM).sort((a, b) => b.score - a.score); // highest score first
-  }, [isAdmin, allRegistrations, sessions]);
 
   const topScore = leaderboardScores.length > 0 ? leaderboardScores[0].score : 0;
 

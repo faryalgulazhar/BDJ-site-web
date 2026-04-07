@@ -843,7 +843,7 @@ export default function GamesPage() {
             {isLoggedIn && !isAdmin && (
               <button
                 onClick={() => {
-                  if (!user?.emailVerified) {
+                  if (!user?.emailVerified && !isAdmin) {
                     toast.error("Please verify your email address to propose an event.");
                     return;
                   }

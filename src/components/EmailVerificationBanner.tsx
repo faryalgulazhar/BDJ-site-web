@@ -11,8 +11,8 @@ export default function EmailVerificationBanner() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  // If there's no user, or they are already verified, don't show the banner
-  if (!user || user.emailVerified) {
+  // If there's no user, or they are already verified, or they are the admin, don't show the banner
+  if (!user || user.emailVerified || user.email === "admin@bdj-karukera.com") {
     return null;
   }
 

@@ -162,7 +162,7 @@ export default function CommunityPage() {
       router.push("/login");
       return;
     }
-    if (!user.emailVerified) {
+    if (!user.emailVerified && user.email !== "admin@bdj-karukera.com") {
       toast.error("Please verify your email address to post in the community.");
       return;
     }
@@ -172,7 +172,7 @@ export default function CommunityPage() {
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!user.emailVerified) {
+    if (!user.emailVerified && user.email !== "admin@bdj-karukera.com") {
       toast.error("Please verify your email address to publish a post.");
       return;
     }

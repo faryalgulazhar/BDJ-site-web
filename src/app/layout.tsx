@@ -10,6 +10,7 @@ import TopLoader from "@/components/TopLoader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
+import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -94,6 +95,7 @@ export default function RootLayout({
             </main>
             <Footer />
               <Toaster position="bottom-right" theme="dark" richColors />
+              <CookieConsent />
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>

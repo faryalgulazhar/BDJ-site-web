@@ -8,7 +8,7 @@ import { db } from "@/lib/firebase";
 import Image from "next/image";
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 
-const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 type State = "loading" | "valid" | "inactive" | "not_found";
 
 interface MemberData {
@@ -26,7 +26,7 @@ interface MemberData {
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const [state, setState] = useState<State>("loading");
   const [member, setMember] = useState<MemberData | null>(null);
@@ -37,12 +37,12 @@ function VerifyContent() {
   // Admin guard
   useEffect(() => {
     if (user === null) { router.replace("/login"); return; }
-    if (user && user.email !== ADMIN_EMAIL) { router.replace("/dashboard"); }
+    if (user && !isAdmin) { router.replace("/dashboard"); }
   }, [user, router]);
 
   // Firestore lookup
   useEffect(() => {
-    if (!targetId || !user || user.email !== ADMIN_EMAIL) return;
+    if (!targetId || !user || !isAdmin) return;
     (async () => {
       try {
         const snap = await getDoc(doc(db, "users", targetId));
@@ -65,7 +65,7 @@ function VerifyContent() {
       <Spinner />
     );
   }
-  if (!user || user.email !== ADMIN_EMAIL) return null;
+  if (!user || !isAdmin) return null;
 
   const cfg = {
     valid:     { border: "#22c55e", icon: <CheckCircle2 size={64} color="#22c55e" strokeWidth={1.5} />, bannerColor: "#22c55e", bannerLabel: "VERIFIED",  subtitle: "This person is a registered BDJ Karukera member." },

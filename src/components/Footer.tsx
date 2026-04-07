@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="mt-auto border-t border-white/5 bg-[#080808] py-10 relative z-10 w-full">
       <div className="max-w-7xl mx-auto px-6 flex flex-col gap-6 text-[11px] font-bold tracking-[0.15em] text-gray-600">
@@ -21,10 +25,10 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-            <Link href="#" className="hover:text-gray-300 transition-all duration-500">PRIVACY POLICY</Link>
-            <Link href="#" className="hover:text-gray-300 transition-all duration-500">TERMS OF SERVICE</Link>
-            <Link href="#" className="hover:text-gray-300 transition-all duration-500">LEGAL MENTIONS</Link>
-            <a href="https://www.instagram.com/bdj_psb" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-500">CONTACT US</a>
+            <Link href="/privacy" className="hover:text-gray-300 transition-all duration-500">{t.footer.privacy}</Link>
+            <Link href="/terms" className="hover:text-gray-300 transition-all duration-500">{t.footer.terms}</Link>
+            <Link href="/legal" className="hover:text-gray-300 transition-all duration-500">{t.footer.legal}</Link>
+            <a href="https://www.instagram.com/bdj_psb" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-all duration-500">{t.footer.contact}</a>
           </div>
         </div>
 

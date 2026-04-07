@@ -11,12 +11,12 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { isIceTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function Navbar() {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  const isAdmin = user?.email === "admin@bdj-karukera.com";
+
 
   const navLinks = [
     { name: t.nav.homepage, href: "/" },

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -41,7 +41,7 @@ interface Registration {
 export default function AdminEventDetailPage({ params }: PageProps) {
   const unwrappedParams = use(params);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   
   const [eventData, setEventData] = useState<EventData | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -60,12 +60,12 @@ export default function AdminEventDetailPage({ params }: PageProps) {
   // Admin Guard
   useEffect(() => {
     if (user === null) { router.replace("/login"); return; }
-    if (user && user.email !== ADMIN_EMAIL) { router.replace("/dashboard"); }
+    if (user && !isAdmin) { router.replace("/dashboard"); }
   }, [user, router]);
 
   // Fetch Event Data
   useEffect(() => {
-    if (!unwrappedParams.id || !user || user.email !== ADMIN_EMAIL) return;
+    if (!unwrappedParams.id || !user || !isAdmin) return;
     
     const fetchEvent = async () => {
       try {
@@ -158,7 +158,7 @@ export default function AdminEventDetailPage({ params }: PageProps) {
     }
   };
 
-  if (!user || user.email !== ADMIN_EMAIL) return null;
+  if (!user || !isAdmin) return null;
 
   if (loading) {
     return (
@@ -262,6 +262,7 @@ export default function AdminEventDetailPage({ params }: PageProps) {
                     disabled={isActioning}
                     onClick={() => submitStatus("present", reg)}
                     title="Mark Present"
+                    aria-label="Mark Present"
                     className="bg-green-500/5 hover:bg-green-500/20 text-green-500 px-3 py-2 text-[10px] font-black tracking-widest transition-all"
                   >
                     P
@@ -270,6 +271,7 @@ export default function AdminEventDetailPage({ params }: PageProps) {
                     disabled={isActioning}
                     onClick={() => submitStatus("late", reg)}
                     title="Mark Late"
+                    aria-label="Mark Late"
                     className="bg-orange-500/5 hover:bg-orange-500/20 text-orange-500 border-l border-white/10 px-3 py-2 text-[10px] font-black tracking-widest transition-all"
                   >
                     L
@@ -278,6 +280,7 @@ export default function AdminEventDetailPage({ params }: PageProps) {
                     disabled={isActioning}
                     onClick={() => submitStatus("absent", reg)}
                     title="Mark Absent"
+                    aria-label="Mark Absent"
                     className="bg-red-500/5 hover:bg-red-500/20 text-red-500 border-l border-white/10 px-3 py-2 text-[10px] font-black tracking-widest transition-all"
                   >
                     A

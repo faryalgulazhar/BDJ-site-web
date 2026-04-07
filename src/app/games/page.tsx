@@ -88,7 +88,7 @@ const categoryColors: Record<GameCategory, string> = {
   TOURNAMENT: "bg-violet-500/20 text-violet-400 border border-violet-500/40",
 };
 
-const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 
 // Default seed sessions so there's always content
 const SEED_SESSIONS: Omit<Session, "id">[] = [
@@ -220,7 +220,7 @@ function SessionCard({
 
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border p-6 gap-5 transition-all duration-500 ${
+      className={`relative flex flex-col rounded-2xl border p-4 sm:p-6 gap-4 sm:gap-5 transition-all duration-500 ${
         isFull
           ? "bg-[#0f172a]/50 border-white/5 opacity-60"
           : isRegistered
@@ -310,15 +310,17 @@ function SessionCard({
       </div>
 
       {/* Title & meta */}
-      <div className="flex flex-col gap-2 flex-1">
-        <h3 className="text-xl font-black tracking-tight text-white leading-tight">{session.title}</h3>
-        <div className="flex flex-col gap-1 text-white/50 text-[13px]">
-          <span className="flex items-center gap-2"><Calendar size={13} />{session.date}</span>
-          <span className="flex items-center gap-2"><Clock size={13} />{session.time}</span>
-          <span className="flex items-center gap-2 font-black text-primary/70 uppercase tracking-tighter text-[11px]"><Plus size={12} className="rotate-45" /> {session.location}</span>
+      <div className="flex flex-col gap-3 flex-1">
+        <h3 className="text-lg xs:text-xl font-black tracking-tight text-white leading-tight">{session.title}</h3>
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-2 gap-x-4 text-white/50 text-[12px] sm:text-[13px]">
+          <span className="flex items-center gap-2 font-medium"><Calendar size={13} className="shrink-0" />{session.date}</span>
+          <span className="flex items-center gap-2 font-medium"><Clock size={13} className="shrink-0" />{session.time}</span>
+          <span className="flex items-center gap-2 font-black text-primary/70 uppercase tracking-tighter text-[10px] sm:text-[11px] xs:col-span-2">
+            <Plus size={12} className="rotate-45 shrink-0" /> {session.location}
+          </span>
         </div>
         {session.suggestedByEmail && (
-          <span className="text-[9px] text-gray-600 uppercase tracking-widest">suggested by {session.suggestedByEmail}</span>
+          <span className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">suggested by {session.suggestedByEmail}</span>
         )}
       </div>
 
@@ -382,11 +384,11 @@ const EMPTY_FORM = { title: "", category: "VIDEO GAME" as GameCategory, date: ""
 
 export default function GamesPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t } = useLanguage();
   const { isIceTheme } = useTheme();
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+
   const isLoggedIn = !!user;
 
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -459,7 +461,7 @@ export default function GamesPage() {
       setIsLoading(false);
     };
     load();
-  }, []);
+  }, [user]);
 
   const reloadSessions = async () => {
     const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));

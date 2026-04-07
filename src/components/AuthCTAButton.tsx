@@ -11,9 +11,7 @@ interface AuthCTAButtonProps {
 
 export default function AuthCTAButton({ primaryText, secondaryText, className }: AuthCTAButtonProps) {
   const router = useRouter();
-  const { user } = useAuth();
-  
-  const isAdmin = user?.email === "admin@bdj-karukera.com";
+  const { user, isAdmin } = useAuth();
 
   const handleClick = () => {
     if (!user) router.push('/register');

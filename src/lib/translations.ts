@@ -195,6 +195,46 @@ export const translations = {
       activityLog: "Activity points log",
       noMembers: "No members have registered for events yet.",
       noEvents: "You haven't registered for any events yet.",
+    },
+    // Legal Pages
+    legalNotice: {
+      title: "LEGAL NOTICE",
+      publisherTitle: "SITE PUBLISHER",
+      publisherText: "BDJ Association — Student association at Paris School of Business. Not officially registered with the French state (No SIRET).",
+      hostingTitle: "HOSTING",
+      hostingText: "This site is hosted by Vercel Inc., located at 340 S Lemon Ave #1150, Walnut, CA 91789, USA.",
+      contactTitle: "CONTACT",
+      contactText: "For any inquiries, contact us at: admin@bdj-karukera.com"
+    },
+    privacyPolicy: {
+      title: "PRIVACY POLICY",
+      dataTitle: "DATA COLLECTED",
+      dataText: "We collect your name, email address, gamer tag, and a unique QR code identifier.",
+      purposeTitle: "PURPOSE",
+      purposeText: "This data is purely used for member identification and event attendance tracking within the association.",
+      storageTitle: "STORAGE & SHARING",
+      storageText: "Data is securely stored in Google Firebase. We never sell or share your data with third parties.",
+      rightsTitle: "YOUR RIGHTS",
+      rightsText: "You can request the deletion of your account and data at any time by contacting us via email.",
+      cookiesTitle: "COOKIES",
+      cookiesText: "We do not use tracking or advertising cookies. We only use strictly necessary cookies for Firebase Authentication."
+    },
+    termsOfUse: {
+      title: "TERMS OF USE",
+      eligibilityTitle: "ELIGIBILITY",
+      eligibilityText: "This platform is exclusively reserved for BDJ members and Paris School of Business students.",
+      accountsTitle: "ACCOUNTS",
+      accountsText: "The association reserves the right to remove any account at the admin's discretion for misuse or non-compliance.",
+      qrTitle: "QR CODES",
+      qrText: "Your digital member card and QR code are strictly personal. Sharing them is prohibited.",
+      liabilityTitle: "LIABILITY",
+      liabilityText: "BDJ Karukera is not liable for any misuse of the platform or external links."
+    },
+    cookieBanner: {
+      message: "We use strictly necessary Firebase Auth cookies to manage your session. No tracking cookies are used.",
+      learnMore: "Learn More",
+      accept: "ACCEPT",
+      decline: "DECLINE"
     }
   },
   FR: {
@@ -390,6 +430,46 @@ export const translations = {
       activityLog: "Journal de points d'activité",
       noMembers: "Aucun membre ne s'est encore inscrit à des événements.",
       noEvents: "Vous n'êtes inscrit à aucun événement pour le moment.",
+    },
+    // Legal Pages
+    legalNotice: {
+      title: "MENTIONS LÉGALES",
+      publisherTitle: "ÉDITEUR DU SITE",
+      publisherText: "Association BDJ — Association étudiante à Paris School of Business. Non déclarée officiellement en préfecture (Sans SIRET).",
+      hostingTitle: "HÉBERGEMENT",
+      hostingText: "Ce site est hébergé par Vercel Inc., situé au 340 S Lemon Ave #1150, Walnut, CA 91789, USA.",
+      contactTitle: "CONTACT",
+      contactText: "Pour toute question, contactez-nous à : admin@bdj-karukera.com"
+    },
+    privacyPolicy: {
+      title: "POLITIQUE DE CONFIDENTIALITÉ",
+      dataTitle: "DONNÉES COLLECTÉES",
+      dataText: "Nous collectons votre nom, e-mail, tag joueur et un identifiant unique de QR code.",
+      purposeTitle: "FINALITÉ",
+      purposeText: "Ces données sont exclusivement utilisées pour l'identification des membres et le suivi des présences aux événements.",
+      storageTitle: "STOCKAGE & PARTAGE",
+      storageText: "Les données sont stockées de manière sécurisée dans Google Firebase. Nous ne vendons ni ne partageons vos données.",
+      rightsTitle: "VOS DROITS",
+      rightsText: "Vous pouvez demander la suppression de votre compte et de vos données à tout moment en nous contactant par e-mail.",
+      cookiesTitle: "COOKIES",
+      cookiesText: "Nous n'utilisons aucun cookie de suivi ou publicitaire. Seuls les cookies de session Firebase Auth sont utilisés.",
+    },
+    termsOfUse: {
+      title: "CONDITIONS D'UTILISATION",
+      eligibilityTitle: "ÉLIGIBILITÉ",
+      eligibilityText: "Cette plateforme est exclusivement réservée aux membres du BDJ et aux étudiants de Paris School of Business.",
+      accountsTitle: "COMPTES",
+      accountsText: "L'association se réserve le droit de supprimer tout compte à sa discrétion en cas d'abus ou de non-respect des règles.",
+      qrTitle: "QR CODES",
+      qrText: "Votre carte de membre numérique et votre QR code sont strictement personnels. Leur partage est interdit.",
+      liabilityTitle: "RESPONSABILITÉ",
+      liabilityText: "Le BDJ Karukera ne saurait être tenu responsable d'une mauvaise utilisation de la plateforme ou des liens externes.",
+    },
+    cookieBanner: {
+      message: "Nous utilisons uniquement des cookies de session Firebase Auth strictement nécessaires. Aucun cookie de suivi n'est utilisé.",
+      learnMore: "En savoir plus",
+      accept: "ACCEPTER",
+      decline: "REFUSER"
     }
   }
 };

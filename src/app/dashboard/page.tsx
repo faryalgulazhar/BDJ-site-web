@@ -17,14 +17,14 @@ const categoryColors: Record<string, string> = {
   "TOURNAMENT": "bg-violet-500/20 text-violet-400 border border-violet-500/40",
 };
 
-const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { isIceTheme } = useTheme();
   const { t } = useLanguage();
   const router = useRouter();
-  const isAdmin = user?.email === ADMIN_EMAIL;
+
   const [registeredSessionIds, setRegisteredSessionIds] = useState<string[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);

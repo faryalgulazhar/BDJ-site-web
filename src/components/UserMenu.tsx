@@ -31,12 +31,11 @@ import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 
 export default function UserMenu() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [gamerTag, setGamerTag] = useState<string | null>(null);
   const [photoURL, setPhotoURL] = useState<string | null>(null);
-  const isAdmin = user?.email === "admin@bdj-karukera.com";
   
   // Notification States (Integrated from NotificationBell)
   const [notifications, setNotifications] = useState<any[]>([]);

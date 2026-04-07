@@ -28,8 +28,7 @@ interface Notification {
 }
 
 export default function NotificationBell() {
-  const { user } = useAuth();
-  const isAdmin = user?.email === "admin@bdj-karukera.com";
+  const { user, isAdmin } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -53,7 +52,6 @@ export default function NotificationBell() {
       where("toUid", "==", user.uid)
     );
     const unsub = onSnapshot(q, (snap) => {
-      console.log("NOTIF DEBUG: Received snapshot for UID:", user.uid, "Count:", snap.docs.length);
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Notification));
       // Sort client-side by createdAt desc
       docs.sort((a, b) => {

@@ -40,11 +40,11 @@ function CardLayout({
 
   return (
     <div 
-      className="relative overflow-hidden shrink-0 transition-all duration-500"
       style={{
-        width: size === 1 ? 'min(320px, 92vw)' : W,
+        width: size === 1 ? 'min(320px, 92vw)' : `${W}px`,
+        maxWidth: "100%",
         aspectRatio: '320/190',
-        borderRadius: 16 * s,
+        borderRadius: size === 1 ? '16px' : `${16 * s}px`,
         background: tk.bg,
         boxShadow: `0 ${8 * s}px ${40 * s}px rgba(0,0,0,0.6)`,
         containerType: 'size',
@@ -276,9 +276,9 @@ export default function MemberCard({ user }: MemberCardProps) {
       </div>
 
       {/* Layout Row for Controls */}
-      <div className="flex items-center justify-between w-full max-w-[320px] mt-4 px-1">
+      <div className="flex flex-col xs:flex-row items-center justify-between w-full max-w-[320px] xs:max-w-[min(320px,92vw)] mt-4 px-1 gap-4 xs:gap-0">
         {/* Theme swatches (Left) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full xs:w-auto justify-between xs:justify-start">
           <div className="flex gap-2">
             {(["fire", "water"] as CardTheme[]).map((t) => (
               <button key={t} onClick={() => switchTheme(t)} 
@@ -298,7 +298,7 @@ export default function MemberCard({ user }: MemberCardProps) {
         </div>
 
         {/* Download button (Right) */}
-        <button onClick={handleDownload} disabled={downloading} style={{
+        <button onClick={handleDownload} disabled={downloading} className="w-full xs:w-auto" style={{
           fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase",
           padding: "8px 16px", borderRadius: 20, border: `1px solid ${tk.accent}55`,
           background: `${tk.accent}18`, color: tk.accent,
@@ -324,8 +324,10 @@ export default function MemberCard({ user }: MemberCardProps) {
         >
           <style>{`@keyframes fadeIn{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}}`}</style>
           <div onClick={e => e.stopPropagation()} className="flex flex-col items-center gap-5 w-[95vw] max-w-md">
-            <CardLayout {...sharedProps} size={1.5} />
-            <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">TAP OUTSIDE TO CLOSE</p>
+            <div className="scale-105 xs:scale-125 md:scale-150 origin-center transition-transform">
+              <CardLayout {...sharedProps} size={1} />
+            </div>
+            <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mt-4">TAP OUTSIDE TO CLOSE</p>
           </div>
         </div>,
         document.body

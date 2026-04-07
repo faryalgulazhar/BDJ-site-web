@@ -7,12 +7,12 @@ import { AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function EmailVerificationBanner() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   // If there's no user, or they are already verified, or they are the admin, don't show the banner
-  if (!user || user.emailVerified || user.email === "admin@bdj-karukera.com") {
+  if (!user || user.emailVerified || isAdmin) {
     return null;
   }
 

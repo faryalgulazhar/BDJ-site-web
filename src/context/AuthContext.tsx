@@ -5,9 +5,12 @@ import { onAuthStateChanged, signOut as firebaseSignOut, User } from "firebase/a
 import { auth } from "@/lib/firebase";
 import SplashScreen from "@/components/SplashScreen";
 
+export const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -37,8 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const value = {
+    user,
+    loading,
+    isAdmin: user?.email === ADMIN_EMAIL,
+    signOut,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
+    <AuthContext.Provider value={value}>
       {showSplash && <SplashScreen visible={loading} />}
       {!loading && children}
     </AuthContext.Provider>

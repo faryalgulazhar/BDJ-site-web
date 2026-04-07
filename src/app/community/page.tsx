@@ -86,7 +86,7 @@ type BoardMember = {
 };
 
 export default function CommunityPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const router = useRouter();
   const { t, language } = useLanguage();
   const { isIceTheme } = useTheme();
@@ -119,7 +119,7 @@ export default function CommunityPage() {
   const [allMembers, setAllMembers] = useState<any[]>([]);
   const [isAllMembersOpen, setIsAllMembersOpen] = useState(false);
 
-  const isAdmin = user?.email === "admin@bdj-karukera.com";
+
 
   // Fetch Firestore Data
   const fetchAllData = async () => {
@@ -162,7 +162,7 @@ export default function CommunityPage() {
       router.push("/login");
       return;
     }
-    if (!user.emailVerified && user.email !== "admin@bdj-karukera.com") {
+    if (!user.emailVerified && !isAdmin) {
       toast.error("Please verify your email address to post in the community.");
       return;
     }
@@ -172,7 +172,7 @@ export default function CommunityPage() {
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!user.emailVerified && user.email !== "admin@bdj-karukera.com") {
+    if (!user.emailVerified && !isAdmin) {
       toast.error("Please verify your email address to publish a post.");
       return;
     }
@@ -663,7 +663,7 @@ export default function CommunityPage() {
                       <MessageCircle size={14} />
                       <span className="text-xs font-bold">{post.commentsList?.length || 0}</span>
                     </button>
-                    {(user?.uid === post.authorId || user?.email === "admin@bdj-karukera.com") && (
+                    {(user?.uid === post.authorId || isAdmin) && (
                       <button
                         onClick={() => handleDeletePost(post.id)}
                         className="ml-auto flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"

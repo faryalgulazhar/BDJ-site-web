@@ -70,7 +70,7 @@ const categoryColors: Record<GameCategory, string> = {
   TOURNAMENT: "bg-violet-500/20 text-violet-400 border border-violet-500/40",
 };
 
-const ADMIN_EMAIL = "admin@bdj-karukera.com";
+
 
 // ─────────────────────────────────────────────
 // Pending Card (Admin view)
@@ -128,8 +128,7 @@ function PendingCard({ session, onApprove, onReject, onMessage }: {
 // ─────────────────────────────────────────────
 export default function AdminOpsPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const { user, isAdmin } = useAuth();
 
   const [isLoading, setIsLoading] = useState(true);
   const [sessions, setSessions] = useState<Session[]>([]);

@@ -20,7 +20,7 @@ import { revalidatePath } from "next/cache";
 
 export async function deleteSessionAction(id: string) {
   try {
-    await deleteDoc(doc(db, "sessions", id));
+    await deleteDoc(doc(db, "events", id));
     revalidatePath("/games");
     return { success: true };
   } catch (error) {
@@ -31,7 +31,7 @@ export async function deleteSessionAction(id: string) {
 
 export async function approveSessionAction(id: string) {
   try {
-    await updateDoc(doc(db, "sessions", id), { approval: "approved" });
+    await updateDoc(doc(db, "events", id), { approval: "approved" });
     revalidatePath("/games");
     return { success: true };
   } catch (error) {
@@ -42,7 +42,7 @@ export async function approveSessionAction(id: string) {
 
 export async function updateSessionAction(id: string, data: any) {
   try {
-    await updateDoc(doc(db, "sessions", id), {
+    await updateDoc(doc(db, "events", id), {
       ...data,
       updatedAt: serverTimestamp(),
     });
@@ -53,6 +53,7 @@ export async function updateSessionAction(id: string, data: any) {
     return { success: false, error: "Failed to update session" };
   }
 }
+
 
 // ── Admin Tasks ──
 

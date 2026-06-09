@@ -55,7 +55,12 @@ function getFirstDayOfWeek(year: number, month: number) {
   return (day + 6) % 7;
 }
 
-export default function CyberCalendar() {
+interface CyberCalendarProps {
+  sessions?: any[];
+  registeredIds?: string[];
+}
+
+export default function CyberCalendar({ sessions, registeredIds }: CyberCalendarProps) {
   const { isIceTheme } = useTheme();
   const { user } = useAuth();
   const now = new Date();
@@ -64,26 +69,24 @@ export default function CyberCalendar() {
   const [selected, setSelected] = useState<CalEvent | null>(null);
   const [events, setEvents] = useState<CalEvent[]>([]);
   const [userRegistrations, setUserRegistrations] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!sessions);
 
   useEffect(() => {
-    if (!user) return;
-    const q = query(collection(db, "registrations"), where("userId", "==", user.uid));
-    const unsub = onSnapshot(q, (snap) => {
-      setUserRegistrations(snap.docs.map(d => d.data().sessionId));
-    });
-    return () => unsub();
-  }, [user]);
+    if (registeredIds) {
+      setUserRegistrations(registeredIds);
+    }
+  }, [registeredIds]);
 
   // Parse custom date string: "MAY 14, 2025" or similar
   const parseSessionDate = (dateStr: string): { day: number, month: number, year: number } | null => {
     try {
       const parts = dateStr.replace(",", "").split(" ");
       if (parts.length < 3) return null;
-      const month = MONTH_MAP[parts[0].toUpperCase()];
+      const monthStr = parts[0].toUpperCase();
+      const month = MONTH_MAP[monthStr];
       const day = parseInt(parts[1]);
       const year = parseInt(parts[2]);
-      if (isNaN(month) || isNaN(day) || isNaN(year)) return null;
+      if (month === undefined || isNaN(day) || isNaN(year)) return null;
       return { day, month, year };
     } catch {
       return null;
@@ -91,12 +94,44 @@ export default function CyberCalendar() {
   };
 
   useEffect(() => {
-    const q = query(collection(db, "sessions"), orderBy("createdAt", "desc"));
+    if (sessions) {
+      const fetchedEvents: CalEvent[] = sessions
+        .map(data => {
+          if (data.approval !== "approved") return null;
+          if (!data.date) return null;
+          
+          const parsedDate = parseSessionDate(data.date);
+          if (!parsedDate) return null;
+
+          let type: EventType = "videogame";
+          if (data.category === "TOURNAMENT") type = "tournament";
+          else if (data.category === "BOARD GAME") type = "tabletop";
+
+          return {
+            id: data.id,
+            day: parsedDate.day,
+            month: parsedDate.month,
+            year: parsedDate.year,
+            label: data.title,
+            type: type
+          };
+        })
+        .filter((e): e is CalEvent => e !== null);
+      
+      setEvents(fetchedEvents);
+      setLoading(false);
+      return;
+    }
+
+    // Fallback if no sessions provided via props
+    const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, (snap) => {
       const fetchedEvents: CalEvent[] = snap.docs
         .map(doc => {
           const data = doc.data();
           if (data.approval !== "approved") return null;
+          if (!data.date) return null;
+          
           const parsedDate = parseSessionDate(data.date);
           if (!parsedDate) return null;
 
@@ -120,7 +155,9 @@ export default function CyberCalendar() {
     });
 
     return () => unsub();
-  }, []);
+  }, [sessions]);
+
+
 
   const totalDays   = getDaysInMonth(viewYear, viewMonth);
   const startOffset = getFirstDayOfWeek(viewYear, viewMonth);

@@ -134,9 +134,8 @@ export default function DashboardPage() {
       <section className="max-w-7xl mx-auto w-full px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* ── Largest Box: Cyber Calendar (spans 2 cols on desktop) ── */}
           <div className={`${box} md:col-span-2 min-h-[400px] md:min-h-[520px] overflow-hidden px-4 md:px-6`}>
-            <CyberCalendar />
+            <CyberCalendar sessions={sessions} registeredIds={registeredSessionIds} />
           </div>
 
           {/* ── Right column: two stacked boxes ── */}

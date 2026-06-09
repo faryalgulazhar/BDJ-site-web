@@ -166,7 +166,7 @@ export default function AdminOpsPage() {
     if (!isAdmin) return;
     setIsLoading(true);
     try {
-      const snap = await getDocs(query(collection(db, "sessions"), orderBy("createdAt", "desc")));
+      const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
       setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() } as Session)));
 
       const msgSnap = await getDocs(query(collection(db, "member_messages"), orderBy("createdAt", "desc")));
@@ -290,7 +290,7 @@ export default function AdminOpsPage() {
     );
     toast.success("Session approved!");
     try {
-      await updateDoc(doc(db, "sessions", id), { approval: "approved" });
+      await updateDoc(doc(db, "events", id), { approval: "approved" });
       await loadData();
     } catch (e) {
       toast.error("Failed to approve session.");

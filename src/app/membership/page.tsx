@@ -23,8 +23,8 @@ export default function MembershipPage() {
         </h1>
         <p className="mt-6 text-gray-400 max-w-lg mx-auto text-base md:text-lg leading-relaxed z-10">
           {language === "FR"
-            ? "Rejoignez l'association BDJ Karukera. Adhésion gratuite, ouverte à tous les étudiants et collaborateurs."
-            : "Join the BDJ Karukera association. Free membership, open to all students and collaborators."}
+            ? "Rejoignez l'association BDJ. Adhésion gratuite, ouverte à tous les étudiants et collaborateurs."
+            : "Join the BDJ association. Free membership, open to all students and collaborators."}
         </p>
         <div className="mt-10 z-10">
           <AuthCTAButton 
@@ -92,7 +92,7 @@ export default function MembershipPage() {
       <section className="max-w-5xl mx-auto w-full px-6 py-12 md:py-20 z-10 text-center">
         <h2 className="font-black tracking-tighter text-white uppercase mb-4" style={{ fontSize: 'clamp(1.8rem, 6vw, 3.5rem)' }}>{t.membership.theRules}</h2>
         <p className="text-gray-400 text-sm md:text-base mb-10 md:mb-12 px-4">
-          By joining BDJ Karukera, you agree to the following guidelines.
+          By joining BDJ, you agree to the following guidelines.
         </p>
 
         <div className="bg-gradient-to-b from-[#1c1a1a] to-[#121212] border border-white/5 rounded-[2.5rem] p-10 md:p-16 text-left shadow-2xl">

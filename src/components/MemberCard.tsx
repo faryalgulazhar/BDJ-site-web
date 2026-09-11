@@ -75,7 +75,7 @@ function CardLayout({
         {/* Row 1 */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontSize: 11 * s, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", fontWeight: 700 }}>
-            BDJ Karukera
+            BDJ
           </span>
           <span style={{
             fontSize: 9 * s, letterSpacing: "0.12em", textTransform: "uppercase",

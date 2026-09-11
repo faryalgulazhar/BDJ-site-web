@@ -6,7 +6,7 @@ import { Plus, ThumbsUp, MessageCircle, X, Loader2, Trash2, Upload } from "lucid
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -52,7 +52,7 @@ const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<s
 const DEFAULT_BOARD = [
   { name: "ALEXANDRE B.", role: "PRESIDENT", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop", descEn: "Alexandre brings visionary leadership and three years of competitive esports management to BDJ. He is dedicated to making this association the top collegiate gaming community in the region.", descFr: "Alexandre apporte un leadership visionnaire et trois ans de gestion d'esports compétitifs au DBJ. Il s'engage à faire de cette association la meilleure communauté de jeux universitaire de la région." },
   { name: "SARAH M.", role: "VICE PRESIDENT", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop", descEn: "As Vice President, Sarah oversees all major tournament logistics and community outreach programs. Her background in event management ensures our LAN parties are flawless.", descFr: "En tant que vice-présidente, Sarah supervise toute la logistique des tournois majeurs et les programmes de sensibilisation communautaire. Son expérience en gestion d'événements garantit que nos soirées LAN sont impeccables." },
-  { name: "THOMAS D.", role: "SECRETARY", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", descEn: "Thomas is the organizational backbone of BDJ Karukera. He manages communications, discord moderation, and ensures our community remains a safe and inclusive space.", descFr: "Thomas est l'épine dorsale organisationnelle de BDJ Karukera. Il gère les communications, la modération discord et veille à ce que notre communauté reste un espace sûr et inclusif." },
+  { name: "THOMAS D.", role: "SECRETARY", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", descEn: "Thomas is the organizational backbone of BDJ. He manages communications, discord moderation, and ensures our community remains a safe and inclusive space.", descFr: "Thomas est l'épine dorsale organisationnelle de BDJ. Il gère les communications, la modération discord et veille à ce que notre communauté reste un espace sûr et inclusif." },
   { name: "LÉA G.", role: "TREASURER", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop", descEn: "Léa handles our sponsorships and treasury. Thanks to her financial strategy, we have been able to secure top-tier gaming equipment and prize pools for our members.", descFr: "Léa gère nos parrainages et notre trésorerie. Grâce à sa stratégie financière, nous avons pu sécuriser des équipements de jeu de haut niveau et des cagnottes pour nos membres." },
 ];
 
@@ -311,7 +311,15 @@ export default function CommunityPage() {
       let finalImgUrl = boardForm.img || "";
 
       if (selectedFile) {
-        finalImgUrl = await resizeImage(selectedFile, 300, 300);
+        const compressed = await resizeImage(selectedFile, 300, 300);
+        // Guard: base64 string size in bytes ≈ length * 0.75
+        const approximateSizeKB = (compressed.length * 0.75) / 1024;
+        if (approximateSizeKB > 900) {
+          toast.error("Image is too large even after compression. Please choose a smaller image (under ~1.2 MB original).");
+          setIsSubmitting(false);
+          return;
+        }
+        finalImgUrl = compressed;
       }
 
       const payload = { ...boardForm, img: finalImgUrl };
@@ -769,7 +777,7 @@ export default function CommunityPage() {
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-xs font-black text-white uppercase truncate max-w-[100px]">{member.gamerTag || member.email?.split('@')[0]}</span>
-                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj-karukera.com' ? 'ADMIN' : 'MEMBER'}</span>
+                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj.com' ? 'ADMIN' : 'MEMBER'}</span>
                   </div>
                 </div>
               ))}
@@ -832,7 +840,7 @@ export default function CommunityPage() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-black text-white uppercase tracking-tight">{member.gamerTag || member.email?.split('@')[0]}</span>
-                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj-karukera.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
+                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
                       </div>
                     </div>
                   ))

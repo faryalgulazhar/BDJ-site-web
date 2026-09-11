@@ -18,7 +18,7 @@ export default function LoginPage() {
 
         <div className="text-center mb-10">
           <h1 className="text-3xl font-black tracking-tight uppercase mb-2">Welcome Back</h1>
-          <p className="text-gray-500 text-sm">Sign in to your BDJ Karukera account.</p>
+          <p className="text-gray-500 text-sm">Sign in to your BDJ account.</p>
         </div>
 
         <LoginForm />

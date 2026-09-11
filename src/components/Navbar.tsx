@@ -45,21 +45,21 @@ export default function Navbar() {
             <div className="relative w-10 h-10 shrink-0">
               <Image 
                 src="/logo_red.png" 
-                alt="BDJ KARUKERA Red" 
+                alt="BDJ Red" 
                 fill
                 priority
                 className={`object-contain transition-opacity duration-500 ${isIceTheme ? 'opacity-0' : 'opacity-100'}`} 
               />
               <Image 
                 src="/logo_blue.png" 
-                alt="BDJ KARUKERA Blue" 
+                alt="BDJ Blue" 
                 fill
                 priority
                 className={`object-contain transition-opacity duration-500 ${isIceTheme ? 'opacity-100' : 'opacity-0'}`} 
               />
             </div>
             <span className="text-primary font-black tracking-tighter text-base uppercase hidden xs:block transition-colors duration-500">
-              BDJ KARUKERA
+              BDJ
             </span>
           </Link>
 

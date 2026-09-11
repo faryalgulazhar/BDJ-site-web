@@ -12,7 +12,7 @@ export default function Footer() {
         {/* Top row */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <span className="text-primary font-black tracking-tighter text-sm uppercase">BDJ Karukera</span>
+            <span className="text-primary font-black tracking-tighter text-sm uppercase">BDJ</span>
             <span className="text-gray-700">·</span>
             <a
               href="https://www.psbedu.paris/fr"
@@ -34,7 +34,7 @@ export default function Footer() {
 
         {/* Bottom row */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 border-t border-white/5 pt-6">
-          <p className="opacity-50 text-center md:text-left">&copy; 2026 BDJ KARUKERA. ALL RIGHTS RESERVED.</p>
+          <p className="opacity-50 text-center md:text-left">&copy; 2026 BDJ. ALL RIGHTS RESERVED.</p>
           <a
             href="https://www.psbedu.paris/fr"
             target="_blank"

@@ -67,7 +67,7 @@ export default function RegisterForm() {
         role: "member"
       });
 
-      toast.success("🎉 Welcome to BDJ Karukera! Your account has been created. Please check your email to verify it.");
+      toast.success("🎉 Welcome to BDJ! Your account has been created. Please check your email to verify it.");
       
       // Delay redirect so user can read the message
       setTimeout(() => {
@@ -100,7 +100,7 @@ export default function RegisterForm() {
           createdAt: serverTimestamp(),
           role: "member"
         });
-        toast.success("🎉 Welcome to BDJ Karukera! Logged in with Google.");
+        toast.success("🎉 Welcome to BDJ! Logged in with Google.");
       } else {
         toast.success("Logged in successfully with Google!");
       }

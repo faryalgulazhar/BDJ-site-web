@@ -33,7 +33,7 @@ export const translations = {
       communityMixers: "COMMUNITY MIXERS",
       memberPerks: "MEMBER PERKS",
       readyToLevelUp: "READY TO LEVEL UP?",
-      readyDesc: "Join BDJ Karukera today and be part of the most active gaming association on campus. Access exclusive tournaments, connect with other players, and make your mark.",
+      readyDesc: "Join BDJ today and be part of the most active gaming association on campus. Access exclusive tournaments, connect with other players, and make your mark.",
       becomeMember: "BECOME A MEMBER"
     },
     // Games Page
@@ -59,7 +59,7 @@ export const translations = {
       hostDesc: "Got a game you love? Members can propose and organize official association tournaments with our full support.",
       proposeEvent: "SUGGEST A SESSION",
       loginRequired: "LOGIN REQUIRED",
-      loginRequiredDesc: "You must be logged in to register for official BDJ Karukera tournaments.",
+      loginRequiredDesc: "You must be logged in to register for official BDJ tournaments.",
       loginToRegister: "LOGIN TO REGISTER",
       tournamentRegistration: "TOURNAMENT REGISTRATION",
       playerTag: "Player Tag",
@@ -80,7 +80,7 @@ export const translations = {
       ourMembers: "OUR MEMBERS",
       viewAllMembers: "VIEW ALL MEMBERS",
       noPosts: "NO POSTS YET",
-      beTheFirst: "Be the very first to share your thoughts with the BDJ Karukera community.",
+      beTheFirst: "Be the very first to share your thoughts with the BDJ community.",
       startConversation: "START A CONVERSATION",
       publishedBadge: "PUBLISHED",
       writeComment: "Write a comment...",
@@ -90,7 +90,7 @@ export const translations = {
       readyToPost: "READY TO POST?",
       wantToJoin: "WANT TO JOIN THE CONVERSATION?",
       loggedInDesc: "You are logged in! Share your updates or start a discussion with the association.",
-      loggedOutDesc: "Login to post updates, comment on suggestions, or vote for new initiatives within BDJ Karukera.",
+      loggedOutDesc: "Login to post updates, comment on suggestions, or vote for new initiatives within BDJ.",
       createNewPost: "CREATE NEW POST",
       loginToPost: "LOGIN TO POST",
       postTitle: "Post Title",
@@ -153,7 +153,7 @@ export const translations = {
     // Auth Pages
     auth: {
       loginTitle: "LOGIN",
-      loginSub: "Access your BDJ Karukera account.",
+      loginSub: "Access your BDJ account.",
       email: "EMAIL ADDRESS",
       emailPlaceholder: "you@student.edu",
       password: "PASSWORD",
@@ -164,7 +164,7 @@ export const translations = {
       noAccount: "DON'T HAVE AN ACCOUNT?",
       registerHere: "REGISTER HERE",
       registerTitle: "REGISTER",
-      registerSub: "Join BDJ Karukera today.",
+      registerSub: "Join BDJ today.",
       gamerTag: "GAMER TAG",
       gamerTagPlaceholder: "Faker#1234",
       createAccount: "CREATE ACCOUNT",
@@ -204,7 +204,7 @@ export const translations = {
       hostingTitle: "HOSTING",
       hostingText: "This site is hosted by Vercel Inc., located at 340 S Lemon Ave #1150, Walnut, CA 91789, USA.",
       contactTitle: "CONTACT",
-      contactText: "For any inquiries, contact us at: admin@bdj-karukera.com"
+      contactText: "For any inquiries, contact us at: admin@bdj.com"
     },
     privacyPolicy: {
       title: "PRIVACY POLICY",
@@ -228,7 +228,7 @@ export const translations = {
       qrTitle: "QR CODES",
       qrText: "Your digital member card and QR code are strictly personal. Sharing them is prohibited.",
       liabilityTitle: "LIABILITY",
-      liabilityText: "BDJ Karukera is not liable for any misuse of the platform or external links."
+      liabilityText: "BDJ is not liable for any misuse of the platform or external links."
     },
     cookieBanner: {
       message: "We use strictly necessary Firebase Auth cookies to manage your session. No tracking cookies are used.",
@@ -269,7 +269,7 @@ export const translations = {
       communityMixers: "RENCONTRES COMMUNAUTAIRES",
       memberPerks: "AVANTAGES MEMBRES",
       readyToLevelUp: "PRÊT À PASSER AU NIVEAU SUPÉRIEUR ?",
-      readyDesc: "Rejoignez BDJ Karukera aujourd'hui et faites partie de l'association de jeu la plus active du campus. Accédez à des tournois exclusifs, connectez-vous avec d'autres joueurs et laissez votre marque.",
+      readyDesc: "Rejoignez BDJ aujourd'hui et faites partie de l'association de jeu la plus active du campus. Accédez à des tournois exclusifs, connectez-vous avec d'autres joueurs et laissez votre marque.",
       becomeMember: "DEVENIR MEMBRE"
     },
     // Games Page
@@ -295,7 +295,7 @@ export const translations = {
       hostDesc: "Vous avez un jeu que vous aimez ? Les membres peuvent proposer et organiser des tournois officiels de l'association avec notre soutien total.",
       proposeEvent: "SUGGÉRER UNE SESSION",
       loginRequired: "CONNEXION REQUISE",
-      loginRequiredDesc: "Vous devez être connecté pour vous inscrire aux tournois officiels BDJ Karukera.",
+      loginRequiredDesc: "Vous devez être connecté pour vous inscrire aux tournois officiels BDJ.",
       loginToRegister: "SE CONNECTER POUR S'INSCRIRE",
       tournamentRegistration: "INSCRIPTION AU TOURNOI",
       playerTag: "Tag du joueur",
@@ -316,7 +316,7 @@ export const translations = {
       ourMembers: "NOS MEMBRES",
       viewAllMembers: "VOIR TOUS LES MEMBRES",
       noPosts: "AUCUN POST POUR LE MOMENT",
-      beTheFirst: "Soyez le tout premier à partager vos pensées avec la communauté BDJ Karukera.",
+      beTheFirst: "Soyez le tout premier à partager vos pensées avec la communauté BDJ.",
       startConversation: "LANCER UNE CONVERSATION",
       publishedBadge: "PUBLIÉ",
       writeComment: "Écrire un commentaire...",
@@ -326,7 +326,7 @@ export const translations = {
       readyToPost: "PRÊT À PUBLIER ?",
       wantToJoin: "VOUS SOUHAITEZ REJOINDRE LA CONVERSATION ?",
       loggedInDesc: "Vous êtes connecté ! Partagez vos mises à jour ou lancez une discussion avec l'association.",
-      loggedOutDesc: "Connectez-vous pour publier des mises à jour, commenter des suggestions ou voter pour de nouvelles initiatives au sein de BDJ Karukera.",
+      loggedOutDesc: "Connectez-vous pour publier des mises à jour, commenter des suggestions ou voter pour de nouvelles initiatives au sein de BDJ.",
       createNewPost: "CRÉER UN NOUVEAU POST",
       loginToPost: "SE CONNECTER POUR PUBLIER",
       postTitle: "Titre du Post",
@@ -388,7 +388,7 @@ export const translations = {
     // Auth Pages
     auth: {
       loginTitle: "CONNEXION",
-      loginSub: "Accédez à votre compte BDJ Karukera.",
+      loginSub: "Accédez à votre compte BDJ.",
       email: "ADRESSE E-MAIL",
       emailPlaceholder: "vous@etudiant.edu",
       password: "MOT DE PASSE",
@@ -399,7 +399,7 @@ export const translations = {
       noAccount: "VOUS N'AVEZ PAS DE COMPTE ?",
       registerHere: "S'INSCRIRE ICI",
       registerTitle: "S'INSCRIRE",
-      registerSub: "Rejoignez BDJ Karukera aujourd'hui.",
+      registerSub: "Rejoignez BDJ aujourd'hui.",
       gamerTag: "TAG JOUEUR",
       gamerTagPlaceholder: "Faker#1234",
       createAccount: "CRÉER UN COMPTE",
@@ -439,7 +439,7 @@ export const translations = {
       hostingTitle: "HÉBERGEMENT",
       hostingText: "Ce site est hébergé par Vercel Inc., situé au 340 S Lemon Ave #1150, Walnut, CA 91789, USA.",
       contactTitle: "CONTACT",
-      contactText: "Pour toute question, contactez-nous à : admin@bdj-karukera.com"
+      contactText: "Pour toute question, contactez-nous à : admin@bdj.com"
     },
     privacyPolicy: {
       title: "POLITIQUE DE CONFIDENTIALITÉ",
@@ -463,7 +463,7 @@ export const translations = {
       qrTitle: "QR CODES",
       qrText: "Votre carte de membre numérique et votre QR code sont strictement personnels. Leur partage est interdit.",
       liabilityTitle: "RESPONSABILITÉ",
-      liabilityText: "Le BDJ Karukera ne saurait être tenu responsable d'une mauvaise utilisation de la plateforme ou des liens externes.",
+      liabilityText: "Le BDJ ne saurait être tenu responsable d'une mauvaise utilisation de la plateforme ou des liens externes.",
     },
     cookieBanner: {
       message: "Nous utilisons uniquement des cookies de session Firebase Auth strictement nécessaires. Aucun cookie de suivi n'est utilisé.",

@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const BASE_URL = "https://bdj-karukera.vercel.app";
+const BASE_URL = "https://bdj.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     "gaming association", "esports", "student club", "jeux vidéo", "tournoi"
   ],
   authors: [{ name: "BDJ – Paris School of Business", url: "https://www.psbedu.paris/fr" }],
-  creator: "BDJ Karukera",
+  creator: "BDJ",
   alternates: {
     canonical: BASE_URL,
   },

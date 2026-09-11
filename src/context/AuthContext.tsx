@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut as firebaseSignOut, User } from "firebase/a
 import { auth } from "@/lib/firebase";
 import SplashScreen from "@/components/SplashScreen";
 
-export const ADMIN_EMAIL = "admin@bdj-karukera.com";
+export const ADMIN_EMAIL = "admin@bdj.com";
 
 interface AuthContextType {
   user: User | null;

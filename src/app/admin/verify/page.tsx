@@ -68,7 +68,7 @@ function VerifyContent() {
   if (!user || !isAdmin) return null;
 
   const cfg = {
-    valid:     { border: "#22c55e", icon: <CheckCircle2 size={64} color="#22c55e" strokeWidth={1.5} />, bannerColor: "#22c55e", bannerLabel: "VERIFIED",  subtitle: "This person is a registered BDJ Karukera member." },
+    valid:     { border: "#22c55e", icon: <CheckCircle2 size={64} color="#22c55e" strokeWidth={1.5} />, bannerColor: "#22c55e", bannerLabel: "VERIFIED",  subtitle: "This person is a registered BDJ member." },
     inactive:  { border: "#f59e0b", icon: <AlertTriangle size={64} color="#f59e0b" strokeWidth={1.5} />, bannerColor: "#f59e0b", bannerLabel: "INACTIVE",  subtitle: "This account exists but is not an active member." },
     not_found: { border: "#FF4D2E", icon: <XCircle size={64} color="#FF4D2E" strokeWidth={1.5} />,       bannerColor: "#FF4D2E", bannerLabel: "INVALID",   subtitle: "No member found with this ID. This QR code may be invalid or expired." },
   }[state];
@@ -149,7 +149,7 @@ function VerifyContent() {
 
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "12px 24px", textAlign: "center" }}>
         <p style={{ margin: 0, fontSize: 9, letterSpacing: "0.18em", color: "rgba(255,255,255,0.15)", textTransform: "uppercase" }}>
-          BDJ Karukera · Admin Verification
+          BDJ · Admin Verification
         </p>
       </div>
     </div>

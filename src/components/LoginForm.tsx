@@ -81,7 +81,7 @@ export default function LoginForm() {
           createdAt: serverTimestamp(),
           role: "member"
         });
-        toast.success("🎉 Welcome to BDJ Karukera! Logged in with Google.");
+        toast.success("🎉 Welcome to BDJ! Logged in with Google.");
       } else {
         toast.success("Logged in successfully with Google!");
       }

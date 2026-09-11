@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: "Community Feed",
   description:
     "Share updates, photos, and discussions with fellow BDJ members at Paris School of Business. Stay connected with the campus gaming community.",
-  alternates: { canonical: "https://bdj.vercel.app/community" },
+  alternates: { canonical: "https://bdj-site-web.vercel.app/community" },
   openGraph: {
     title: "Community | BDJ – PSB Paris",
     description:
       "Connect with BDJ members, share gaming highlights and join the conversation.",
-    url: "https://bdj.vercel.app/community",
+    url: "https://bdj-site-web.vercel.app/community",
   },
 };
 

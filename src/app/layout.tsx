@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const BASE_URL = "https://bdj.vercel.app";
+const BASE_URL = "https://bdj-site-web.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

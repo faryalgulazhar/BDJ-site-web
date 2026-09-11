@@ -133,7 +133,7 @@ export default function SettingsPage() {
         } else {
           updateData.gamerTag = gamerTag.trim();
           updateData.usernameChanges = arrayUnion({
-            old: userData.gamerTag,
+            old: userData.gamerTag || null,
             new: gamerTag.trim(),
             date: Timestamp.now()
           });

@@ -217,12 +217,6 @@ export default function AdminAttendancePage() {
             Back to Dashboard
           </Link>
           <div className="flex items-center gap-3">
-            <Link
-              href="/admin/members"
-              className="text-[11px] font-black tracking-widest uppercase px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-all border border-white/10"
-            >
-              Manage Members
-            </Link>
             <button
               onClick={fetchAttendance}
               title="Refresh logs"

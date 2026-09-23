@@ -83,8 +83,6 @@ export default function LoginForm() {
           createdAt: serverTimestamp(),
           role: "member",
           onboardingComplete: false,
-          isAdmin: false,
-          superAdmin: false,
         });
         toast.success("🎉 Welcome to BDJ!");
       } else {

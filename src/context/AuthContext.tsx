@@ -7,17 +7,13 @@ import { auth, db } from "@/lib/firebase";
 import SplashScreen from "@/components/SplashScreen";
 import type { PrivateUserProfile, PublicUserProfile } from "@/types/user";
 
-// Fallback admin emails used until the first `isAdmin: true` is manually set
-// in Firestore Console for the bootstrap admin.
 export const ADMIN_EMAIL = "admin@bdj.com";
-export const ADMIN_EMAILS = ["admin@bdj.com", "admin@bdj-karukera.com"];
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   profileLoading: boolean;
   isAdmin: boolean;
-  isSuperAdmin: boolean;
   onboardingComplete: boolean;
   userProfile: PrivateUserProfile | null;
   publicProfile: PublicUserProfile | null;
@@ -91,18 +87,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // isAdmin: Firestore flag takes priority; email fallback covers the bootstrap period
-  const isEmailAdmin = !!user?.email && ADMIN_EMAILS.includes(user.email);
-  const isAdmin = userProfile?.isAdmin === true || isEmailAdmin;
-  const isSuperAdmin = userProfile?.superAdmin === true || isEmailAdmin;
-  const onboardingComplete = userProfile?.onboardingComplete === true || isEmailAdmin;
+  // Single hardcoded admin account
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  const onboardingComplete = userProfile?.onboardingComplete === true || isAdmin;
 
   const value: AuthContextType = {
     user,
     loading,
     profileLoading,
     isAdmin,
-    isSuperAdmin,
     onboardingComplete,
     userProfile,
     publicProfile,

@@ -51,8 +51,6 @@ export default function OnboardingPage() {
           email: user.email,
           legalName: legalName.trim(),
           onboardingComplete: true,
-          isAdmin: false,
-          superAdmin: false,
           role: "member",
           createdAt: serverTimestamp(),
         },

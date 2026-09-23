@@ -2,8 +2,6 @@ export interface PrivateUserProfile {
   uid: string;
   email: string;
   legalName: string;        // attendance only — never shown publicly
-  isAdmin: boolean;         // written by Cloud Function / console only
-  superAdmin: boolean;      // console-only, never app-writable
   onboardingComplete: boolean;
   role?: string;
   memberId?: string;

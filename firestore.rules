@@ -4,11 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.email == "admin@bdj-karukera.com" ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true)
-      );
+      return request.auth != null && request.auth.token.email == "admin@bdj.com";
     }
 
     // ── Private user doc ─────────────────────────────────────────────
@@ -18,11 +14,8 @@ service cloud.firestore {
                   && (request.auth.uid == userId || isAdmin());
       // New user creates their own doc on first sign-in
       allow create: if request.auth != null && request.auth.uid == userId;
-      // Owner can update own doc, but NEVER touch isAdmin/superAdmin
-      allow update: if request.auth != null
-                    && request.auth.uid == userId
-                    && !request.resource.data.diff(resource.data)
-                        .affectedKeys().hasAny(['isAdmin', 'superAdmin']);
+      // Owner can update own doc
+      allow update: if request.auth != null && request.auth.uid == userId;
     }
 
     // ── Public sub-doc ────────────────────────────────────────────────
@@ -44,12 +37,6 @@ service cloud.firestore {
     match /attendance/{docId} {
       allow read:   if request.auth != null && isAdmin();
       allow create: if request.auth != null && isAdmin();
-    }
-
-    // ── Admin log ─────────────────────────────────────────────────────
-    match /adminLog/{docId} {
-      allow read:   if request.auth != null && isAdmin();
-      allow write:  if false; // Cloud Function (Admin SDK) only
     }
 
     // ── Posts ─────────────────────────────────────────────────────────

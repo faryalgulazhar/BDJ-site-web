@@ -3,49 +3,91 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users: can read/write own doc, admin can read all
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth != null && request.auth.token.email == "admin@bdj-karukera.com";
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == "admin@bdj-karukera.com" ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true)
+      );
     }
 
-    // Posts: any authenticated user can read/create; only owner or admin can delete
+    // ── Private user doc ─────────────────────────────────────────────
+    match /users/{userId} {
+      // Owner or admin can read the full private doc
+      allow read: if request.auth != null
+                  && (request.auth.uid == userId || isAdmin());
+      // New user creates their own doc on first sign-in
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Owner can update own doc, but NEVER touch isAdmin/superAdmin
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data)
+                        .affectedKeys().hasAny(['isAdmin', 'superAdmin']);
+    }
+
+    // ── Public sub-doc ────────────────────────────────────────────────
+    match /users/{userId}/public/profile {
+      // Any authenticated user can read public profiles
+      allow read: if request.auth != null;
+      // Only the owner can write their own public profile
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.data.keys().hasOnly(['username', 'photoURL']);
+    }
+
+    // Collection group rule for public profile subcollections
+    match /{path=**}/public/{docId} {
+      allow read: if request.auth != null;
+    }
+
+    // ── Attendance ────────────────────────────────────────────────────
+    match /attendance/{docId} {
+      allow read:   if request.auth != null && isAdmin();
+      allow create: if request.auth != null && isAdmin();
+    }
+
+    // ── Admin log ─────────────────────────────────────────────────────
+    match /adminLog/{docId} {
+      allow read:   if request.auth != null && isAdmin();
+      allow write:  if false; // Cloud Function (Admin SDK) only
+    }
+
+    // ── Posts ─────────────────────────────────────────────────────────
     match /posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null;
       allow update: if request.auth != null;
       allow delete: if request.auth != null &&
-        (request.auth.uid == resource.data.authorId ||
-         request.auth.token.email == "admin@bdj-karukera.com");
+        (request.auth.uid == resource.data.authorId || isAdmin());
     }
 
-    // Events: anyone can read, only authenticated users can create, admin can update/delete
+    // ── Events + Registrations ────────────────────────────────────────
     match /events/{eventId} {
       allow read: if true;
       allow create: if request.auth != null;
-      // Admin has full control; users can update for registration (currentRegistrations/status)
       allow update: if request.auth != null;
-      allow delete: if request.auth != null &&
-        request.auth.token.email == "admin@bdj-karukera.com";
+      allow delete: if request.auth != null && isAdmin();
 
       // Event Registrations:
       match /registrations/{userId} {
         allow read: if true;
-        // User can create their own registration
-        allow create: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == "admin@bdj-karukera.com");
-        // User can delete their own registration to cancel
-        allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == "admin@bdj-karukera.com");
-        // Only admin can update the status
-        allow update: if request.auth != null && request.auth.token.email == "admin@bdj-karukera.com";
+        allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow update: if request.auth != null && isAdmin();
       }
     }
 
-    // Notifications: admin can create; recipient can read/update (mark as read)
+    // ── Notifications ─────────────────────────────────────────────────
     match /notifications/{notifId} {
-      allow create: if request.auth != null &&
-        request.auth.token.email == "admin@bdj-karukera.com";
+      allow create: if request.auth != null && isAdmin();
       allow read, update: if request.auth != null &&
         request.auth.uid == resource.data.toUid;
+    }
+
+    // ── Board Members ─────────────────────────────────────────────────
+    match /boardMembers/{memberId} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
     }
   }
 }

@@ -220,7 +220,7 @@ function SessionCard({
 
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border p-4 sm:p-6 gap-4 sm:gap-5 transition-all duration-500 ${
+      className={`relative flex flex-col rounded-2xl border p-4 sm:p-6 gap-4 sm:gap-5 transition-all duration-500 max-w-full overflow-hidden ${
         isFull
           ? "bg-[#0f172a]/50 border-white/5 opacity-60"
           : isRegistered
@@ -239,7 +239,7 @@ function SessionCard({
         </div>
       )}
       {session.approval === "pending" && (
-        <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-md uppercase border border-amber-500/20 w-fit">
+        <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-md uppercase border border-amber-500/20 w-fit shrink-0">
           PENDING
         </span>
       )}
@@ -260,7 +260,7 @@ function SessionCard({
                 className="fixed inset-0 z-30"
                 onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); }}
               />
-              <div className="absolute top-full right-0 mt-2 flex flex-col gap-1 bg-[#0f172a]/95 border border-white/10 rounded-xl p-2 shadow-2xl backdrop-blur-3xl min-w-[140px] origin-top-right animate-in fade-in zoom-in-95 duration-200 z-40">
+              <div className="absolute top-full right-0 mt-2 flex flex-col gap-1 bg-[#0f172a]/95 border border-white/10 rounded-xl p-2 shadow-2xl backdrop-blur-3xl min-w-[140px] max-w-[calc(100vw-32px)] origin-top-right animate-in fade-in zoom-in-95 duration-200 z-40">
                 <button
                   onClick={(e) => { e.stopPropagation(); setIsDropdownOpen(false); onViewAttendees(session); }}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-500/10 text-gray-300 hover:text-blue-400 text-[10px] font-black uppercase tracking-widest transition-all w-full text-left"
@@ -287,22 +287,22 @@ function SessionCard({
       )}
 
       {/* Top row */}
-      <div className="flex items-center justify-between gap-2">
-        <span className={`text-[10px] font-black tracking-widest px-3 py-1 rounded-full uppercase ${categoryColors[session.category]}`}>
+      <div className={`flex items-center justify-between gap-2 flex-wrap ${isAdmin ? "pr-9" : ""}`}>
+        <span className={`text-[10px] font-black tracking-widest px-3 py-1 rounded-full uppercase shrink-0 ${categoryColors[session.category]}`}>
           {session.category}
         </span>
         {isFull ? (
-          <span className="flex items-center gap-1 text-[11px] font-bold text-white/40">
+          <span className="flex items-center gap-1 text-[11px] font-bold text-white/40 shrink-0">
             <Clock size={12} />
             {t.games.tournamentFull}
           </span>
         ) : isRegistered ? (
-          <span className="flex items-center gap-1 text-[11px] font-bold text-green-400">
+          <span className="flex items-center gap-1 text-[11px] font-bold text-green-400 shrink-0">
             <CheckCircle size={12} />
             {t.games.registeredBadge}
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-[11px] font-bold text-white/60">
+          <span className="flex items-center gap-1 text-[11px] font-bold text-white/60 shrink-0">
             <Users size={12} />
             {spotsLeft} / {session.totalSpots} {t.games.spotsLeft.toLowerCase()}
           </span>
@@ -310,17 +310,17 @@ function SessionCard({
       </div>
 
       {/* Title & meta */}
-      <div className="flex flex-col gap-3 flex-1">
-        <h3 className="text-lg xs:text-xl font-black tracking-tight text-white leading-tight">{session.title}</h3>
-        <div className="grid grid-cols-1 xs:grid-cols-2 gap-y-2 gap-x-4 text-white/50 text-[12px] sm:text-[13px]">
-          <span className="flex items-center gap-2 font-medium"><Calendar size={13} className="shrink-0" />{session.date}</span>
-          <span className="flex items-center gap-2 font-medium"><Clock size={13} className="shrink-0" />{session.time}</span>
-          <span className="flex items-center gap-2 font-black text-primary/70 uppercase tracking-tighter text-[10px] sm:text-[11px] xs:col-span-2">
-            <Plus size={12} className="rotate-45 shrink-0" /> {session.location}
+      <div className="flex flex-col gap-3 flex-1 min-w-0">
+        <h3 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight break-words">{session.title}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-white/50 text-[12px] sm:text-[13px]">
+          <span className="flex items-center gap-2 font-medium truncate"><Calendar size={13} className="shrink-0" /><span className="truncate">{session.date}</span></span>
+          <span className="flex items-center gap-2 font-medium truncate"><Clock size={13} className="shrink-0" /><span className="truncate">{session.time}</span></span>
+          <span className="flex items-center gap-2 font-black text-primary/70 uppercase tracking-tighter text-[10px] sm:text-[11px] sm:col-span-2 truncate">
+            <Plus size={12} className="rotate-45 shrink-0" /> <span className="truncate">{session.location}</span>
           </span>
         </div>
         {session.suggestedByEmail && (
-          <span className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">suggested by {session.suggestedByEmail}</span>
+          <span className="text-[9px] text-gray-600 uppercase tracking-widest mt-1 truncate">suggested by {session.suggestedByEmail}</span>
         )}
       </div>
 
@@ -330,7 +330,7 @@ function SessionCard({
           <button
             disabled={isFull && session.approval !== "pending"}
             onClick={() => session.approval === "pending" ? onApprove(session.id) : onRegister(session.id)}
-            className={`w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 ${
+            className={`w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 text-center break-words ${
               session.approval === "pending"
                 ? "bg-green-500 hover:bg-green-600 text-white shadow-[0_0_30px_-10px_#22c55e]"
                 : isFull
@@ -353,7 +353,7 @@ function SessionCard({
         ) : (
           <button
             onClick={() => onUnregister(session.id)}
-            className="w-full py-3 rounded-xl text-xs font-black tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-[#0f172a] border border-green-500/30 text-green-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 group"
+            className="w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 text-center break-words bg-[#0f172a] border border-green-500/30 text-green-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 group"
           >
             {isLoadingId === session.id ? (
               <Loader2 size={14} className="animate-spin" />
@@ -515,9 +515,21 @@ export default function GamesPage() {
 
     setLoadingId(id);
     try {
-      // Fetch user profile for gamerTag
-      const userSnap = await getDocs(query(collection(db, "users"), where("__name__", "==", user.uid)));
-      const gamerTag = userSnap.docs[0]?.data()?.gamerTag || user.displayName || "Gamer";
+      // Fetch user profile for username / gamerTag
+      let gamerTag = user.displayName || "Gamer";
+      try {
+        const pubSnap = await getDoc(doc(db, "users", user.uid, "public", "profile"));
+        if (pubSnap.exists() && pubSnap.data()?.username) {
+          gamerTag = pubSnap.data().username;
+        } else {
+          const userSnap = await getDoc(doc(db, "users", user.uid));
+          if (userSnap.exists() && userSnap.data()?.gamerTag) {
+            gamerTag = userSnap.data().gamerTag;
+          }
+        }
+      } catch {
+        // fallback
+      }
 
       // 1. Create registration doc
       await setDoc(doc(db, "events", id, "registrations", user.uid), {
@@ -805,7 +817,7 @@ export default function GamesPage() {
   };
 
   // ── Derived data ──
-  const visibleSessions = sessions.filter(s => s.approval === "approved");
+  const visibleSessions = sessions.filter(s => isAdmin ? true : s.approval === "approved");
 
   const filteredSessions = visibleSessions.filter(s =>
     activeTab === "ALL" ? true : categoryToTab[s.category] === activeTab
@@ -820,12 +832,12 @@ export default function GamesPage() {
 
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20">
+    <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20 w-full max-w-full overflow-x-hidden">
 
       {/* ── Suggest Session Modal (members) ── */}
       {isSuggestOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-[2rem] md:rounded-[2.5rem] w-full max-w-md p-6 md:p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
+          <div className="bg-[#121212] border border-white/10 rounded-3xl sm:rounded-[2.5rem] w-full max-w-md p-6 sm:p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
             <button onClick={() => setIsSuggestOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
             <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter mb-6">SUGGEST A SESSION</h2>
             <form onSubmit={handleSuggest} className="flex flex-col gap-4">
@@ -836,7 +848,7 @@ export default function GamesPage() {
                   placeholder="Tell the admin why this session would be great..." className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none" />
               </div>
               <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
+                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500 w-full">
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "SUBMIT SUGGESTION"}
               </button>
             </form>
@@ -847,13 +859,13 @@ export default function GamesPage() {
       {/* ── Admin: Create Session Modal ── */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-[2.5rem] w-full max-w-md p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
+          <div className="bg-[#121212] border border-white/10 rounded-3xl sm:rounded-[2.5rem] w-full max-w-md p-6 sm:p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
             <button onClick={() => setIsCreateOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">CREATE SESSION</h2>
             <form onSubmit={handleAdminCreate} className="flex flex-col gap-4">
               <SessionFormFields form={adminForm} setForm={setAdminForm} />
               <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
+                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500 w-full">
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "CREATE SESSION"}
               </button>
             </form>
@@ -864,13 +876,13 @@ export default function GamesPage() {
       {/* ── Admin: Edit Session Modal ── */}
       {isEditOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-[2.5rem] w-full max-w-md p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
+          <div className="bg-[#121212] border border-white/10 rounded-3xl sm:rounded-[2.5rem] w-full max-w-md p-6 sm:p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
             <button onClick={() => setIsEditOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">EDIT SESSION</h2>
             <form onSubmit={handleAdminEdit} className="flex flex-col gap-4">
               <SessionFormFields form={adminForm} setForm={setAdminForm} />
               <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
+                className="mt-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500 w-full">
                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "SAVE CHANGES"}
               </button>
             </form>
@@ -881,16 +893,16 @@ export default function GamesPage() {
 
 
       {/* ── Hero ── */}
-      <section className="max-w-7xl mx-auto w-full px-6 pt-24 md:pt-32 pb-8 md:pb-10">
+      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-24 md:pt-32 pb-8 md:pb-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="max-w-2xl">
-            <h1 className="font-black tracking-tighter text-white leading-[0.9] uppercase" style={{ fontSize: 'clamp(2.5rem, 10vw, 6rem)' }}>{t.games.heroTitle}</h1>
+            <h1 className="font-black tracking-tighter text-white leading-[0.9] uppercase break-words" style={{ fontSize: 'clamp(2.2rem, 9vw, 6rem)' }}>{t.games.heroTitle}</h1>
             <p className="mt-4 text-gray-400 max-w-md text-sm md:text-base leading-relaxed px-1">{t.games.heroDesc}</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {isAdmin && (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => {
                      if (isBulkMode && selectedSessionIds.length > 0) {
@@ -937,12 +949,12 @@ export default function GamesPage() {
 
 
       {/* ── Filters ── */}
-      <section className="max-w-7xl mx-auto w-full px-6 pb-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full md:w-auto">
+      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 pb-8 sm:pb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 border-b border-white/5 pb-6 sm:pb-8">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full md:w-auto max-w-full touch-pan-x">
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
+                className={`flex-shrink-0 px-4 sm:px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-500 ${
                   activeTab === tab
                     ? "bg-primary text-white shadow-[var(--shadow-primary)]"
                     : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
@@ -954,7 +966,7 @@ export default function GamesPage() {
           </div>
           <button 
             onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-500 bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5 whitespace-nowrap w-fit self-end md:self-auto"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-500 bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5 whitespace-nowrap w-full sm:w-fit justify-between sm:justify-start self-start sm:self-auto"
           >
             SORT BY DATE: {sortOrder === "desc" ? "NEWEST" : "OLDEST"}
             <span className={`transition-transform duration-300 ${sortOrder === "asc" ? "rotate-180" : ""}`}>↓</span>
@@ -963,7 +975,7 @@ export default function GamesPage() {
       </section>
 
       {/* ── Cards Grid ── */}
-      <section className="max-w-7xl mx-auto w-full px-6">
+      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         {isLoading ? (
           <div className="flex justify-center py-24"><Loader2 size={32} className="text-primary animate-spin" /></div>
         ) : filteredSessions.length === 0 ? (
@@ -971,7 +983,7 @@ export default function GamesPage() {
             {t.games.noGamesMatch}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
             {filteredSessions.map(s => (
               <SessionCard
                 key={s.id}
@@ -997,22 +1009,22 @@ export default function GamesPage() {
 
       {/* ── Locked CTA (hidden when logged in) ── */}
       {!isLoggedIn && (
-        <section className="max-w-7xl mx-auto w-full px-6 mt-20">
-          <div className={`relative rounded-3xl border border-primary/20 bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a0a0a] to-[#0f0808]'} p-16 md:p-24 text-center overflow-hidden shadow-[var(--shadow-primary)]`}>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+        <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 mt-16 sm:mt-20">
+          <div className={`relative rounded-3xl border border-primary/20 bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a0a0a] to-[#0f0808]'} p-6 sm:p-12 md:p-24 text-center overflow-hidden shadow-[var(--shadow-primary)]`}>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] h-[200px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
             <div className="relative flex flex-col items-center gap-6">
               <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
                 <Lock size={28} className="text-primary" />
               </div>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white uppercase">{t.games.loginRequired}</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white uppercase break-words">{t.games.loginRequired}</h2>
               <p className="text-gray-400 max-w-sm text-sm md:text-base leading-relaxed">{t.games.loginRequiredDesc}</p>
-              <div className="flex flex-col sm:flex-row gap-4 mt-2">
+              <div className="flex flex-col sm:flex-row gap-4 mt-2 w-full sm:w-auto justify-center">
                 <button onClick={() => router.push("/register")}
-                  className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)]">
+                  className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 shadow-[var(--shadow-primary)] w-full sm:w-auto">
                   {t.auth.registerHere}
                 </button>
-                <button onClick={() => router.push("/register")}
-                  className="bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/70 hover:text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500">
+                <button onClick={() => router.push("/login")}
+                  className="bg-transparent border border-white/20 hover:border-white/40 hover:bg-white/5 text-white/70 hover:text-white px-8 py-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-500 w-full sm:w-auto">
                   {t.auth.loginHere}
                 </button>
               </div>
@@ -1023,8 +1035,8 @@ export default function GamesPage() {
 
       {/* ── Attendees Modal ── */}
       {isAttendeesOpen && activeSessionForAttendees && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
-          <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-lg rounded-3xl p-8 relative shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6">
+          <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-lg rounded-3xl p-5 sm:p-8 relative shadow-2xl overflow-hidden max-h-[90vh]">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
             <button onClick={() => { setIsAttendeesOpen(false); setActiveSessionForAttendees(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
             <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-1">ATTENDEE LIST</h2>
@@ -1053,8 +1065,8 @@ export default function GamesPage() {
 
       {/* ── Unregistration Justification Modal ── */}
       {isUnregisterOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
-          <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6">
+          <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl overflow-hidden max-h-[90vh]">
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
              <button onClick={() => setIsUnregisterOpen(false)} className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
              

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Plus, ThumbsUp, MessageCircle, X, Loader2, Trash2, Upload } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { collection, collectionGroup, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -86,7 +86,7 @@ type BoardMember = {
 };
 
 export default function CommunityPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, publicProfile } = useAuth();
   const router = useRouter();
   const { t, language } = useLanguage();
   const { isIceTheme } = useTheme();
@@ -119,8 +119,6 @@ export default function CommunityPage() {
   const [allMembers, setAllMembers] = useState<any[]>([]);
   const [isAllMembersOpen, setIsAllMembersOpen] = useState(false);
 
-
-
   // Fetch Firestore Data
   const fetchAllData = async () => {
     setIsLoading(true);
@@ -142,9 +140,30 @@ export default function CommunityPage() {
         setBoardMembers(boardSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BoardMember[]);
       }
 
-      // Fetch All Users
-      const usersSnap = await getDocs(collection(db, "users"));
-      setAllMembers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      // Fetch All Users from public profiles subcollection group
+      try {
+        const pubSnap = await getDocs(collectionGroup(db, "public"));
+        const members = pubSnap.docs.map(d => ({
+          id: d.ref.parent.parent?.id || d.id,
+          username: d.data().username,
+          photoURL: d.data().photoURL,
+          gamerTag: d.data().username,
+          ...d.data()
+        }));
+        if (members.length > 0) {
+          setAllMembers(members);
+        } else {
+          const usersSnap = await getDocs(collection(db, "users"));
+          setAllMembers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+      } catch {
+        try {
+          const usersSnap = await getDocs(collection(db, "users"));
+          setAllMembers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        } catch (e) {
+          console.error("Error fetching members:", e);
+        }
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -185,8 +204,8 @@ export default function CommunityPage() {
     try {
       await addDoc(collection(db, "posts"), {
         authorId: user.uid,
-        authorName: user.displayName || user.email?.split("@")[0].toUpperCase() || "ANONYMOUS MEMBER",
-        authorImg: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=200&auto=format&fit=crop", // Default user icon
+        authorName: publicProfile?.username || user.displayName || user.email?.split("@")[0].toUpperCase() || "ANONYMOUS MEMBER",
+        authorImg: publicProfile?.photoURL || user.photoURL || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=200&auto=format&fit=crop", // Default user icon
         title: newTitle.toUpperCase(),
         content: newContent,
         createdAt: serverTimestamp(),
@@ -272,8 +291,8 @@ export default function CommunityPage() {
     const postRef = doc(db, "posts", postId);
     const newComment = {
       id: Math.random().toString(36).substr(2, 9),
-      authorName: user.displayName || user.email?.split("@")[0].toUpperCase() || "MEMBER",
-      authorImg: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=200&auto=format&fit=crop",
+      authorName: publicProfile?.username || user.displayName || user.email?.split("@")[0].toUpperCase() || "MEMBER",
+      authorImg: publicProfile?.photoURL || user.photoURL || "https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=200&auto=format&fit=crop",
       content: commentText.trim(),
       createdAt: new Date().toISOString()
     };
@@ -768,16 +787,16 @@ export default function CommunityPage() {
                 <div key={member.id} className="bg-[var(--card-bg)] border border-[var(--border)] rounded-3xl p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-primary/5 transition-all duration-500">
                   <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
                     <Image 
-                              src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=${isIceTheme ? '101625' : '1a1a1a'}&color=${isIceTheme ? '3FCEEE' : 'FF5F5F'}`} 
-                      alt={member.gamerTag || "Member"} 
+                      src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username || member.gamerTag || member.email || "User")}&background=${isIceTheme ? '101625' : '1a1a1a'}&color=${isIceTheme ? '3FCEEE' : 'FF5F5F'}`} 
+                      alt={member.username || member.gamerTag || "Member"} 
                       width={48} 
                       height={48} 
                       className="w-full h-full object-cover" 
                     />
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-black text-white uppercase truncate max-w-[100px]">{member.gamerTag || member.email?.split('@')[0]}</span>
-                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj.com' ? 'ADMIN' : 'MEMBER'}</span>
+                    <span className="text-xs font-black text-white uppercase truncate max-w-[100px]">{member.username || member.gamerTag || member.email?.split('@')[0]}</span>
+                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.isAdmin || member.email === 'admin@bdj.com' ? 'ADMIN' : 'MEMBER'}</span>
                   </div>
                 </div>
               ))}
@@ -829,8 +848,8 @@ export default function CommunityPage() {
                       <div className="relative">
                         <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors">
                           <Image 
-                                    src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.gamerTag || member.email || "User")}&background=${isIceTheme ? '101625' : '1a1a1a'}&color=${isIceTheme ? '3FCEEE' : 'FF5F5F'}`} 
-                            alt={member.gamerTag || "Member"} 
+                            src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username || member.gamerTag || member.email || "User")}&background=${isIceTheme ? '101625' : '1a1a1a'}&color=${isIceTheme ? '3FCEEE' : 'FF5F5F'}`} 
+                            alt={member.username || member.gamerTag || "Member"} 
                             width={64} 
                             height={64} 
                             className="w-full h-full object-cover" 
@@ -839,8 +858,8 @@ export default function CommunityPage() {
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-[var(--background)] rounded-full"></div>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-sm font-black text-white uppercase tracking-tight">{member.gamerTag || member.email?.split('@')[0]}</span>
-                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.email === 'admin@bdj.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
+                        <span className="text-sm font-black text-white uppercase tracking-tight">{member.username || member.gamerTag || member.email?.split('@')[0]}</span>
+                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.isAdmin || member.email === 'admin@bdj.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
                       </div>
                     </div>
                   ))

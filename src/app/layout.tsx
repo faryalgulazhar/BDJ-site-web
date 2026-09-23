@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
+import OnboardingGuard from "@/components/OnboardingGuard";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import PageTransition from "@/components/PageTransition";
@@ -25,6 +26,11 @@ const geistMono = Geist_Mono({
 });
 
 const BASE_URL = "https://bdj-site-web.vercel.app";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -89,12 +95,14 @@ export default function RootLayout({
             <CustomCursor />
             <EmailVerificationBanner />
             <Navbar />
+            <OnboardingGuard>
             <main className="flex-1 flex flex-col min-h-screen">
               <PageTransition>
                 {children}
               </PageTransition>
             </main>
             <Footer />
+            </OnboardingGuard>
               <Toaster position="bottom-right" theme="dark" richColors />
               <CookieConsent />
             </AuthProvider>

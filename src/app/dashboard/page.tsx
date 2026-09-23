@@ -20,7 +20,7 @@ const categoryColors: Record<string, string> = {
 
 
 export default function DashboardPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, publicProfile } = useAuth();
   const { isIceTheme } = useTheme();
   const { t } = useLanguage();
   const router = useRouter();
@@ -43,15 +43,23 @@ export default function DashboardPage() {
     
     if (isAdmin) {
       // Admin: Fetch ALL users for leaderboard
-      const unsub = onSnapshot(collection(db, "users"), (snap) => {
-        const scores = snap.docs.map(d => {
+      const unsub = onSnapshot(collection(db, "users"), async (snap) => {
+        const scores = await Promise.all(snap.docs.map(async (d) => {
           const u = d.data();
+          let tag = u.gamerTag || u.email?.split("@")[0] || "PLAYER";
+          try {
+            const pubSnap = await getDoc(doc(db, "users", d.id, "public", "profile"));
+            if (pubSnap.exists() && pubSnap.data()?.username) {
+              tag = pubSnap.data().username;
+            }
+          } catch {}
           return {
-            tag: u.gamerTag || u.email?.split("@")[0] || "PLAYER",
+            tag,
             email: u.email,
             score: u.activityPoints || 0
           };
-        }).sort((a, b) => b.score - a.score);
+        }));
+        scores.sort((a, b) => b.score - a.score);
         setLeaderboardScores(scores);
       });
       return () => unsub();
@@ -124,7 +132,7 @@ export default function DashboardPage() {
         <p className="mt-4 text-gray-400 text-sm max-w-md leading-relaxed">
           {t.dashboard.welcomeBack}{" "}
           <span className="text-primary font-black transition-colors duration-500">
-            {user.displayName || user.email?.split("@")[0] || "Player"}
+            {publicProfile?.username || user.displayName || user.email?.split("@")[0] || "Player"}
           </span>
           {t.dashboard.hub}
         </p>

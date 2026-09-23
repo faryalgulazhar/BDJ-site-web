@@ -71,22 +71,28 @@ export default function LoginForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if user profile already exists
+      // Check if private user profile already exists
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
+        // Write ONLY the private doc skeleton — no displayName/gamerTag from Google
+        // (unreliable: many users don't use real names on Google).
+        // legalName + username are collected on /onboarding.
         await setDoc(doc(db, "users", user.uid), {
-          gamerTag: user.displayName || "New Player",
-          email: user.email,
           uid: user.uid,
+          email: user.email,
           createdAt: serverTimestamp(),
-          role: "member"
+          role: "member",
+          onboardingComplete: false,
+          isAdmin: false,
+          superAdmin: false,
         });
-        toast.success("🎉 Welcome to BDJ! Logged in with Google.");
+        toast.success("🎉 Welcome to BDJ!");
       } else {
-        toast.success("Logged in successfully with Google!");
+        toast.success("Welcome back!");
       }
 
-      router.push("/");
+      // OnboardingGuard in the layout will redirect to /onboarding if needed.
+      router.push("/community");
     } catch (err: any) {
       console.error(err);
     }

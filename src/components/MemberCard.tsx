@@ -162,42 +162,43 @@ export default function MemberCard({ user }: MemberCardProps) {
 
   useEffect(() => { setMounted(true); }, []);
 
+  const [displayName, setDisplayName] = useState<string>(user.displayName || user.email?.split("@")[0] || "Member");
+  const [photoURL, setPhotoURL] = useState<string | null>(user.photoURL || null);
+
   const tk = THEMES[theme];
   const verifyUrl = `https://bdj-site-web.vercel.app/admin/verify?id=${user.uid}`;
-  const displayName = user.displayName || user.email?.split("@")[0] || "Member";
-  const initials = displayName.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+  const initials = displayName.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "M";
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.cardTheme) setTheme(data.cardTheme as CardTheme);
-        if (data.role) setRole(data.role);
-        if (data.memberId) setMemberId(data.memberId);
-        if (data.createdAt?.toDate) {
-          const d: Date = data.createdAt.toDate();
-          setJoinedLabel(`Since ${d.toLocaleString("en-US", { month: "long" })} ${d.getFullYear()}`);
+      try {
+        const pubRef = doc(db, "users", user.uid, "public", "profile");
+        const pubSnap = await getDoc(pubRef);
+        if (pubSnap.exists()) {
+          const pubData = pubSnap.data();
+          if (pubData.username) setDisplayName(pubData.username);
+          if (pubData.photoURL !== undefined) setPhotoURL(pubData.photoURL);
         }
-        // Patch missing fields if they exist in Auth but not in Firestore
-        await setDoc(ref, {
-          email: user.email,
-          displayName: data.displayName || user.displayName || null,
-          photoURL: data.photoURL || user.photoURL || null,
-        }, { merge: true });
-      } else {
-        const createdAt = new Date();
-        await setDoc(ref, {
-          email: user.email,
-          displayName: user.displayName || null,
-          photoURL: user.photoURL || null,
-          role: "Member",
-          cardTheme: "fire",
-          createdAt: serverTimestamp(),
-        });
-        setJoinedLabel(`Since ${createdAt.toLocaleString("en-US", { month: "long" })} ${createdAt.getFullYear()}`);
+      } catch (err) {
+        console.error("Failed to load public profile for card:", err);
+      }
+
+      try {
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.cardTheme) setTheme(data.cardTheme as CardTheme);
+          if (data.role) setRole(data.role);
+          if (data.memberId) setMemberId(data.memberId);
+          if (data.createdAt?.toDate) {
+            const d: Date = data.createdAt.toDate();
+            setJoinedLabel(`Since ${d.toLocaleString("en-US", { month: "long" })} ${d.getFullYear()}`);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load user doc for card:", err);
       }
     })();
   }, [user]);
@@ -260,7 +261,7 @@ export default function MemberCard({ user }: MemberCardProps) {
     }
   };
 
-  const sharedProps = { tk, displayName, initials, memberId, joinedLabel, role, userPhotoURL: user.photoURL, verifyUrl };
+  const sharedProps = { tk, displayName, initials, memberId, joinedLabel, role, userPhotoURL: photoURL || user.photoURL, verifyUrl };
 
   return (
     <div className="flex flex-col items-center gap-3 w-full h-full justify-center py-1">

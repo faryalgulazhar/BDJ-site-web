@@ -24,7 +24,6 @@ import {
   writeBatch, 
   doc,
   addDoc,
-  getDocs,
   serverTimestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -54,18 +53,19 @@ export default function UserMenu() {
     if (!user) return;
     (async () => {
       try {
-        const snap = await getDocs(query(collection(db, "users"), where("__name__", "==", user.uid)));
-        const data = snap.docs[0]?.data();
-        
+        const { getDoc: fsGetDoc, doc: fsDoc } = await import("firebase/firestore");
+        const pubSnap = await fsGetDoc(fsDoc(db, "users", user.uid, "public", "profile"));
+        const pubData = pubSnap.data();
+
         if (isAdmin) {
           setGamerTag("ADMIN");
         } else {
-          setGamerTag(data?.gamerTag || user.displayName || user.email?.split('@')[0].toUpperCase() || "PLAYER");
+          setGamerTag(pubData?.username || user.email?.split('@')[0].toUpperCase() || "PLAYER");
         }
-        
-        setPhotoURL(data?.photoURL || user.photoURL || null);
-      } catch { 
-        setGamerTag(isAdmin ? "ADMIN" : (user.email?.split('@')[0].toUpperCase() || "PLAYER")); 
+
+        setPhotoURL(pubData?.photoURL || user.photoURL || null);
+      } catch {
+        setGamerTag(isAdmin ? "ADMIN" : (user.email?.split('@')[0].toUpperCase() || "PLAYER"));
       }
     })();
   }, [user, isAdmin]);

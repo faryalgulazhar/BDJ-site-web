@@ -21,6 +21,7 @@ import Image from "next/image";
 import { 
   doc, 
   getDoc, 
+  setDoc,
   updateDoc, 
   arrayUnion, 
   Timestamp 
@@ -68,10 +69,12 @@ export default function SettingsPage() {
   const { isIceTheme } = useTheme();
   const router = useRouter();
 
-  const [gamerTag, setGamerTag] = useState("");
+  const [username, setUsername] = useState("");
+  const [legalName, setLegalName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [publicData, setPublicData] = useState<any>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -90,7 +93,15 @@ export default function SettingsPage() {
         if (snap.exists()) {
           const data = snap.data();
           setUserData(data);
-          setGamerTag(data.gamerTag || "");
+          setLegalName(data.legalName || "");
+        }
+        const pubSnap = await getDoc(doc(db, "users", user.uid, "public", "profile"));
+        if (pubSnap.exists()) {
+          const pData = pubSnap.data();
+          setPublicData(pData);
+          setUsername(pData.username || "");
+        } else if (snap.exists()) {
+          setUsername(snap.data().gamerTag || "");
         }
       } catch (e) {
         console.error(e);
@@ -101,28 +112,31 @@ export default function SettingsPage() {
 
     fetchProfile();
   }, [user, router]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !userData) return;
+    if (!user) return;
 
     setSaving(true);
     try {
-      let finalPhotoUrl = userData.photoURL || "";
-      const updateData: any = {};
+      let finalPhotoUrl = publicData?.photoURL || userData?.photoURL || "";
+      const pubUpdateData: any = {};
+      const privUpdateData: any = {};
 
       // 1. Handle Photo Upload
       if (selectedFile) {
         finalPhotoUrl = await resizeImage(selectedFile, 300, 300);
-        updateData.photoURL = finalPhotoUrl;
+        pubUpdateData.photoURL = finalPhotoUrl;
       }
 
-      // 2. Handle Gamer Tag Change
-      if (gamerTag.trim() !== userData.gamerTag) {
+      // 2. Handle Username Change
+      const currentUsername = publicData?.username || userData?.gamerTag || "";
+      if (username.trim() && username.trim() !== currentUsername) {
         // Check month limits
         const now = new Date();
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const recentChanges = (userData.usernameChanges || []).filter((change: any) => {
-          const changeDate = change.date.toDate ? change.date.toDate() : new Date(change.date);
+        const recentChanges = (userData?.usernameChanges || []).filter((change: any) => {
+          const changeDate = change.date?.toDate ? change.date.toDate() : new Date(change.date);
           return changeDate > thirtyDaysAgo;
         });
 
@@ -131,23 +145,31 @@ export default function SettingsPage() {
             description: "Username change blocked, but photo updates will still save."
           });
         } else {
-          updateData.gamerTag = gamerTag.trim();
-          updateData.usernameChanges = arrayUnion({
-            old: userData.gamerTag || null,
-            new: gamerTag.trim(),
+          pubUpdateData.username = username.trim();
+          privUpdateData.usernameChanges = arrayUnion({
+            old: currentUsername || null,
+            new: username.trim(),
             date: Timestamp.now()
           });
         }
       }
 
       // 3. Finalize Update
-      if (Object.keys(updateData).length === 0) {
+      if (Object.keys(pubUpdateData).length === 0 && Object.keys(privUpdateData).length === 0) {
         setSaving(false);
         return;
       }
 
-      await updateDoc(doc(db, "users", user.uid), updateData);
-      setUserData({ ...userData, ...updateData });
+      if (Object.keys(pubUpdateData).length > 0) {
+        await setDoc(doc(db, "users", user.uid, "public", "profile"), pubUpdateData, { merge: true });
+        setPublicData((prev: any) => ({ ...prev, ...pubUpdateData }));
+      }
+
+      if (Object.keys(privUpdateData).length > 0) {
+        await updateDoc(doc(db, "users", user.uid), privUpdateData);
+        setUserData((prev: any) => ({ ...prev, ...privUpdateData }));
+      }
+
       setSelectedFile(null);
       setPreviewUrl(null);
       toast.success("Profile updated!");
@@ -252,9 +274,9 @@ export default function SettingsPage() {
                   <div className="flex flex-col items-center gap-4 py-4 border-b border-white/5 mb-2">
                     <div className="relative group">
                       <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors bg-black/40">
-                        {previewUrl || userData?.photoURL ? (
+                        {previewUrl || publicData?.photoURL || userData?.photoURL ? (
                           <Image 
-                            src={previewUrl || userData.photoURL} 
+                            src={previewUrl || publicData?.photoURL || userData?.photoURL} 
                             alt="Profile" 
                             width={96} 
                             height={96} 
@@ -286,25 +308,45 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
+                  {/* Legal Name (Read-only, attendance records) */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest px-1">Gamer Tag</label>
+                    <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest px-1">
+                      Legal Name
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                      <input 
+                        type="text" 
+                        value={legalName || "Not set"}
+                        disabled
+                        className="w-full bg-black/20 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-gray-400 font-medium cursor-not-allowed select-none text-base"
+                      />
+                    </div>
+                    <p className="text-[10px] text-gray-500 px-1 mt-1">
+                      Used for official records only. Contact an admin to update.
+                    </p>
+                  </div>
+
+                  {/* Public Username */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest px-1">Username</label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
                       <input 
                         type="text" 
-                        value={gamerTag}
-                        onChange={(e) => setGamerTag(e.target.value)}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         placeholder="Choose your handle..."
                         className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white font-bold focus:outline-none focus:border-primary/50 transition-all text-base focus:text-base"
                       />
                     </div>
-                    <p className="text-[10px] text-gray-600 px-1 mt-1 uppercase tracking-tight">Characters: {gamerTag.length} / 20</p>
-                 </div>
+                    <p className="text-[10px] text-gray-600 px-1 mt-1 uppercase tracking-tight">Characters: {username.length} / 20</p>
+                  </div>
 
-                 <button 
-                  disabled={saving || (gamerTag === userData?.gamerTag && !selectedFile)}
-                  className="bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:hover:bg-primary text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[var(--shadow-primary)]"
-                 >
+                  <button 
+                   disabled={saving || (username === (publicData?.username || userData?.gamerTag || "") && !selectedFile)}
+                   className="bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:hover:bg-primary text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[var(--shadow-primary)]"
+                  >
                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                    {saving ? "SAVING..." : "UPDATE PROFILE"}
                  </button>

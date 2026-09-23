@@ -96,3 +96,12 @@ img, video {
     padding-right: 1rem;
   }
 }
+
+/* Hide scrollbars while retaining scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

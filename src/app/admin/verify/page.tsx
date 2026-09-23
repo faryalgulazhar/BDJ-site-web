@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
@@ -14,6 +14,7 @@ type State = "loading" | "valid" | "inactive" | "not_found";
 interface MemberData {
   displayName?: string;
   gamerTag?: string;
+  username?: string;
   email?: string;
   photoURL?: string;
   role: string;
@@ -31,6 +32,7 @@ function VerifyContent() {
   const [state, setState] = useState<State>("loading");
   const [member, setMember] = useState<MemberData | null>(null);
   const [joinDate, setJoinDate] = useState("");
+  const loggedRef = useRef(false);
 
   const targetId = searchParams.get("id");
 
@@ -38,7 +40,7 @@ function VerifyContent() {
   useEffect(() => {
     if (user === null) { router.replace("/login"); return; }
     if (user && !isAdmin) { router.replace("/dashboard"); }
-  }, [user, router]);
+  }, [user, router, isAdmin]);
 
   // Firestore lookup
   useEffect(() => {
@@ -48,17 +50,45 @@ function VerifyContent() {
         const snap = await getDoc(doc(db, "users", targetId));
         if (!snap.exists()) { setState("not_found"); return; }
         const data = snap.data() as MemberData;
+
+        try {
+          const pubSnap = await getDoc(doc(db, "users", targetId, "public", "profile"));
+          if (pubSnap.exists()) {
+            const pubData = pubSnap.data();
+            if (pubData.username) data.username = pubData.username;
+            if (pubData.photoURL) data.photoURL = pubData.photoURL;
+          }
+        } catch (e) {
+          console.error("Failed to load public profile:", e);
+        }
+
         setMember(data);
         if (data.createdAt?.toDate) {
           const d = data.createdAt.toDate();
           setJoinDate(`${d.toLocaleString("en-US", { month: "long" })} ${d.getFullYear()}`);
         }
-        setState(data.active === false ? "inactive" : "valid");
+        const isValid = data.active !== false;
+        setState(isValid ? "inactive" : "valid");
+
+        // Log attendance on successful scan
+        if (isValid && !loggedRef.current) {
+          loggedRef.current = true;
+          try {
+            await addDoc(collection(db, "attendance"), {
+              uid: targetId,
+              eventId: searchParams.get("event") || null,
+              scannedAt: serverTimestamp(),
+              scannedBy: user.uid,
+            });
+          } catch (e) {
+            console.error("Failed to log attendance:", e);
+          }
+        }
       } catch {
         setState("not_found");
       }
     })();
-  }, [targetId, user]);
+  }, [targetId, user, isAdmin, searchParams]);
 
   if (state === "loading" || user === undefined) {
     return (
@@ -74,6 +104,7 @@ function VerifyContent() {
   }[state];
 
   const displayName =
+    member?.username ||
     member?.displayName ||
     member?.gamerTag ||
     member?.email?.split("@")[0] ||

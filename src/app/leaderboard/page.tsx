@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy, limit, doc } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, limit, doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import PageTransition from "@/components/PageTransition";
-import { Crown, Medal, Download } from "lucide-react";
+import { Crown, Medal, Download, Plus, Minus, Flame, Droplet, Circle } from "lucide-react";
 import { exportToExcel } from "@/lib/excel";
+import { toast } from "sonner";
 
 interface LeaderboardUser {
   id: string;
   username: string;
   points: number;
   team?: "red" | "blue";
+  legalName?: string;
+  email?: string;
 }
 
 export default function LeaderboardPage() {
@@ -85,6 +88,32 @@ export default function LeaderboardPage() {
     exportToExcel(rows, "Leaderboard_Export");
   };
 
+  const handleAdjustPoints = async (userId: string, amount: number) => {
+    try {
+      await updateDoc(doc(db, "users", userId), {
+        points: increment(amount)
+      });
+    } catch (error) {
+      console.error("Failed to adjust points", error);
+    }
+  };
+
+  const handleToggleTeam = async (userId: string, currentTeam?: string) => {
+    try {
+      const newTeam = currentTeam === "red" ? "blue" : currentTeam === "blue" ? "" : "red";
+      await updateDoc(doc(db, "users", userId), { team: newTeam });
+      try {
+        await updateDoc(doc(db, "users", userId, "public", "profile"), { team: newTeam });
+      } catch (e) {
+        // Ignore if public profile doc doesn't exist
+      }
+      toast.success(`Team updated successfully!`);
+    } catch (error) {
+      console.error("Failed to update team", error);
+      toast.error("Failed to update team.");
+    }
+  };
+
   const totalPoints = redPoints + bluePoints || 1;
   const redPercentage = (redPoints / totalPoints) * 100;
   const bluePercentage = (bluePoints / totalPoints) * 100;
@@ -113,12 +142,12 @@ export default function LeaderboardPage() {
 
         {/* Team Strip */}
         <div className={`bg-[#0f172a] rounded-2xl p-5 md:p-8 border border-white/5 ${primaryGlow} transition-all duration-500`}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 mb-4 md:mb-6">
-            <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex flex-col text-left">
               <span className="text-[10px] md:text-xs font-black tracking-[0.2em] uppercase text-[#FF5F5F]">TEAM RED</span>
               <span className="text-2xl md:text-3xl font-black text-white tracking-tighter">{redPoints} <span className="text-sm text-gray-500">PTS</span></span>
             </div>
-            <div className="flex flex-col text-left md:text-right">
+            <div className="flex flex-col text-right">
               <span className="text-[10px] md:text-xs font-black tracking-[0.2em] uppercase text-[#3FCEEE]">TEAM BLUE</span>
               <span className="text-2xl md:text-3xl font-black text-white tracking-tighter">{bluePoints} <span className="text-sm text-gray-500">PTS</span></span>
             </div>
@@ -152,28 +181,47 @@ export default function LeaderboardPage() {
               }
 
               return (
-                <div key={u.id} className={`flex items-center justify-between p-4 md:p-5 border-b border-white/5 transition-colors ${isCurrentUser ? 'bg-white/5' : 'hover:bg-white/[0.02]'}`}>
+                <div key={u.id} className={`group flex items-center justify-between p-4 md:p-5 border-b border-white/5 transition-colors ${isCurrentUser ? 'bg-white/5' : 'hover:bg-white/[0.02]'}`}>
                   <div className="flex items-center gap-3 md:gap-5 min-w-0">
                     <div className={`flex items-center justify-center w-8 md:w-10 font-black text-lg md:text-xl tracking-tighter ${rankStyle}`}>
                       {rankIcon ? rankIcon : `#${i + 1}`}
                     </div>
                     
-                    {u.team ? (
-                      <div className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0 ${u.team === 'red' ? teamRedDot : teamBlueDot}`} />
+                    {isAdmin ? (
+                      <button 
+                        onClick={() => handleToggleTeam(u.id, u.team)}
+                        className="flex items-center justify-center text-lg md:text-xl shrink-0 transition-transform hover:scale-110"
+                        title="Click to toggle team"
+                      >
+                        {u.team === 'red' ? <Flame size={18} className="text-[#FF5F5F] drop-shadow-[0_0_8px_rgba(255,95,95,0.5)]" /> : u.team === 'blue' ? <Droplet size={18} className="text-[#3FCEEE] drop-shadow-[0_0_8px_rgba(63,206,238,0.5)]" /> : <Circle size={18} className="text-gray-500" />}
+                      </button>
                     ) : (
-                      <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0 bg-gray-600" />
+                      <div className="flex items-center justify-center text-lg md:text-xl shrink-0">
+                        {u.team === 'red' ? <Flame size={18} className="text-[#FF5F5F] drop-shadow-[0_0_8px_rgba(255,95,95,0.5)]" /> : u.team === 'blue' ? <Droplet size={18} className="text-[#3FCEEE] drop-shadow-[0_0_8px_rgba(63,206,238,0.5)]" /> : <Circle size={18} className="text-gray-500" />}
+                      </div>
                     )}
                     
-                    <span className="font-bold text-sm md:text-base text-white truncate uppercase tracking-tight">
-                      {u.username || 'ANONYMOUS'}
-                    </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+                      <span className="font-bold text-sm md:text-base text-white truncate uppercase tracking-tight">
+                        {isAdmin ? (u.legalName || u.username || 'ANONYMOUS') : (u.username || 'ANONYMOUS')}
+                      </span>
+                      {isAdmin && u.email && (
+                        <span className="text-[9px] md:text-[10px] text-gray-500 truncate tracking-widest">{u.email}</span>
+                      )}
+                    </div>
                     {isCurrentUser && (
                       <span className={`text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full uppercase shrink-0 border ${isIceTheme ? 'bg-[#3FCEEE]/20 text-[#3FCEEE] border-[#3FCEEE]/40' : 'bg-[#FF5F5F]/20 text-[#FF5F5F] border-[#FF5F5F]/40'}`}>
                         YOU
                       </span>
                     )}
                   </div>
-                  <div className="font-black text-sm md:text-base tracking-tighter shrink-0 ml-4">
+                  <div className="font-black text-sm md:text-base tracking-tighter shrink-0 ml-2 md:ml-4 flex items-center gap-2">
+                    {isAdmin && (
+                      <div className="flex gap-1 md:gap-2 mr-1 md:mr-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => handleAdjustPoints(u.id, 1)} className="p-1.5 md:p-1 bg-green-500/10 hover:bg-green-500/30 text-green-500 rounded-lg md:rounded"><Plus size={14} className="md:w-3 md:h-3" /></button>
+                        <button onClick={() => handleAdjustPoints(u.id, -1)} className="p-1.5 md:p-1 bg-red-500/10 hover:bg-red-500/30 text-red-500 rounded-lg md:rounded"><Minus size={14} className="md:w-3 md:h-3" /></button>
+                      </div>
+                    )}
                     <span className="text-white">{u.points || 0}</span> <span className="text-gray-500 text-[10px] md:text-xs tracking-widest">PTS</span>
                   </div>
                 </div>
@@ -197,11 +245,9 @@ export default function LeaderboardPage() {
                   -
                 </div>
                 
-                {currentUserRank.data.team ? (
-                  <div className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0 ${currentUserRank.data.team === 'red' ? teamRedDot : teamBlueDot}`} />
-                ) : (
-                  <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full shrink-0 bg-gray-600" />
-                )}
+                <div className="flex items-center justify-center text-lg md:text-xl shrink-0">
+                  {currentUserRank.data.team === 'red' ? <Flame size={18} className="text-[#FF5F5F] drop-shadow-[0_0_8px_rgba(255,95,95,0.5)]" /> : currentUserRank.data.team === 'blue' ? <Droplet size={18} className="text-[#3FCEEE] drop-shadow-[0_0_8px_rgba(63,206,238,0.5)]" /> : <Circle size={18} className="text-gray-500" />}
+                </div>
                 
                 <span className="font-bold text-sm md:text-base text-white truncate uppercase tracking-tight">
                   {currentUserRank.data.username || 'ANONYMOUS'}

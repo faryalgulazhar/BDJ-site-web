@@ -4,14 +4,15 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { 
-  collection, doc, getDoc, updateDoc, onSnapshot, increment 
+  collection, doc, getDoc, updateDoc, onSnapshot, increment, setDoc, serverTimestamp, getDocs, deleteDoc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { 
   CheckCircle2, AlertTriangle, XCircle, Clock, 
-  Camera, X, Users, RefreshCw, Calendar
+  Camera, X, Users, RefreshCw, Calendar, Download, Trash2, Plus, Search
 } from "lucide-react";
+import { exportToExcel } from "@/lib/excel";
 import { toast } from "sonner";
 
 
@@ -36,6 +37,7 @@ interface Registration {
   name: string;
   status: "pending" | "present" | "late" | "absent";
   timestamp?: any;
+  walkIn?: boolean;
 }
 
 export default function AdminEventDetailPage({ params }: PageProps) {
@@ -56,6 +58,12 @@ export default function AdminEventDetailPage({ params }: PageProps) {
   // Action Modal State
   const [targetReg, setTargetReg] = useState<Registration | null>(null);
   const [isActioning, setIsActioning] = useState(false);
+  const [isAddingAll, setIsAddingAll] = useState(false);
+
+  // Add Member State
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Admin Guard
   useEffect(() => {
@@ -104,7 +112,7 @@ export default function AdminEventDetailPage({ params }: PageProps) {
     }
   };
 
-  const processScan = (scannedText: string) => {
+  const processScan = async (scannedText: string) => {
     try {
       // Typically URL looks like https://domain.com/admin/verify?id=USER_ID
       // Or it might be just the USER_ID string.
@@ -118,11 +126,120 @@ export default function AdminEventDetailPage({ params }: PageProps) {
       if (reg) {
         setTargetReg(reg);
       } else {
-        toast.error("This user is NOT registered for this event.");
+        // User not registered - Instant Registration
+        setIsActioning(true);
+        toast.loading("User not registered. Registering instantly...", { id: "instant-reg" });
+        
+        try {
+          const userSnap = await getDoc(doc(db, "users", userId));
+          if (!userSnap.exists()) {
+             toast.error("Invalid QR Code: User does not exist in the system.", { id: "instant-reg" });
+             setIsActioning(false);
+             return;
+          }
+          
+          let name = userSnap.data().legalName || userSnap.data().gamerTag || userSnap.data().displayName || userSnap.data().email || userId;
+          
+          try {
+             const pubSnap = await getDoc(doc(db, "users", userId, "public", "profile"));
+             if (pubSnap.exists() && pubSnap.data().username) {
+               name = pubSnap.data().username;
+             }
+          } catch(e) {}
+          
+          if (!unwrappedParams.id) return;
+
+          await setDoc(doc(db, "events", unwrappedParams.id, "registrations", userId), {
+             userId,
+             name,
+             status: "present",
+             walkIn: true,
+             timestamp: serverTimestamp()
+          });
+          
+          await updateDoc(doc(db, "users", userId), {
+            activityPoints: increment(1)
+          });
+          
+          toast.success(`Instantly registered and marked ${name} as PRESENT!`, { id: "instant-reg" });
+          
+        } catch (regError) {
+          console.error(regError);
+          toast.error("Failed to instantly register the user.", { id: "instant-reg" });
+        }
+        setIsActioning(false);
       }
     } catch (e) {
-      toast.error("Invalid QR Code format.");
+      toast.error("Invalid QR Code format.", { id: "instant-reg" });
     }
+  };
+
+  const handleAddAllMembers = async () => {
+    if (!confirm("Are you sure you want to add ALL registered members to this event?")) return;
+    
+    setIsAddingAll(true);
+    toast.loading("Importing all members...", { id: "import-members" });
+    
+    try {
+      const usersSnap = await getDocs(collection(db, "users"));
+      let addedCount = 0;
+      
+      const batchPromises = [];
+      
+      for (const userDoc of usersSnap.docs) {
+         const uid = userDoc.id;
+         if (registrations.some(r => r.userId === uid)) continue;
+         
+         const userData = userDoc.data();
+         let name = userData.legalName || userData.gamerTag || userData.displayName || userData.email || uid;
+         
+         if (!unwrappedParams.id) continue;
+         
+         batchPromises.push(
+           setDoc(doc(db, "events", unwrappedParams.id, "registrations", uid), {
+             userId: uid,
+             name,
+             status: "pending",
+             walkIn: false,
+             timestamp: serverTimestamp()
+           })
+         );
+         addedCount++;
+      }
+      
+      await Promise.all(batchPromises);
+      
+      if (addedCount > 0 && unwrappedParams.id) {
+        await updateDoc(doc(db, "events", unwrappedParams.id), {
+           currentRegistrations: increment(addedCount)
+        });
+      }
+      
+      toast.success(`Imported ${addedCount} new members to the event.`, { id: "import-members" });
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to import members.", { id: "import-members" });
+    }
+    setIsAddingAll(false);
+  };
+
+  const handleExportExcel = () => {
+    if (registrations.length === 0) {
+      toast.error("No registrations to export.");
+      return;
+    }
+
+    const rows = registrations.map((r) => ({
+      "User Name": r.name || "",
+      "Status": r.status.toUpperCase(),
+      "User ID": r.userId,
+      "Walk-In": r.walkIn ? "Yes" : "No",
+    }));
+
+    const eventName = eventData?.title ? eventData.title.replace(/\s+/g, '-').toLowerCase() : 'event';
+    const today = new Date().toISOString().slice(0, 10);
+    exportToExcel(rows, `bdj-${eventName}-attendees-${today}`);
+    toast.success(`Exported ${registrations.length} attendees to Excel!`);
   };
 
   const submitStatus = async (newStatus: "present" | "late" | "absent" | "pending", regToUpdate?: Registration) => {
@@ -158,6 +275,71 @@ export default function AdminEventDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleRemoveMember = async (reg: Registration) => {
+    if (!window.confirm(`Are you sure you want to remove ${reg.name} from this event?`)) return;
+    
+    setIsActioning(true);
+    try {
+      if (!unwrappedParams.id) return;
+      
+      const hadPoints = (reg.status === "present" || reg.status === "late");
+      if (hadPoints) {
+        await updateDoc(doc(db, "users", reg.userId), {
+          activityPoints: increment(-1)
+        });
+      }
+
+      await deleteDoc(doc(db, "events", unwrappedParams.id, "registrations", reg.userId));
+      
+      await updateDoc(doc(db, "events", unwrappedParams.id), {
+        currentRegistrations: increment(-1)
+      });
+      
+      toast.success(`Removed ${reg.name} from the event.`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to remove member.");
+    } finally {
+      setIsActioning(false);
+    }
+  };
+
+  const openAddMemberModal = async () => {
+    setIsAddMemberOpen(true);
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      const users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setAvailableUsers(users);
+    } catch (e) {
+      toast.error("Failed to load users");
+    }
+  };
+
+  const handleManuallyAddMember = async (userDoc: any) => {
+    if (!unwrappedParams.id) return;
+    setIsActioning(true);
+    try {
+      let name = userDoc.legalName || userDoc.gamerTag || userDoc.displayName || userDoc.email || userDoc.id;
+      await setDoc(doc(db, "events", unwrappedParams.id, "registrations", userDoc.id), {
+         userId: userDoc.id,
+         name,
+         status: "pending",
+         walkIn: true,
+         timestamp: serverTimestamp()
+      });
+      
+      await updateDoc(doc(db, "events", unwrappedParams.id), {
+         currentRegistrations: increment(1)
+      });
+      
+      toast.success(`Added ${name} to the event.`);
+    } catch (e) {
+      toast.error("Failed to add member.");
+    } finally {
+      setIsActioning(false);
+    }
+  };
+
   if (!user || !isAdmin) return null;
 
   if (loading) {
@@ -185,12 +367,36 @@ export default function AdminEventDetailPage({ params }: PageProps) {
             <span className="text-gray-400">{eventData?.location}</span>
           </div>
         </div>
-        <button 
-          onClick={() => setIsScannerOpen(true)}
-          className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all shadow-lg flex items-center gap-2 justify-center"
-        >
-          <Camera size={18} /> OPEN QR SCANNER
-        </button>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <button 
+            onClick={handleExportExcel}
+            className="bg-green-600 hover:bg-green-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all shadow-[0_0_30px_-5px_rgba(22,163,74,0.3)] flex items-center gap-2 justify-center w-full sm:w-auto"
+          >
+            <Download size={18} />
+            EXPORT EXCEL
+          </button>
+          <button 
+            onClick={openAddMemberModal}
+            className="bg-[#121212] hover:bg-white/5 border border-white/10 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all flex items-center gap-2 justify-center w-full sm:w-auto"
+          >
+            <Plus size={18} />
+            ADD MEMBER
+          </button>
+          <button 
+            onClick={handleAddAllMembers}
+            disabled={isAddingAll}
+            className="bg-[#121212] hover:bg-white/5 border border-white/10 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all flex items-center gap-2 justify-center w-full sm:w-auto"
+          >
+            {isAddingAll ? <RefreshCw className="animate-spin" size={18} /> : <Users size={18} />}
+            IMPORT ALL MEMBERS
+          </button>
+          <button 
+            onClick={() => setIsScannerOpen(true)}
+            className="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all shadow-lg flex items-center gap-2 justify-center w-full sm:w-auto"
+          >
+            <Camera size={18} /> OPEN QR SCANNER
+          </button>
+        </div>
       </div>
 
       {/* ── Stats ── */}
@@ -285,6 +491,15 @@ export default function AdminEventDetailPage({ params }: PageProps) {
                   >
                     A
                   </button>
+                  <button 
+                    disabled={isActioning}
+                    onClick={() => handleRemoveMember(reg)}
+                    title="Remove Member"
+                    aria-label="Remove Member"
+                    className="bg-red-500/10 hover:bg-red-500/30 text-red-500 border-l border-white/10 px-3 py-2 text-[10px] font-black tracking-widest transition-all"
+                  >
+                    <Trash2 size={12} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -335,6 +550,54 @@ export default function AdminEventDetailPage({ params }: PageProps) {
                </div>
             </div>
          </div>
+      )}
+
+      {/* ── Add Member Modal ── */}
+      {isAddMemberOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-8 relative shadow-2xl animate-in zoom-in-95 duration-200 max-h-[80vh] flex flex-col">
+            <button onClick={() => setIsAddMemberOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white"><X size={20}/></button>
+            <h3 className="font-black text-xl text-white uppercase tracking-tighter mb-6">Manually Add Member</h3>
+            
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+            
+            <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2">
+              {availableUsers
+                .filter(u => !registrations.some(r => r.userId === u.id))
+                .filter(u => {
+                   const search = searchQuery.toLowerCase();
+                   return (u.legalName?.toLowerCase().includes(search) || u.gamerTag?.toLowerCase().includes(search) || u.email?.toLowerCase().includes(search));
+                })
+                .map(u => (
+                <div key={u.id} className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-white/[0.02]">
+                  <div>
+                    <div className="text-white font-bold text-sm uppercase">{u.legalName || u.gamerTag || "Unknown User"}</div>
+                    <div className="text-gray-500 text-xs">{u.email}</div>
+                  </div>
+                  <button 
+                    disabled={isActioning}
+                    onClick={() => handleManuallyAddMember(u)}
+                    className="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                  >
+                    ADD
+                  </button>
+                </div>
+              ))}
+              {availableUsers.filter(u => !registrations.some(r => r.userId === u.id)).length === 0 && (
+                <div className="text-center text-gray-500 text-xs font-bold uppercase mt-4">No available users found.</div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

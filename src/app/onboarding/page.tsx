@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
-import { Loader2, User, Shield, ChevronRight, LogOut } from "lucide-react";
+import { Loader2, User, Shield, ChevronRight, LogOut, Flame, Droplet, Circle } from "lucide-react";
 import Image from "next/image";
 
 export default function OnboardingPage() {
@@ -15,6 +15,7 @@ export default function OnboardingPage() {
 
   const [legalName, setLegalName] = useState("");
   const [username, setUsername] = useState("");
+  const [faction, setFaction] = useState<"red" | "blue" | "">("");
   const [submitting, setSubmitting] = useState(false);
 
   // Pre-fill username from old gamerTag if it exists
@@ -50,6 +51,7 @@ export default function OnboardingPage() {
           uid: user.uid,
           email: user.email,
           legalName: legalName.trim(),
+          team: faction,
           onboardingComplete: true,
           role: "member",
           createdAt: serverTimestamp(),
@@ -60,6 +62,7 @@ export default function OnboardingPage() {
       // 2. Write username + photoURL to the public sub-doc
       await setDoc(doc(db, "users", user.uid, "public", "profile"), {
         username: username.trim(),
+        team: faction,
         photoURL: user.photoURL || null,
       });
 
@@ -153,6 +156,52 @@ export default function OnboardingPage() {
               <p className="text-[10px] text-gray-600 leading-relaxed px-1">
                 This is what other members will see on the site.
               </p>
+            </div>
+
+            {/* Faction Selection */}
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                <Shield size={12} className="text-primary" />
+                Choose Your Faction
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFaction("red")}
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    faction === "red"
+                      ? "bg-red-500/10 border-[#FF5F5F] shadow-[0_0_20px_-5px_rgba(255,95,95,0.5)]"
+                      : "bg-black/40 border-white/10 hover:border-[#FF5F5F]/50 opacity-60"
+                  }`}
+                >
+                  <Flame size={28} className={faction === "red" ? "text-[#FF5F5F]" : "text-gray-400"} />
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${faction === "red" ? "text-[#FF5F5F]" : "text-gray-400"}`}>Team Red</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFaction("blue")}
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    faction === "blue"
+                      ? "bg-[#3FCEEE]/10 border-[#3FCEEE] shadow-[0_0_20px_-5px_rgba(63,206,238,0.5)]"
+                      : "bg-black/40 border-white/10 hover:border-[#3FCEEE]/50 opacity-60"
+                  }`}
+                >
+                  <Droplet size={28} className={faction === "blue" ? "text-[#3FCEEE]" : "text-gray-400"} />
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${faction === "blue" ? "text-[#3FCEEE]" : "text-gray-400"}`}>Team Blue</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFaction("")}
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    faction === ""
+                      ? "bg-gray-500/10 border-gray-500 shadow-[0_0_20px_-5px_rgba(107,114,128,0.5)]"
+                      : "bg-black/40 border-white/10 hover:border-gray-500/50 opacity-60"
+                  }`}
+                >
+                  <Circle size={28} className={faction === "" ? "text-gray-300" : "text-gray-400"} />
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${faction === "" ? "text-gray-300" : "text-gray-400"}`}>Neutral</span>
+                </button>
+              </div>
             </div>
 
             {/* Submit */}

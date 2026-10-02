@@ -239,7 +239,7 @@ function SessionCard({
 
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border p-4 sm:p-6 gap-4 sm:gap-5 transition-all duration-500 max-w-full overflow-hidden ${
+      className={`relative flex flex-col rounded-2xl border p-5 md:p-6 gap-4 md:gap-5 transition-all duration-500 max-w-full overflow-hidden ${
         isFull
           ? "bg-[#0f172a]/50 border-white/5 opacity-60"
           : isRegistered
@@ -311,7 +311,7 @@ function SessionCard({
       )}
 
       {/* Top row */}
-      <div className={`flex items-center justify-between gap-2 flex-wrap ${isAdmin ? "pr-9" : ""}`}>
+      <div className={`flex flex-wrap items-center justify-between gap-2 ${isAdmin ? "pr-9" : ""}`}>
         <span className={`text-[10px] font-black tracking-widest px-3 py-1 rounded-full uppercase shrink-0 ${categoryColors[session.category]}`}>
           {session.category}
         </span>
@@ -335,11 +335,11 @@ function SessionCard({
 
       {/* Title & meta */}
       <div className="flex flex-col gap-3 flex-1 min-w-0">
-        <h3 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight break-words">{session.title}</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-white/50 text-[12px] sm:text-[13px]">
+        <h3 className="text-lg md:text-xl font-black tracking-tight text-white leading-tight break-words">{session.title}</h3>
+        <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-white/50 text-[11px] md:text-[13px]">
           <span className="flex items-center gap-2 font-medium truncate"><Calendar size={13} className="shrink-0" /><span className="truncate">{session.date}</span></span>
           <span className="flex items-center gap-2 font-medium truncate"><Clock size={13} className="shrink-0" /><span className="truncate">{session.time}</span></span>
-          <span className="flex items-center gap-2 font-black text-primary/70 uppercase tracking-tighter text-[10px] sm:text-[11px] sm:col-span-2 truncate">
+          <span className="flex items-center gap-1 md:gap-2 font-black text-primary/70 uppercase tracking-tighter text-[10px] md:text-[11px] col-span-2 truncate">
             <Plus size={12} className="rotate-45 shrink-0" /> <span className="truncate">{session.location}</span>
           </span>
         </div>
@@ -537,17 +537,18 @@ export default function GamesPage() {
 
     setLoadingId(id);
     try {
-      // Fetch user profile for username / gamerTag
-      let gamerTag = user.displayName || "Gamer";
+      let registrationName = user.displayName || "Gamer";
       try {
-        const pubSnap = await getDoc(doc(db, "users", user.uid, "public", "profile"));
-        if (pubSnap.exists() && pubSnap.data()?.username) {
-          gamerTag = pubSnap.data().username;
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (userSnap.exists() && userSnap.data()?.legalName) {
+           registrationName = userSnap.data().legalName;
+        } else if (userSnap.exists() && userSnap.data()?.gamerTag) {
+           registrationName = userSnap.data().gamerTag;
         } else {
-          const userSnap = await getDoc(doc(db, "users", user.uid));
-          if (userSnap.exists() && userSnap.data()?.gamerTag) {
-            gamerTag = userSnap.data().gamerTag;
-          }
+           const pubSnap = await getDoc(doc(db, "users", user.uid, "public", "profile"));
+           if (pubSnap.exists() && pubSnap.data()?.username) {
+             registrationName = pubSnap.data().username;
+           }
         }
       } catch {
         // fallback
@@ -556,7 +557,7 @@ export default function GamesPage() {
       // 1. Create registration doc
       await setDoc(doc(db, "events", id, "registrations", user.uid), {
         userId: user.uid,
-        name: gamerTag,
+        name: registrationName,
         status: "pending",
         walkIn,
         timestamp: serverTimestamp(),
@@ -849,7 +850,7 @@ export default function GamesPage() {
 
 
       {/* ── Hero ── */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-24 md:pt-32 pb-8 md:pb-10">
+      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-20 md:pt-32 pb-8 md:pb-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="max-w-2xl">
             <h1 className="font-black tracking-tighter text-white leading-[0.9] uppercase break-words" style={{ fontSize: 'clamp(2.2rem, 9vw, 6rem)' }}>{t.games.heroTitle}</h1>
@@ -924,7 +925,7 @@ export default function GamesPage() {
             {t.games.noGamesMatch}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full">
             {filteredSessions.map(s => (
               <SessionCard
                 key={s.id}

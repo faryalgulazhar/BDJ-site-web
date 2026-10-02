@@ -7,9 +7,9 @@ import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { Star, X, Calendar, Clock } from "lucide-react";
 import CyberCalendar from "@/components/CyberCalendar";
-import { collection, query, where, onSnapshot, getDocs, getDoc, doc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, getDocs, getDoc, doc, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import MemberCard from "@/components/MemberCard";
+import { QRCodeCanvas } from "qrcode.react";
 
 const categoryColors: Record<string, string> = {
   "VIDEO GAME": "bg-primary/20 text-primary border border-primary/40",
@@ -28,9 +28,11 @@ export default function DashboardPage() {
   const [registeredSessionIds, setRegisteredSessionIds] = useState<string[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   
   const [leaderboardScores, setLeaderboardScores] = useState<any[]>([]);
   const [computedPoints, setComputedPoints] = useState(0);
+  const [pointsLog, setPointsLog] = useState<any[]>([]);
 
   // Auth Guard
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function DashboardPage() {
           return {
             tag,
             email: u.email,
-            score: u.activityPoints || 0
+            score: u.points || 0
           };
         }));
         scores.sort((a, b) => b.score - a.score);
@@ -64,12 +66,18 @@ export default function DashboardPage() {
       });
       return () => unsub();
     } else {
-      // User: Fetch their own activityPoints
-      const unsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
+      // User: Fetch their own points and pointsLog
+      const unsubUser = onSnapshot(doc(db, "users", user.uid), (snap) => {
         const u = snap.data();
-        if (u) setComputedPoints(u.activityPoints || 0);
+        if (u) setComputedPoints(u.points || 0);
       });
-      return () => unsub();
+      
+      const qLog = query(collection(db, "users", user.uid, "pointsLog"), orderBy("createdAt", "desc"));
+      const unsubLog = onSnapshot(qLog, (snap) => {
+        setPointsLog(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      });
+
+      return () => { unsubUser(); unsubLog(); };
     }
   }, [user, isAdmin]);
 
@@ -165,7 +173,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-gray-400 mt-1 leading-relaxed">
                   {isAdmin 
                     ? `${t.dashboard.leaderboardDesc} ${sessions.length} ${t.dashboard.leaderboardDescSuffix}`
-                    : <>{t.dashboard.pointsDesc} <span className="text-primary font-bold transition-colors duration-500">+1 PT</span>.</>
+                    : "View your points balance and history."
                   }
                 </p>
               </div>
@@ -179,9 +187,57 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Member Card */}
-            <div className={`${box} flex-1 !p-2 md:!p-4 overflow-hidden items-center justify-center`}>
-              {user && <MemberCard user={user} />}
+            {/* QR Code Card */}
+            <div 
+              onClick={() => setIsQrModalOpen(true)}
+              className={`${box} flex-1 overflow-hidden items-center justify-center relative group cursor-pointer hover:border-primary/50`}
+            >
+              {user && (() => {
+                const verifyUrl = `https://bdj-site-web.vercel.app/admin/verify?id=${user.uid}`;
+                const displayName = publicProfile?.username || user.displayName || user.email?.split("@")[0] || "Member";
+                return (
+                  <div className="flex flex-col items-center justify-center gap-4 w-full h-full py-2">
+                    {/* Label */}
+                    <p className="text-[9px] font-black tracking-[0.25em] text-white/25 uppercase">MEMBER QR</p>
+
+                    {/* QR Code */}
+                    <div className="relative">
+                      <div className={`p-3 rounded-2xl transition-all duration-500 ${
+                        isIceTheme
+                          ? "bg-[#e8f8ff] shadow-[0_0_40px_-8px_rgba(63,206,238,0.5)]"
+                          : "bg-white shadow-[0_0_40px_-8px_rgba(255,77,46,0.4)]"
+                      }`}>
+                        <QRCodeCanvas
+                          value={verifyUrl}
+                          size={140}
+                          level="H"
+                          bgColor="transparent"
+                          fgColor="#0a0a0a"
+                        />
+                      </div>
+                      {/* Corner accents */}
+                      <div className={`absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 rounded-tl-lg ${
+                        isIceTheme ? "border-[#3FCEEE]" : "border-primary"
+                      }`} />
+                      <div className={`absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 rounded-tr-lg ${
+                        isIceTheme ? "border-[#3FCEEE]" : "border-primary"
+                      }`} />
+                      <div className={`absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 rounded-bl-lg ${
+                        isIceTheme ? "border-[#3FCEEE]" : "border-primary"
+                      }`} />
+                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 rounded-br-lg ${
+                        isIceTheme ? "border-[#3FCEEE]" : "border-primary"
+                      }`} />
+                    </div>
+
+                    {/* Name + hint */}
+                    <div className="flex flex-col items-center gap-1">
+                      <p className="text-white font-black text-sm tracking-tight uppercase truncate max-w-[180px]">{displayName}</p>
+                      <p className="text-[9px] font-bold text-white/20 tracking-widest uppercase">Scan to verify membership</p>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
           </div>
@@ -198,10 +254,10 @@ export default function DashboardPage() {
               <X size={22} />
             </button>
             <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter mb-1">
-              {isAdmin ? t.dashboard.leaderboardTitle : t.dashboard.yourEvents}
+              {isAdmin ? t.dashboard.leaderboardTitle : "Points History"}
             </h2>
             <p className="text-primary text-[10px] uppercase font-black tracking-widest mb-6 transition-colors duration-500">
-              {isAdmin ? t.dashboard.leaderboardSub : t.dashboard.activityLog}
+              {isAdmin ? t.dashboard.leaderboardSub : "YOUR RECENT ACTIVITY"}
             </p>
             
             <div className="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
@@ -228,28 +284,28 @@ export default function DashboardPage() {
                   ))
                 )
               ) : (
-                // STANDARD USER VIEW
-                validRegisteredSessions.length === 0 ? (
+                // STANDARD USER VIEW (Points Log)
+                pointsLog.length === 0 ? (
                   <div className="py-12 text-center text-gray-600 font-bold uppercase tracking-widest text-[10px]">
-                    {t.dashboard.noEvents}
+                    No points history yet.
                   </div>
                 ) : (
-                  validRegisteredSessions
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // sort newest first
-                    .map((session, i) => (
-                      <div key={i} className="flex p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/30 transition-all flex-col gap-2">
+                  pointsLog.map((log) => (
+                      <div key={log.id} className="flex p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/30 transition-all flex-col gap-2">
                         <div className="flex items-center justify-between">
-                          <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-black tracking-widest transition-colors duration-500 ${categoryColors[session.category] || "bg-primary/20 text-primary border border-primary/20"}`}>
-                            {session.category}
+                          <span className="text-[10px] px-2 py-0.5 rounded uppercase font-black tracking-widest transition-colors duration-500 bg-primary/20 text-primary border border-primary/20">
+                            ACTIVITY
                           </span>
-                          <span className="text-green-400 font-black text-[9px] uppercase tracking-widest flex items-center gap-1">
-                            +1 PT
+                          <span className={`${log.amount > 0 ? "text-green-400" : "text-red-400"} font-black text-[12px] uppercase tracking-widest flex items-center gap-1`}>
+                            {log.amount > 0 ? "+" : ""}{log.amount} PTS
                           </span>
                         </div>
-                        <h3 className="text-white font-black text-sm uppercase tracking-tight mt-1">{session.title}</h3>
+                        <h3 className="text-white font-black text-sm uppercase tracking-tight mt-1">{log.reason}</h3>
                         <div className="flex items-center gap-4 text-gray-500 text-[10px] font-bold tracking-widest mt-1 uppercase">
-                          <span className="flex items-center gap-1"><Calendar size={12} /> {session.date}</span>
-                          <span className="flex items-center gap-1"><Clock size={12} /> {session.time}</span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} /> 
+                            {log.createdAt?.toDate ? log.createdAt.toDate().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "JUST NOW"}
+                          </span>
                         </div>
                       </div>
                     ))
@@ -259,6 +315,46 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ── QR Code Expanded Modal ── */}
+      {isQrModalOpen && user && (() => {
+        const verifyUrl = `https://bdj-site-web.vercel.app/admin/verify?id=${user.uid}`;
+        const displayName = publicProfile?.username || user.displayName || user.email?.split("@")[0] || "Member";
+        return (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 text-white" onClick={() => setIsQrModalOpen(false)}>
+            <div 
+              className="bg-[#0a0e1a] border border-white/10 w-full max-w-sm rounded-3xl p-8 relative shadow-[0_0_80px_-15px_rgba(255,255,255,0.1)] flex flex-col items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setIsQrModalOpen(false)} 
+                className="absolute top-5 right-5 text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+              
+              <p className="text-[12px] font-black tracking-[0.3em] text-white/50 uppercase mb-8">MEMBER QR</p>
+              
+              <div className={`p-4 rounded-3xl mb-8 ${
+                isIceTheme
+                  ? "bg-[#e8f8ff] shadow-[0_0_60px_-10px_rgba(63,206,238,0.6)]"
+                  : "bg-white shadow-[0_0_60px_-10px_rgba(255,77,46,0.5)]"
+              }`}>
+                <QRCodeCanvas
+                  value={verifyUrl}
+                  size={240}
+                  level="H"
+                  bgColor="transparent"
+                  fgColor="#0a0a0a"
+                />
+              </div>
+
+              <p className="text-white font-black text-2xl tracking-tight uppercase text-center w-full truncate">{displayName}</p>
+              <p className="text-xs font-bold text-white/30 tracking-widest uppercase mt-2 text-center">Scan to verify membership</p>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

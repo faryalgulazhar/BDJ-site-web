@@ -68,18 +68,17 @@ interface Session {
   currentRegistrations: number;
   status: RegistrationStatus;
   approval: SessionApproval;
-  suggestedBy?: string;
-  suggestedByEmail?: string;
+  mandatory?: boolean;
   createdAt?: any;
 }
 
-type Tab = "ALL" | "VIDEO GAMES" | "BOARD GAMES" | "TOURNAMENTS";
-const tabs: Tab[] = ["ALL", "VIDEO GAMES", "BOARD GAMES", "TOURNAMENTS"];
+type Tab = "ALL" | "VIDEO GAMES" | "BOARD GAMES" | "TOURNAMENT";
+const tabs: Tab[] = ["ALL", "VIDEO GAMES", "BOARD GAMES", "TOURNAMENT"];
 
 const categoryToTab: Record<GameCategory, Tab> = {
   "VIDEO GAME": "VIDEO GAMES",
   "BOARD GAME": "BOARD GAMES",
-  TOURNAMENT: "TOURNAMENTS",
+  TOURNAMENT: "TOURNAMENT",
 };
 
 const categoryColors: Record<GameCategory, string> = {
@@ -174,6 +173,26 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner font-bold"
       />
     </div>
+    {/* Mandatory toggle */}
+    <button
+      type="button"
+      onClick={() => setForm({ ...form, mandatory: !form.mandatory })}
+      className={`flex items-center justify-between px-5 py-4 rounded-2xl border transition-all duration-300 ${
+        form.mandatory
+          ? "bg-red-500/10 border-red-500/40 text-red-400"
+          : "bg-white/5 border-white/5 text-gray-400 hover:border-white/10"
+      }`}
+    >
+      <div className="flex flex-col items-start gap-0.5">
+        <span className="text-[10px] font-black tracking-widest uppercase">Attendance</span>
+        <span className="text-xs font-medium">{form.mandatory ? "Mandatory — attendance required" : "Optional — no attendance requirement"}</span>
+      </div>
+      <div className={`w-10 h-6 rounded-full transition-all duration-300 flex items-center px-1 ${
+        form.mandatory ? "bg-red-500 justify-end" : "bg-white/10 justify-start"
+      }`}>
+        <div className="w-4 h-4 rounded-full bg-white shadow" />
+      </div>
+    </button>
   </>
 );
 
@@ -186,7 +205,7 @@ interface CardProps {
   isLoggedIn: boolean;
   isAdmin: boolean;
   isRegistered: boolean;
-  onRegister: (id: string) => void;
+  onRegister: (id: string, walkIn?: boolean) => void;
   onUnregister: (id: string) => void;
   onApprove: (id: string) => void;
   onDelete: (id: string) => void;
@@ -241,6 +260,11 @@ function SessionCard({
       {session.approval === "pending" && (
         <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-md uppercase border border-amber-500/20 w-fit shrink-0">
           PENDING
+        </span>
+      )}
+      {session.mandatory && session.approval !== "pending" && (
+        <span className="bg-red-500/10 text-red-400 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-md uppercase border border-red-500/20 w-fit shrink-0">
+          ⚠ MANDATORY
         </span>
       )}
 
@@ -319,37 +343,41 @@ function SessionCard({
             <Plus size={12} className="rotate-45 shrink-0" /> <span className="truncate">{session.location}</span>
           </span>
         </div>
-        {session.suggestedByEmail && (
-          <span className="text-[9px] text-gray-600 uppercase tracking-widest mt-1 truncate">suggested by {session.suggestedByEmail}</span>
-        )}
+
       </div>
 
       {/* Action button */}
       <div className="flex flex-col gap-2">
         {!isRegistered ? (
-          <button
-            disabled={isFull && session.approval !== "pending"}
-            onClick={() => session.approval === "pending" ? onApprove(session.id) : onRegister(session.id)}
-            className={`w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 text-center break-words ${
-              session.approval === "pending"
-                ? "bg-green-500 hover:bg-green-600 text-white shadow-[0_0_30px_-10px_#22c55e]"
-                : isFull
-                ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
-                : "bg-primary hover:bg-primary/80 text-white shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)]"
-            }`}
-          >
-            {isLoadingId === session.id ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : session.approval === "pending" ? (
-              <>
-                <Check size={14} strokeWidth={3} /> APPROVE
-              </>
+          <>
+            {session.approval === "pending" ? (
+              <button
+                onClick={() => onApprove(session.id)}
+                className="w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white shadow-[0_0_30px_-10px_#22c55e]"
+              >
+                {isLoadingId === session.id ? <Loader2 size={14} className="animate-spin" /> : <><Check size={14} strokeWidth={3} /> APPROVE</>}
+              </button>
+            ) : isFull && isLoggedIn ? (
+              // Walk-in button — bypasses capacity for on-the-day registration
+              <button
+                onClick={() => onRegister(session.id, true)}
+                className="w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 hover:border-amber-500/50"
+              >
+                {isLoadingId === session.id ? <Loader2 size={14} className="animate-spin" /> : <><Users size={14} /> WALK-IN REGISTER</>}
+              </button>
             ) : isFull ? (
-              t.games.tournamentFull
+              <button disabled className="w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase bg-white/5 text-white/20 cursor-not-allowed border border-white/5">
+                {t.games.tournamentFull}
+              </button>
             ) : (
-              t.games.registerTrigger
+              <button
+                onClick={() => onRegister(session.id)}
+                className="w-full py-3 px-3 rounded-xl text-xs font-black tracking-[0.08em] sm:tracking-[0.15em] uppercase transition-all duration-500 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 text-white shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)]"
+              >
+                {isLoadingId === session.id ? <Loader2 size={14} className="animate-spin" /> : t.games.registerTrigger}
+              </button>
             )}
-          </button>
+          </>
         ) : (
           <button
             onClick={() => onUnregister(session.id)}
@@ -362,12 +390,15 @@ function SessionCard({
                 <CheckCircle size={14} className="group-hover:hidden" />
                 <span className="group-hover:hidden">{t.games.registeredBadge}</span>
                 <X size={14} className="hidden group-hover:block" />
-                <span className="hidden group-hover:block uppercase">Unregister</span>
+                <span className="hidden group-hover:block uppercase">{t.games.unregister}</span>
               </>
             )}
           </button>
         )}
 
+        {!isLoggedIn && isFull && !isRegistered && (
+          <p className="text-center text-[10px] text-amber-500/50 -mt-2 font-medium">Login to register as a walk-in</p>
+        )}
         {!isLoggedIn && !isFull && !isRegistered && (
           <p className="text-center text-[10px] text-white/20 -mt-2 font-medium">{t.games.loginRequiredDesc}</p>
         )}
@@ -380,7 +411,7 @@ function SessionCard({
 // ─────────────────────────────────────────────
 // Page
 // ─────────────────────────────────────────────
-const EMPTY_FORM = { title: "", category: "VIDEO GAME" as GameCategory, date: "", time: "", location: "", totalSpots: 8 };
+const EMPTY_FORM = { title: "", category: "VIDEO GAME" as GameCategory, date: "", time: "", location: "", totalSpots: 8, mandatory: false };
 
 export default function GamesPage() {
   const router = useRouter();
@@ -398,7 +429,7 @@ export default function GamesPage() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   // Modals
-  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -423,7 +454,7 @@ export default function GamesPage() {
   const [isUnregistering, setIsUnregistering] = useState(false);
 
   // Forms
-  const [suggestForm, setSuggestForm] = useState({ ...EMPTY_FORM, reason: "" });
+
   const [adminForm, setAdminForm] = useState({ ...EMPTY_FORM });
 
   // ── Load sessions ──
@@ -489,16 +520,7 @@ export default function GamesPage() {
       await updateDoc(doc(db, "events", id), { approval: "approved" });
       
       // Notify the requester
-      if (session.suggestedBy) {
-        await addDoc(collection(db, "notifications"), {
-          toUid: session.suggestedBy,
-          type: "suggestion_approved",
-          title: session.title,
-          message: `🎉 Great news! Your session suggestion "${session.title}" has been approved.`,
-          read: false,
-          createdAt: serverTimestamp(),
-        });
-      }
+
 
       await reloadSessions();
       toast.success("Session approved!");
@@ -508,10 +530,10 @@ export default function GamesPage() {
     setLoadingId(null);
   };
 
-  const handleRegister = async (id: string) => {
+  const handleRegister = async (id: string, walkIn = false) => {
     if (!isLoggedIn) { router.push("/register"); return; }
     const session = sessions.find(s => s.id === id);
-    if (!session || session.status === "full" || userRegistrations.includes(id)) return;
+    if (!session || userRegistrations.includes(id)) return;
 
     setLoadingId(id);
     try {
@@ -536,17 +558,18 @@ export default function GamesPage() {
         userId: user.uid,
         name: gamerTag,
         status: "pending",
+        walkIn,
         timestamp: serverTimestamp(),
       });
 
-      // 2. Increment session registrations
+      // 2. Increment count — walk-ins don't flip status to "full"
       await updateDoc(doc(db, "events", id), {
         currentRegistrations: (session.currentRegistrations || 0) + 1,
-        status: (session.currentRegistrations + 1) >= session.totalSpots ? "full" : "open"
+        ...(!walkIn && { status: (session.currentRegistrations + 1) >= session.totalSpots ? "full" : "open" }),
       });
 
       await reloadSessions();
-      toast.success(`Registered for ${session.title}!`);
+      toast.success(walkIn ? `Walk-in registered for ${session.title}! ✓` : `Registered for ${session.title}!`);
     } catch (e) {
       console.error(e);
       toast.error("Registration failed.");
@@ -638,57 +661,7 @@ export default function GamesPage() {
     router.push(`/admin/events/${session.id}`);
   };
 
-  // ── Suggest session (member) ──
-  const handleSuggest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || isSubmitting) return; // Prevention of double logic
-    setIsSubmitting(true);
-    
-    const newSessionData = {
-      title: suggestForm.title.toUpperCase(),
-      category: suggestForm.category,
-      date: suggestForm.date.toUpperCase(),
-      time: suggestForm.time,
-      location: suggestForm.location.toUpperCase(),
-      totalSpots: Number(suggestForm.totalSpots),
-      currentRegistrations: 0,
-      status: "open",
-      approval: "pending",
-      suggestedBy: user.uid,
-      suggestedByEmail: user.email,
-    };
 
-    // Optimistic UI update
-    const tempId = "temp-" + Date.now();
-    setSessions(prev => [{ id: tempId, ...newSessionData, createdAt: new Date() } as any, ...prev]);
-    setIsSuggestOpen(false);
-    toast.success("Session suggested! Waiting for admin approval.");
-
-    try {
-      const docRef = await addDoc(collection(db, "events"), {
-        ...newSessionData,
-        createdAt: serverTimestamp(),
-      });
-      // Notify admin of new suggestion
-      await addDoc(collection(db, "notifications"), {
-        toUid: "admin",
-        type: "new_suggestion",
-        title: newSessionData.title,
-        sessionId: docRef.id,
-        fromUid: user.uid,
-        fromEmail: user.email,
-        message: `📋 New session suggestion: "${newSessionData.title}" by ${user.email}`,
-        read: false,
-        createdAt: serverTimestamp(),
-      });
-      await reloadSessions();
-      setSuggestForm({ ...EMPTY_FORM, reason: "" });
-    } catch (e) { 
-      toast.error("Failed to submit suggestion."); 
-      setSessions(prev => prev.filter(s => s.id !== tempId));
-    }
-    setIsSubmitting(false);
-  };
 
   // ── Admin: create session directly ──
   const handleAdminCreate = async (e: React.FormEvent) => {
@@ -702,6 +675,7 @@ export default function GamesPage() {
         time: adminForm.time,
         location: adminForm.location.toUpperCase(),
         totalSpots: Number(adminForm.totalSpots),
+        mandatory: adminForm.mandatory ?? false,
         currentRegistrations: 0,
         status: "open",
         approval: "approved",
@@ -776,6 +750,7 @@ export default function GamesPage() {
       time: session.time,
       location: session.location,
       totalSpots: session.totalSpots,
+      mandatory: session.mandatory ?? false,
     });
     setIsEditOpen(true);
   };
@@ -792,6 +767,7 @@ export default function GamesPage() {
       time: adminForm.time,
       location: adminForm.location.toUpperCase(),
       totalSpots: Number(adminForm.totalSpots),
+      mandatory: adminForm.mandatory ?? false,
     };
 
     // Optimistic UI
@@ -834,27 +810,7 @@ export default function GamesPage() {
   return (
     <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20 w-full max-w-full overflow-x-hidden">
 
-      {/* ── Suggest Session Modal (members) ── */}
-      {isSuggestOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121212] border border-white/10 rounded-3xl sm:rounded-[2.5rem] w-full max-w-md p-6 sm:p-10 relative shadow-2xl overflow-y-auto max-h-[90vh]">
-            <button onClick={() => setIsSuggestOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
-            <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter mb-6">SUGGEST A SESSION</h2>
-            <form onSubmit={handleSuggest} className="flex flex-col gap-4">
-              <SessionFormFields form={suggestForm} setForm={(f: any) => setSuggestForm({ ...f, reason: suggestForm.reason })} />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Why this session? (optional)</label>
-                <textarea rows={3} value={suggestForm.reason} onChange={e => setSuggestForm({ ...suggestForm, reason: e.target.value })}
-                  placeholder="Tell the admin why this session would be great..." className="bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors resize-none" />
-              </div>
-              <button disabled={isSubmitting} type="submit"
-                className="mt-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/80 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500 w-full">
-                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "SUBMIT SUGGESTION"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+
 
       {/* ── Admin: Create Session Modal ── */}
       {isCreateOpen && (
@@ -928,21 +884,6 @@ export default function GamesPage() {
                 )}
               </div>
             )}
-            {isLoggedIn && !isAdmin && (
-              <button
-                onClick={() => {
-                  if (!user?.emailVerified && !isAdmin) {
-                    toast.error("Please verify your email address to propose an event.");
-                    return;
-                  }
-                  setIsSuggestOpen(true);
-                }}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-6 py-4 rounded-full text-[11px] font-black tracking-widest transition-all duration-500 shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary)] whitespace-nowrap uppercase w-full sm:w-auto justify-center"
-              >
-                <Plus size={16} strokeWidth={3} />
-                {t.games.proposeEvent}
-              </button>
-            )}
           </div>
         </div>
       </section>
@@ -960,7 +901,7 @@ export default function GamesPage() {
                     : "bg-[#1a1a1a] text-gray-400 hover:text-white hover:bg-white/10 border border-white/5"
                 }`}
               >
-                {tab === "ALL" ? t.games.allPlatforms : tab === "VIDEO GAMES" ? t.games.consoleTab : tab === "BOARD GAMES" ? t.games.tabletopTab : "TOURNAMENTS"}
+                {tab === "ALL" ? t.games.allPlatforms : tab === "VIDEO GAMES" ? t.games.consoleTab : tab === "BOARD GAMES" ? t.games.tabletopTab : "TOURNAMENT"}
               </button>
             ))}
           </div>

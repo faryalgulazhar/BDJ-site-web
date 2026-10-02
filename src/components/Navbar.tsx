@@ -29,7 +29,7 @@ export default function Navbar() {
 
 
   const navLinks = [
-    { name: t.nav.homepage, href: "/" },
+    { name: "LEADERBOARD", href: "/leaderboard" },
     { name: t.nav.membership, href: "/membership" },
     { name: t.nav.games, href: "/games" },
     { name: t.nav.community, href: "/community" },

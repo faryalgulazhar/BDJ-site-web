@@ -59,8 +59,6 @@ interface Session {
   currentRegistrations: number;
   status: RegistrationStatus;
   approval: SessionApproval;
-  suggestedBy?: string;
-  suggestedByEmail?: string;
   createdAt?: any;
 }
 
@@ -72,56 +70,7 @@ const categoryColors: Record<GameCategory, string> = {
 
 
 
-// ─────────────────────────────────────────────
-// Pending Card (Admin view)
-// ─────────────────────────────────────────────
-function PendingCard({ session, onApprove, onReject, onMessage }: {
-  session: Session;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
-  onMessage: (session: Session) => void;
-}) {
-  return (
-    <div className="bg-[var(--card-bg)] border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-3 shadow-[0_0_20px_-10px_#f59e0b] transition-colors duration-500">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <span className={`text-[10px] font-black tracking-widest px-3 py-1 rounded-full uppercase ${categoryColors[session.category]} mb-3 inline-block`}>
-            {session.category}
-          </span>
-          <h4 className="text-base font-black text-white tracking-tight">{session.title}</h4>
-          <p className="text-[11px] text-gray-500 mt-1">{session.date} · {session.time}</p>
-          <p className="text-[11px] text-primary/70 font-black uppercase tracking-widest mt-0.5">{session.location}</p>
-          <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-widest">{session.totalSpots} spots</p>
-          {session.suggestedByEmail && (
-            <p className="text-[10px] text-amber-500/70 mt-1 uppercase tracking-widest">by {session.suggestedByEmail}</p>
-          )}
-        </div>
-        <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-1 rounded-full font-black uppercase tracking-widest whitespace-nowrap">PENDING</span>
-      </div>
-      <div className="flex flex-wrap gap-3 items-center mt-2">
-        <button
-          onClick={() => onApprove(session.id)}
-          className="flex-1 flex items-center justify-center gap-1.5 bg-green-500/15 hover:bg-green-500/30 text-green-400 border border-green-500/30 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
-        >
-          <ShieldCheck size={14} /> APPROVE
-        </button>
-        <button
-          onClick={() => onMessage(session)}
-          className="flex items-center justify-center gap-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
-          title="Message Suggester"
-        >
-          <MessageSquare size={14} />
-        </button>
-        <button
-          onClick={() => onReject(session.id)}
-          className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all"
-        >
-          <Trash2 size={14} /> REJECT
-        </button>
-      </div>
-    </div>
-  );
-}
+
 
 // ─────────────────────────────────────────────
 // Page
@@ -132,17 +81,12 @@ export default function AdminOpsPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [memberMessages, setMemberMessages] = useState<any[]>([]);
   const [adminTasks, setAdminTasks] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [isDeletingMember, setIsDeletingMember] = useState<string | null>(null);
 
   // Messaging state
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
-  const [messageTarget, setMessageTarget] = useState<Session | null>(null);
-  const [messageText, setMessageText] = useState("");
-  const [isSendingMsg, setIsSendingMsg] = useState(false);
 
   // Tasks state
   const [newTaskContent, setNewTaskContent] = useState("");
@@ -169,9 +113,6 @@ export default function AdminOpsPage() {
       const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
       setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() } as Session)));
 
-      const msgSnap = await getDocs(query(collection(db, "member_messages"), orderBy("createdAt", "desc")));
-      setMemberMessages(msgSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-
       const taskSnap = await getDocs(query(collection(db, "admin_tasks"), orderBy("createdAt", "desc")));
       setAdminTasks(taskSnap.docs.map(d => ({ id: d.id, ...d.data() })));
 
@@ -195,28 +136,6 @@ export default function AdminOpsPage() {
       setIsLoading(false);
     }
   }, [user, isAdmin]);
-
-  // ── Handlers ──
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!messageTarget?.suggestedBy || !messageText.trim()) return;
-    setIsSendingMsg(true);
-    try {
-      await addDoc(collection(db, "notifications"), {
-        toUid: messageTarget.suggestedBy,
-        toEmail: messageTarget.suggestedByEmail,
-        sessionTitle: messageTarget.title,
-        message: messageText.trim(),
-        read: false,
-        createdAt: serverTimestamp(),
-      });
-      setIsMessageOpen(false);
-      setMessageTarget(null);
-      setMessageText("");
-      toast.success("Message sent to " + messageTarget.suggestedByEmail);
-    } catch (e) { toast.error("Failed to send message."); }
-    setIsSendingMsg(false);
-  };
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,15 +182,7 @@ export default function AdminOpsPage() {
     }
   };
 
-  const handleDeleteMessage = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "member_messages", id));
-      setMemberMessages(prev => prev.filter(m => m.id !== id));
-      toast.success("Message deleted");
-    } catch (e) {
-      toast.error("Failed to delete message");
-    }
-  };
+
 
   const handleDeleteNotification = async (id: string) => {
     try {
@@ -374,43 +285,6 @@ export default function AdminOpsPage() {
     <div className="flex-1 flex flex-col min-h-screen selection:bg-primary/30 pb-20">
       
       {/* ── Admin: Message Compose Modal ── */}
-      {isMessageOpen && messageTarget && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[2.5rem] w-full max-w-md p-10 relative shadow-2xl transition-colors duration-500">
-            <button onClick={() => setIsMessageOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"><X size={22} /></button>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center">
-                <MessageSquare size={16} className="text-blue-400" />
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-white uppercase tracking-tighter">MESSAGE MEMBER</h2>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest">{messageTarget.suggestedByEmail}</p>
-              </div>
-            </div>
-            <p className="text-[11px] text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2.5 mt-4 mb-6">
-              Re: <span className="font-black">{messageTarget.title}</span> suggestion
-            </p>
-            <form onSubmit={handleSendMessage} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Your message</label>
-                <textarea
-                  rows={5}
-                  required
-                  autoFocus
-                  value={messageText}
-                  onChange={e => setMessageText(e.target.value)}
-                  placeholder="E.g. Great suggestion! Your session has been approved and will appear on the games page."
-                  className="bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed"
-                />
-              </div>
-              <button disabled={isSendingMsg} type="submit"
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-white/10 disabled:text-gray-500 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-500">
-                {isSendingMsg ? <Loader2 size={16} className="animate-spin" /> : <><MessageSquare size={14} /> SEND MESSAGE</>}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ── Admin Area Content ── */}
       <section className="max-w-7xl mx-auto w-full px-6 py-12 flex flex-col gap-12 mt-10">
@@ -435,75 +309,11 @@ export default function AdminOpsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
           
-          {/* Column 1: Suggestions */}
-          <div className="flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
-                <h2 className="text-xl font-black text-white uppercase tracking-tighter">Review Suggestions</h2>
-                <span className="bg-amber-500/10 text-amber-500 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-500/20">{pendingSessions.length}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {pendingSessions.length === 0 ? (
-                <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px] transition-colors duration-500">No pending suggestions</div>
-              ) : (
-                pendingSessions.map(s => (
-                  <PendingCard 
-                    key={s.id} 
-                    session={s} 
-                    onApprove={handleApprove} 
-                    onReject={handleDelete} 
-                    onMessage={(s) => { setMessageTarget(s); setIsMessageOpen(true); }} 
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Column 2: Member Messages & System Alerts */}
+          {/* Column 1: System Alerts */}
           <div className="flex flex-col gap-12">
             
-            {/* Member Replies */}
-            <div className="flex flex-col gap-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-primary rounded-full transition-colors duration-500" />
-                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">Member Replies</h2>
-                  <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full border border-primary/20 transition-colors duration-500">{memberMessages.length}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                {memberMessages.length === 0 ? (
-                  <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px] transition-colors duration-500">No messages from members</div>
-                ) : (
-                  memberMessages.map((m) => (
-                    <div key={m.id} className="group p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] hover:border-primary/50 transition-all duration-500 relative">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-primary font-black uppercase tracking-widest transition-colors duration-500">{m.fromEmail?.split('@')[0]}</span>
-                          <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">RE: {m.originalSession}</span>
-                        </div>
-                        <button onClick={() => handleDeleteMessage(m.id)} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 transition-all p-1">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                      <p className="text-gray-300 text-xs leading-relaxed italic">"{m.content}"</p>
-                      <div className="mt-3 flex justify-end">
-                         <span className="text-[8px] text-gray-700 font-black uppercase">
-                           {m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
-                         </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
             {/* Unregistration Alerts */}
             <div className="flex flex-col gap-8">
               <div className="flex items-center justify-between">
@@ -544,7 +354,7 @@ export default function AdminOpsPage() {
             
           </div>
 
-          {/* Column 3: Admin Tasks Section */}
+          {/* Column 2: Admin Tasks Section */}
           <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -622,7 +432,7 @@ export default function AdminOpsPage() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
         title="REJECT SUGGESTION?"
-        description="Delete this suggestion permanently? This action cannot be undone."
+        description="Delete this session permanently? This action cannot be undone."
       />
 
       {/* ── Member Directory Section ── */}

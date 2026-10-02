@@ -19,6 +19,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
+import { exportToExcel } from "@/lib/excel";
 
 interface AttendanceRecord {
   id: string;
@@ -150,37 +151,26 @@ export default function AdminAttendancePage() {
     });
   }, [records, search, eventFilter]);
 
-  // CSV Export
-  const exportCsv = () => {
+  // Excel Export
+  const handleExportExcel = () => {
     if (filtered.length === 0) {
       toast.error("No records to export.");
       return;
     }
 
-    const headers = ["Legal Name", "Public Username", "Email", "Event ID", "Date", "Time", "User ID"];
-    const rows = filtered.map((r) => [
-      `"${(r.legalName || "").replace(/"/g, '""')}"`,
-      `"${(r.username || "").replace(/"/g, '""')}"`,
-      `"${(r.email || "").replace(/"/g, '""')}"`,
-      `"${(r.eventId || "").replace(/"/g, '""')}"`,
-      r.scannedAt ? r.scannedAt.toLocaleDateString("en-CA") : "",
-      r.scannedAt ? r.scannedAt.toLocaleTimeString("en-GB") : "",
-      `"${r.uid}"`,
-    ]);
+    const rows = filtered.map((r) => ({
+      "Legal Name": r.legalName || "",
+      "Public Username": r.username || "",
+      "Email": r.email || "",
+      "Event ID": r.eventId || "",
+      "Date": r.scannedAt ? r.scannedAt.toLocaleDateString("fr-FR") : "",
+      "Time": r.scannedAt ? r.scannedAt.toLocaleTimeString("fr-FR") : "",
+      "User ID": r.uid
+    }));
 
-    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
-    // UTF-8 BOM so Excel opens accented French characters properly
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
     const today = new Date().toISOString().slice(0, 10);
-    link.href = url;
-    link.setAttribute("download", `bdj-attendance-${today}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.success(`Exported ${filtered.length} attendance records to CSV!`);
+    exportToExcel(rows, `bdj-attendance-${today}`);
+    toast.success(`Exported ${filtered.length} attendance records to Excel!`);
   };
 
   // Stats
@@ -243,12 +233,12 @@ export default function AdminAttendancePage() {
           </div>
 
           <button
-            onClick={exportCsv}
+            onClick={handleExportExcel}
             disabled={filtered.length === 0}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_0_30px_-5px_rgba(255,77,46,0.3)] hover:shadow-[0_0_40px_-3px_rgba(255,77,46,0.5)] self-start md:self-auto"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_0_30px_-5px_rgba(22,163,74,0.3)] hover:shadow-[0_0_40px_-3px_rgba(22,163,74,0.5)] self-start md:self-auto"
           >
             <Download size={16} />
-            Export CSV ({filtered.length})
+            Export Excel ({filtered.length})
           </button>
         </div>
 

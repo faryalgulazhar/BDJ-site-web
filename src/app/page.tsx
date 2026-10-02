@@ -56,9 +56,9 @@ export default function Home() {
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column (Images & small cards) */}
-          <div className="flex-1 flex flex-col gap-6">
+          <div className="flex-1 flex flex-col gap-6 min-w-0">
             {/* Big Competitive Leagues */}
-            <div className="relative h-[350px] md:h-[450px] rounded-[2rem] overflow-hidden group border border-white/5 mx-4 md:mx-0">
+            <div className="relative flex-1 min-h-[350px] md:min-h-[450px] rounded-[2rem] overflow-hidden group border border-white/5">
               <Image 
                 src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop" 
                 width={800}
@@ -101,7 +101,7 @@ export default function Home() {
               <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="8.5" r="1.5"/><circle cx="8.5" cy="15.5" r="1.5"/>
             </svg>
             <h4 className="text-sm font-black text-white tracking-widest uppercase mb-3">{t.home.tabletopNights}</h4>
-            <p className="text-gray-500 text-sm leading-relaxed">Strategy, roleplay, and classic board games every Wednesday.</p>
+            <p className="text-gray-500 text-sm leading-relaxed">Strategy, roleplay, and classic board games every Thursday.</p>
           </div>
         </div>
       </section>

@@ -38,7 +38,7 @@ export const translations = {
     },
     // Games Page
     games: {
-      heroTitle: "GAMES & TOURNAMENTS",
+      heroTitle: "GAMES & TOURNAMENT",
       heroDesc: "Discover our competitive leagues, casual play sessions, and upcoming tournaments. Filter by your platform to find exactly what you're looking for.",
       allPlatforms: "ALL PLATFORMS",
       pcTab: "PC",
@@ -53,7 +53,6 @@ export const translations = {
       registeredBadge: "REGISTERED",
       viewFullDetails: "VIEW FULL DETAILS",
       noGamesMatch: "NO GAMES MATCH YOUR FILTER.",
-      noGamesSub: "Try selecting a different platform category to browse available tournaments.",
       exploreAll: "EXPLORE ALL GAMES",
       wantToHost: "WANT TO HOST A TOURNAMENT?",
       hostDesc: "Got a game you love? Members can propose and organize official association tournaments with our full support.",
@@ -67,7 +66,9 @@ export const translations = {
       teamName: "Team Name (Optional)",
       teamNamePlaceholder: "Leave blank if solo",
       confirmRegistration: "CONFIRM REGISTRATION",
-      cancel: "CANCEL"
+      cancel: "CANCEL",
+      unregister: "UNREGISTER",
+      noGamesSub: "Try selecting a different platform category to browse available sessions."
     },
     // Community Page
     community: {
@@ -274,7 +275,7 @@ export const translations = {
     },
     // Games Page
     games: {
-      heroTitle: "JEUX & TOURNOIS",
+      heroTitle: "JEUX & TOURNOI",
       heroDesc: "Découvrez nos ligues compétitives, nos sessions de jeu décontractées et nos tournois à venir. Filtrez par plateforme pour trouver exactement ce que vous cherchez.",
       allPlatforms: "TOUTES LES PLATEFORMES",
       pcTab: "PC",
@@ -289,7 +290,6 @@ export const translations = {
       registeredBadge: "INSCRIT",
       viewFullDetails: "VOIR LES DÉTAILS",
       noGamesMatch: "AUCUN JEU NE CORRESPOND À VOTRE FILTRE.",
-      noGamesSub: "Essayez de sélectionner une catégorie de plateforme différente pour parcourir les tournois disponibles.",
       exploreAll: "EXPLORER TOUS LES JEUX",
       wantToHost: "VOUS SOUHAITEZ ORGANISER UN TOURNOI ?",
       hostDesc: "Vous avez un jeu que vous aimez ? Les membres peuvent proposer et organiser des tournois officiels de l'association avec notre soutien total.",
@@ -303,7 +303,9 @@ export const translations = {
       teamName: "Nom d'équipe (Optionnel)",
       teamNamePlaceholder: "Laissez vide si solo",
       confirmRegistration: "CONFIRMER L'INSCRIPTION",
-      cancel: "ANNULER"
+      cancel: "ANNULER",
+      unregister: "SE DÉSINSCRIRE",
+      noGamesSub: "Essayez de sélectionner une catégorie de plateforme différente pour parcourir les sessions disponibles."
     },
     // Community Page
     community: {

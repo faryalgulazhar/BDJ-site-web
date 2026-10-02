@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Plus, ThumbsUp, MessageCircle, X, Loader2, Trash2, Upload } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { collection, collectionGroup, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { collection, collectionGroup, addDoc, getDocs, query, orderBy, serverTimestamp, Timestamp, deleteDoc, doc, updateDoc, arrayUnion, arrayRemove, writeBatch, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -115,9 +115,14 @@ export default function CommunityPage() {
   const [isDeleteBoardModalOpen, setIsDeleteBoardModalOpen] = useState(false);
   const [targetDeleteId, setTargetDeleteId] = useState<string | null>(null);
 
-  // All Members
   const [allMembers, setAllMembers] = useState<any[]>([]);
   const [isAllMembersOpen, setIsAllMembersOpen] = useState(false);
+
+  // Admin Member Management
+  const [selectedAdminMember, setSelectedAdminMember] = useState<any | null>(null);
+  const [pointAmount, setPointAmount] = useState<number | "">("");
+  const [pointReason, setPointReason] = useState("");
+  const [isManaging, setIsManaging] = useState(false);
 
   // Fetch Firestore Data
   const fetchAllData = async () => {
@@ -399,6 +404,57 @@ export default function CommunityPage() {
       console.error(error);
     }
     setTargetDeleteId(null);
+  };
+
+  const handlePointsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin || !selectedAdminMember || !pointAmount || !pointReason) return;
+    
+    setIsManaging(true);
+    try {
+      const batch = writeBatch(db);
+      const userRef = doc(db, "users", selectedAdminMember.id);
+      const logRef = doc(collection(db, "users", selectedAdminMember.id, "pointsLog"));
+
+      batch.update(userRef, { points: increment(Number(pointAmount)) });
+      batch.set(logRef, {
+        amount: Number(pointAmount),
+        reason: pointReason,
+        addedBy: user?.email || "admin",
+        createdAt: serverTimestamp()
+      });
+
+      await batch.commit();
+
+      // Update local state
+      setAllMembers(prev => prev.map(m => m.id === selectedAdminMember.id ? { ...m, points: (m.points || 0) + Number(pointAmount) } : m));
+      setSelectedAdminMember({ ...selectedAdminMember, points: (selectedAdminMember.points || 0) + Number(pointAmount) });
+      
+      toast.success(`Successfully added/removed points.`);
+      setPointAmount("");
+      setPointReason("");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update points.");
+    } finally {
+      setIsManaging(false);
+    }
+  };
+
+  const handleTeamChange = async (team: "red" | "blue") => {
+    if (!isAdmin || !selectedAdminMember) return;
+    setIsManaging(true);
+    try {
+      await updateDoc(doc(db, "users", selectedAdminMember.id), { team });
+      setAllMembers(prev => prev.map(m => m.id === selectedAdminMember.id ? { ...m, team } : m));
+      setSelectedAdminMember({ ...selectedAdminMember, team });
+      toast.success(`Team assigned: ${team.toUpperCase()}`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update team.");
+    } finally {
+      setIsManaging(false);
+    }
   };
 
   // Format timestamp safely
@@ -859,8 +915,24 @@ export default function CommunityPage() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-black text-white uppercase tracking-tight">{member.username || member.gamerTag || member.email?.split('@')[0]}</span>
-                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.isAdmin || member.email === 'admin@bdj.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
+                        <div className="flex gap-2">
+                          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{member.isAdmin || member.email === 'admin@bdj.com' ? 'ADMIN' : 'STUDENT MEMBER'}</span>
+                          {member.team && (
+                            <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${member.team === 'red' ? 'bg-[#FF5F5F]/20 text-[#FF5F5F]' : 'bg-[#3FCEEE]/20 text-[#3FCEEE]'}`}>
+                              TEAM {member.team}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      
+                      {isAdmin && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSelectedAdminMember(member); }}
+                          className="mt-2 w-full py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[9px] font-black tracking-widest uppercase transition-colors border border-primary/20"
+                        >
+                          Manage Member
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
@@ -868,6 +940,79 @@ export default function CommunityPage() {
             </div>
 
             {/* Footer Removed */}
+          </div>
+        </div>
+      )}
+
+      {/* Admin Member Management Modal */}
+      {selectedAdminMember && isAdmin && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md transition-colors">
+          <div className="bg-[var(--background)] border border-[var(--border)] rounded-[2rem] w-full max-w-md p-8 relative shadow-2xl animate-in zoom-in-95 duration-500">
+            <button
+              onClick={() => { setSelectedAdminMember(null); setPointAmount(""); setPointReason(""); }}
+              className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Manage Member</h2>
+            <p className="text-primary text-[10px] font-black tracking-widest uppercase mb-6">
+              {selectedAdminMember.username || selectedAdminMember.gamerTag || selectedAdminMember.email?.split('@')[0]} 
+              • {selectedAdminMember.points || 0} PTS
+            </p>
+
+            {/* Team Selection */}
+            <div className="mb-8">
+              <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase block mb-3">Assign Team</label>
+              <div className="flex gap-4">
+                <button
+                  disabled={isManaging}
+                  onClick={() => handleTeamChange("red")}
+                  className={`flex-1 py-3 rounded-xl border-2 transition-all font-black uppercase tracking-widest text-[10px] ${selectedAdminMember.team === "red" ? "bg-[#FF5F5F]/20 border-[#FF5F5F] text-[#FF5F5F]" : "bg-transparent border-white/10 text-gray-400 hover:border-[#FF5F5F]/50"}`}
+                >
+                  Team Red
+                </button>
+                <button
+                  disabled={isManaging}
+                  onClick={() => handleTeamChange("blue")}
+                  className={`flex-1 py-3 rounded-xl border-2 transition-all font-black uppercase tracking-widest text-[10px] ${selectedAdminMember.team === "blue" ? "bg-[#3FCEEE]/20 border-[#3FCEEE] text-[#3FCEEE]" : "bg-transparent border-white/10 text-gray-400 hover:border-[#3FCEEE]/50"}`}
+                >
+                  Team Blue
+                </button>
+              </div>
+            </div>
+
+            {/* Points Management */}
+            <form onSubmit={handlePointsSubmit} className="flex flex-col gap-4 border-t border-white/5 pt-6">
+              <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Modify Points (+ or -)</label>
+              
+              <div className="flex gap-4">
+                <input
+                  required
+                  type="number"
+                  placeholder="-10 or 50"
+                  value={pointAmount}
+                  onChange={(e) => setPointAmount(e.target.value ? Number(e.target.value) : "")}
+                  className="w-1/3 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 text-center"
+                />
+                <input
+                  required
+                  type="text"
+                  placeholder="Reason..."
+                  value={pointReason}
+                  onChange={(e) => setPointReason(e.target.value)}
+                  className="flex-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isManaging || !pointAmount || !pointReason}
+                className="mt-2 w-full flex justify-center items-center gap-2 bg-primary hover:bg-primary/80 disabled:opacity-50 text-white px-6 py-4 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all shadow-[var(--shadow-primary)]"
+              >
+                {isManaging ? <Loader2 size={16} className="animate-spin" /> : "Update Points"}
+              </button>
+            </form>
           </div>
         </div>
       )}

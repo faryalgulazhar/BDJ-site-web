@@ -138,7 +138,7 @@ const SessionFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
         className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-all shadow-inner"
       />
     </div>
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-[10px] text-gray-400 font-bold tracking-widest uppercase px-1">Date</label>
         <input

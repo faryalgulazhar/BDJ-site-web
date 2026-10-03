@@ -3,64 +3,88 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Admin = verified admin@bdj.com only (email_verified prevents unverified spoofing)
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == "admin@bdj.com";
+      return request.auth != null
+          && request.auth.token.email == "admin@bdj.com"
+          && request.auth.token.email_verified == true;
     }
 
-    // ── Private user doc ─────────────────────────────────────────────
+    // Fields that only the admin may touch on user documents
+    function touchesAdminFields() {
+      return request.resource.data.diff(resource.data)
+               .affectedKeys()
+               .hasAny(['points', 'team']);
+    }
+
+    // ── Private user doc ─────────────────────────────────────────────────────
     match /users/{userId} {
       // Owner or admin can read the full private doc
       allow read: if request.auth != null
                   && (request.auth.uid == userId || isAdmin());
+
       // New user creates their own doc on first sign-in
       allow create: if request.auth != null && request.auth.uid == userId;
-      // Owner can update own doc, but cannot modify points or team
-      allow update: if request.auth != null && 
-                    ((request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points'])) 
-                     || isAdmin());
 
-      // ── Points Log ──────────────────────────────────────────────────
+      // Owner can update own doc but CANNOT touch 'points' or 'team'.
+      // Admin can write anything (including adjusting points and toggling team).
+      allow update: if request.auth != null
+                    && (
+                         (request.auth.uid == userId && !touchesAdminFields())
+                         || isAdmin()
+                       );
+
+      // ── Points Log ───────────────────────────────────────────────────────
       match /pointsLog/{logId} {
         allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
         allow write: if request.auth != null && isAdmin();
       }
     }
 
-    // ── Public sub-doc ────────────────────────────────────────────────
+    // ── Public sub-doc ───────────────────────────────────────────────────────
     match /users/{userId}/public/profile {
       // Any authenticated user can read public profiles
       allow read: if request.auth != null;
-      // Only the owner can write their own public profile
-      allow write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
 
-    // Collection group rule for public profile subcollections
+      // Owner can update their own public profile but NOT 'team' or 'points'.
+      // Admin can write anything (including syncing team after a toggle).
+      allow write: if request.auth != null
+                   && (
+                        (request.auth.uid == userId
+                          && !(request.resource.data.diff(resource.data)
+                                 .affectedKeys()
+                                 .hasAny(['points', 'team'])))
+                        || isAdmin()
+                      );
+    }
+
+    // Collection-group rule so other sub-docs under /public/ are readable
     match /{path=**}/public/{docId} {
       allow read: if request.auth != null;
     }
 
-    // ── Attendance ────────────────────────────────────────────────────
+    // ── Attendance ───────────────────────────────────────────────────────────
     match /attendance/{docId} {
       allow read:   if request.auth != null && isAdmin();
       allow create: if request.auth != null && isAdmin();
     }
 
-    // ── Posts ─────────────────────────────────────────────────────────
+    // ── Posts ────────────────────────────────────────────────────────────────
     match /posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null;
       allow update: if request.auth != null;
-      allow delete: if request.auth != null &&
-        (request.auth.uid == resource.data.authorId || isAdmin());
+      allow delete: if request.auth != null
+                    && (request.auth.uid == resource.data.authorId || isAdmin());
     }
 
-    // ── Events + Registrations ────────────────────────────────────────
+    // ── Events + Registrations ───────────────────────────────────────────────
     match /events/{eventId} {
       allow read: if true;
       allow create: if request.auth != null;
       allow update: if request.auth != null;
       allow delete: if request.auth != null && isAdmin();
 
-      // Event Registrations:
       match /registrations/{userId} {
         allow read: if true;
         allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
@@ -69,14 +93,23 @@ service cloud.firestore {
       }
     }
 
-    // ── Notifications ─────────────────────────────────────────────────
+    // ── Notifications ────────────────────────────────────────────────────────
+    // Create: authenticated user may only create a notif addressed to
+    //   (a) themselves  – confirmation receipts sent to self
+    //   (b) the special "admin" sentinel  – unregister/suggest alerts
+    //   (c) the admin may create any notification
     match /notifications/{notifId} {
-      allow create: if request.auth != null;
-      allow read, update, delete: if request.auth != null &&
-        (request.auth.uid == resource.data.toUid || isAdmin());
+      allow create: if request.auth != null
+                    && (
+                         isAdmin()
+                         || request.resource.data.toUid == request.auth.uid
+                         || request.resource.data.toUid == "admin"
+                       );
+      allow read, update, delete: if request.auth != null
+                                   && (request.auth.uid == resource.data.toUid || isAdmin());
     }
 
-    // ── Board Members ─────────────────────────────────────────────────
+    // ── Board Members ────────────────────────────────────────────────────────
     match /boardMembers/{memberId} {
       allow read: if true;
       allow write: if request.auth != null && isAdmin();

@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
       return () => { unsubUser(); unsubLog(); };
     }
-  }, [user, isAdmin]);
+  }, [user?.uid, isAdmin]);
 
   // Sessions Fetcher & Registration Filter for Users
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function DashboardPage() {
     };
     
     loadEvents();
-  }, [user, isAdmin]);
+  }, [user?.uid, isAdmin]);
 
   if (user === undefined || user === null) {
     return (

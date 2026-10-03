@@ -44,12 +44,21 @@ body {
   background: var(--background);
   color: #ffffff;
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
 
 * {
   box-sizing: border-box;
-  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/*
+  Theme-transition: opt-in smooth fade for CSS-variable-driven colors.
+  Apply this class to specific containers (body, navbar, glow div) instead
+  of blasting every DOM element with simultaneous transitions.
+  box-shadow is intentionally excluded — it triggers repaint on every element.
+*/
+.theme-transition,
+body {
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 img, video {

@@ -29,6 +29,7 @@ export default function SplashScreen({ visible }: { visible: boolean }) {
     const trail1: { x: number; y: number }[] = [];
     const trail2: { x: number; y: number }[] = [];
 
+    // Draw trail with a single shadowBlur pass (batch all segments at same alpha level)
     function drawTrail(
       trail: { x: number; y: number }[],
       color: string
@@ -54,30 +55,29 @@ export default function SplashScreen({ visible }: { visible: boolean }) {
       }
     }
 
+    // Reduced from 4 save/restore+shadowBlur passes to 2:
+    // - Haze: single radial-gradient fill (no shadowBlur needed)
+    // - Core: one shadowBlur pass for the bright dot
     function drawDot(x: number, y: number, color: string) {
-      // Outer haze
+      // Haze — use a radial gradient so we skip shadowBlur on the large radius
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, 14);
+      grad.addColorStop(0, color.replace(")", ",0.35)").replace("rgb", "rgba") + "");
+      grad.addColorStop(1, "transparent");
+      // Simple parse: color is a hex string like "#FF4D2E"
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      const hazeGrad = ctx.createRadialGradient(x, y, 0, x, y, 14);
+      hazeGrad.addColorStop(0, `rgba(${r},${g},${b},0.35)`);
+      hazeGrad.addColorStop(1, `rgba(${r},${g},${b},0)`);
       ctx.save();
-      ctx.globalAlpha = 0.12;
-      ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 20;
+      ctx.fillStyle = hazeGrad;
       ctx.beginPath();
       ctx.arc(x, y, 14, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Mid glow
-      ctx.save();
-      ctx.globalAlpha = 0.30;
-      ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      ctx.arc(x, y, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Core
+      // Core with single shadowBlur
       ctx.save();
       ctx.globalAlpha = 1;
       ctx.fillStyle = color;
@@ -88,11 +88,11 @@ export default function SplashScreen({ visible }: { visible: boolean }) {
       ctx.fill();
       ctx.restore();
 
-      // Specular
+      // Specular highlight — no shadowBlur
       ctx.save();
       ctx.globalAlpha = 1;
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
       ctx.shadowBlur = 0;
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
       ctx.beginPath();
       ctx.arc(x - 1.5, y - 1.8, 1.4, 0, Math.PI * 2);
       ctx.fill();
@@ -112,29 +112,23 @@ export default function SplashScreen({ visible }: { visible: boolean }) {
       if (trail1.length > TRAIL) trail1.shift();
       if (trail2.length > TRAIL) trail2.shift();
 
-      // Clip to circle
       ctx.clearRect(0, 0, W, H);
       ctx.save();
       ctx.beginPath();
       ctx.arc(cx, cy, clipR, 0, Math.PI * 2);
       ctx.clip();
 
-      // Background
       ctx.fillStyle = "#060912";
       ctx.fillRect(0, 0, W, H);
 
-      // Orbit ring
       ctx.beginPath();
       ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
       ctx.strokeStyle = "rgba(255,255,255,0.07)";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Trails
       drawTrail(trail1, FIRE_COLOR);
       drawTrail(trail2, ICE_COLOR);
-
-      // Dots
       drawDot(x1, y1, FIRE_COLOR);
       drawDot(x2, y2, ICE_COLOR);
 
@@ -143,7 +137,21 @@ export default function SplashScreen({ visible }: { visible: boolean }) {
     }
 
     rafRef.current = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(rafRef.current);
+
+    // Pause the loop when the tab is not visible — avoids burning CPU/GPU in the background
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(rafRef.current);
+      } else {
+        rafRef.current = requestAnimationFrame(frame);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   return (

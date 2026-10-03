@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, useSpring, useMotionValue } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function CustomCursor() {
   const { isIceTheme } = useTheme();
   const [isHovering, setIsHovering] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const isVisibleRef = useRef(false);
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -20,7 +20,7 @@ export default function CustomCursor() {
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
+      if (!isVisibleRef.current) isVisibleRef.current = true;
     };
 
     const handleHoverStart = (e: MouseEvent) => {
@@ -45,7 +45,7 @@ export default function CustomCursor() {
       window.removeEventListener("mousemove", moveCursor);
       window.removeEventListener("mouseover", handleHoverStart);
     };
-  }, [isVisible, cursorX, cursorY]);
+  }, [cursorX, cursorY]);
 
   if (typeof window !== "undefined" && "ontouchstart" in window) return null;
 

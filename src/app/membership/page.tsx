@@ -15,8 +15,8 @@ export default function MembershipPage() {
       {/* ── Hero Section ── */}
       <section className="relative w-full flex flex-col items-center justify-center pt-32 pb-24 text-center px-6 overflow-hidden">
         {/* Background ambient glow matching screenshot */}
-        <div className={`absolute top-0 right-0 w-[500px] h-[500px] ${isIceTheme ? 'bg-cyan-500/10' : 'bg-red-500/10'} blur-[150px] rounded-full pointer-events-none`}></div>
-        <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] ${isIceTheme ? 'bg-cyan-900/5' : 'bg-red-900/5'} blur-[150px] rounded-full pointer-events-none`}></div>
+        <div className={`absolute top-0 right-0 w-[500px] h-[500px] ${isIceTheme ? 'bg-cyan-500/10' : 'bg-red-500/10'} blur-[150px] rounded-full pointer-events-none`} style={{ willChange: 'transform', transform: 'translateZ(0)' }}></div>
+        <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] ${isIceTheme ? 'bg-cyan-900/5' : 'bg-red-900/5'} blur-[150px] rounded-full pointer-events-none`} style={{ willChange: 'transform', transform: 'translateZ(0)' }}></div>
         
         <h1 className="font-black tracking-tighter text-white uppercase leading-[0.9] z-10 drop-shadow-lg" style={{ fontSize: 'clamp(2.5rem, 10vw, 6rem)' }}>
           {t.membership.heroTitle}
@@ -119,7 +119,7 @@ export default function MembershipPage() {
       {/* ── Bottom CTA ── */}
       <section className="max-w-5xl mx-auto w-full px-6 pb-12 md:pb-20 z-10 mt-6 md:mt-10">
         <div className={`bg-gradient-to-b ${isIceTheme ? 'from-[#0f172a] to-[#020617]' : 'from-[#1a1212] to-[#140e0e]'} border border-primary/10 rounded-[2rem] md:rounded-[3rem] p-10 md:p-24 text-center shadow-[var(--shadow-primary)] relative overflow-hidden`}>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] pointer-events-none"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] pointer-events-none" style={{ willChange: 'transform', transform: 'translateZ(0)' }}></div>
           
           <div className="relative z-10 flex flex-col items-center gap-6">
             <span className="bg-[var(--primary)]/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[var(--primary)]/20 flex items-center gap-2">
